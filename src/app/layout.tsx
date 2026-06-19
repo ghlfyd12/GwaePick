@@ -41,6 +41,12 @@ export const metadata: Metadata = {
     locale: "ko_KR",
     siteName: site.name,
   },
+  // 네이버 서치어드바이저 사이트 소유확인
+  verification: {
+    other: {
+      "naver-site-verification": "2f393506335df66451949dbd43a2539457e1517c",
+    },
+  },
 };
 
 export default function RootLayout({
