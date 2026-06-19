@@ -4,6 +4,7 @@ import Curriculum from "@/components/sections/Curriculum";
 import WhyUs from "@/components/sections/WhyUs";
 import TeacherIntro from "@/components/sections/TeacherIntro";
 import Teachers from "@/components/sections/Teachers";
+import ReviewVideos from "@/components/ReviewVideos";
 import { site } from "@/data/site";
 
 /*
@@ -34,12 +35,20 @@ export default function Home() {
       {/* 후기 & 성장 스토리 */}
       <section
         id="proof"
-        className="flex min-h-[50vh] flex-col items-center justify-center gap-2 border-t border-line bg-surface px-4 py-20 text-center"
+        className="border-t border-line bg-surface px-4 py-16 sm:px-6 sm:py-20"
       >
-        <h2 className="text-xl font-bold text-ink sm:text-2xl">
-          후기 &amp; 성장 스토리
-        </h2>
-        <p className="text-muted">다음 작업에서 구현</p>
+        <div className="mx-auto max-w-3xl text-center">
+          <h2 className="text-2xl font-bold text-ink sm:text-3xl">
+            후기 &amp; 성장 스토리
+          </h2>
+          <p className="mt-3 text-base leading-relaxed text-muted sm:text-lg">
+            실제 수업을 경험한 학생과 학부모의 후기로, 우리 아이의 가능성을
+            함께 확인하세요.
+          </p>
+        </div>
+
+        {/* 영상으로 만나는 후기 (텍스트 후기 슬라이더는 다음 작업에서 구현) */}
+        <ReviewVideos />
       </section>
 
       {/* 무료 상담 신청 폼 — 모든 CTA 의 앵커 목적지(#consult) */}
