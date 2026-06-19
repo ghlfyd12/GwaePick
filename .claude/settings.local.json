@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(node --version)",
+      "PowerShell(npm --version)",
+      "Bash(node -e \"const fs=require\\('fs'\\);for\\(const f of ['hero-main.png','hero-news.png']\\){const b=fs.readFileSync\\(f\\);const w=b.readUInt32BE\\(16\\),h=b.readUInt32BE\\(20\\);console.log\\(f,w+'x'+h\\);}\")",
+      "Bash(python -c 'import struct; *)",
+      "Bash(/c/Users/user/node-portable/node-v24.16.0-win-x64/node.exe -e \"const fs=require\\('fs'\\);for\\(const f of ['hero-main.png','hero-news.png']\\){const b=fs.readFileSync\\(f\\);console.log\\(f,b.readUInt32BE\\(16\\)+'x'+b.readUInt32BE\\(20\\)\\);}\")",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(sed -i 's#/c/Users/user/GwaePick#C:/Users/user/GwaePick#' /tmp/mkgray.js)",
+      "Bash(/c/Users/user/node-portable/node-v24.16.0-win-x64/node.exe /tmp/mkgray.js)",
+      "Bash(cat)",
+      "Bash(/c/Users/user/node-portable/node-v24.16.0-win-x64/node.exe /tmp/mkcurri.js)",
+      "Bash(/c/Users/user/node-portable/node-v24.16.0-win-x64/node.exe -e 'const fs=require\\('\\\\''fs'\\\\''\\);const b=fs.readFileSync\\('\\\\''C:/Users/user/GwaePick/public/images/students-white.png'\\\\''\\);console.log\\('\\\\''size'\\\\'',b.length,'\\\\''w'\\\\'',b.readUInt32BE\\(16\\),'\\\\''h'\\\\'',b.readUInt32BE\\(20\\)\\);')",
+      "Bash(/c/Users/user/node-portable/node-v24.16.0-win-x64/node.exe /tmp/mkteachers.js)",
+      "Bash(find /c/Users/user -maxdepth 5 -type f \\\\\\( -iname \"*.png\" -o -iname \"*.jpg\" -o -iname \"*.jpeg\" -o -iname \"*.webp\" \\\\\\) -newermt \"-20 minutes\" 2>/dev/null | grep -iv node_modules | head -40)",
+      "Bash(cp \"/c/Users/user/Downloads/teacher-intro.png.png\" \"/c/Users/user/GwaePick/public/images/teacher-intro.png\" && file \"/c/Users/user/GwaePick/public/images/teacher-intro.png\" && ls -l \"/c/Users/user/GwaePick/public/images/teacher-intro.png\")"
+    ]
+  }
+}
