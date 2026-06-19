@@ -9,19 +9,9 @@ import { reviewVideos } from "@/data/reviewVideos";
  */
 export default function ReviewVideos() {
   return (
-    <div className="mx-auto mt-10 max-w-5xl sm:mt-12">
-      {/* 블록 헤더 */}
-      <div className="text-center">
-        <h3 className="text-lg font-bold text-ink sm:text-xl">
-          영상으로 만나는 후기
-        </h3>
-        <p className="mt-2 text-sm leading-relaxed text-muted sm:text-base">
-          직접 수업을 경험한 학생과 학부모의 이야기입니다.
-        </p>
-      </div>
-
-      {/* 영상 그리드 — 모바일 1열 / 태블릿·데스크톱 2열 */}
-      <ul className="mt-6 grid grid-cols-1 gap-5 sm:mt-8 md:grid-cols-2 md:gap-6">
+    <div className="mx-auto mt-8 max-w-5xl sm:mt-10">
+      {/* 영상 그리드 — 모바일 1열 / 태블릿·데스크톱 2열 (헤더는 섹션 부제로 이동) */}
+      <ul className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
         {reviewVideos.map((v) => (
           <li key={v.id}>
             {/* 반응형 16:9 컨테이너 — 화면 너비에 맞춰 깨지지 않게 */}

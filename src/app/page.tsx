@@ -41,9 +41,11 @@ export default function Home() {
           <h2 className="text-2xl font-bold text-ink sm:text-3xl">
             후기 &amp; 성장 스토리
           </h2>
-          <p className="mt-3 text-base leading-relaxed text-muted sm:text-lg">
-            실제 수업을 경험한 학생과 학부모의 후기로, 우리 아이의 가능성을
-            함께 확인하세요.
+          <p className="mt-3 text-base font-semibold text-ink sm:text-lg">
+            영상으로 만나는 후기
+          </p>
+          <p className="mt-1 text-base leading-relaxed text-muted sm:text-lg">
+            직접 수업을 경험한 학생과 학부모의 이야기입니다.
           </p>
         </div>
 
