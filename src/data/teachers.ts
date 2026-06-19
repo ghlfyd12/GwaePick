@@ -1,115 +1,66 @@
 /**
- * Teachers(전문 선생님 소개) 캐러셀 데이터 단일 소스.
+ * 선생님 단일 소스(실제 44명) — 사이트 전역에서 이 배열 하나만 사용한다.
  *
- * 컴포넌트(Teachers.tsx)에는 문자열을 하드코딩하지 않는다.
- * 톤(CLAUDE.md): 차분한 신뢰감. "컨설턴트/컨설팅/코치/코칭/멘토" 금지 → "선생님".
- * 색: 주황(accent) + 차콜/웜 뉴트럴 + 흰색 (보라 없음). 카드 배경은 레인보우 금지, 브랜드 톤 변주만.
- *
- * ⚠️ 선생님 정보(이름·학력·한마디)는 "실제 사실"이어야 한다. 아래 값은 전부 교체용 플레이스홀더다.
- *    허위 학력·멘트를 넣지 말 것. 사진은 본인 동의 전제(없으면 회색 플레이스홀더 유지).
+ * 사용처: OUR TEACHER 캐러셀(랜덤 10명), 소속 선생님 그리드(/teachers, TeacherPool).
+ * (호환을 위해 src/data/teacherPool.ts 가 이 파일을 그대로 재노출한다.)
+ * 컴포넌트에는 카드 내용을 하드코딩하지 않는다. 이름은 개인정보 보호용 마스킹 표기.
+ * 사진은 public/teachers/teacher-XX.png.
  */
 
-/** 제목 한 조각. emphasis 면 주황(accent) 강조. */
-export type TextSegment = {
-  text: string;
-  emphasis?: boolean;
-};
+export type Subject = "국어" | "영어" | "수학" | "사회" | "과학" | "코딩";
 
-/** 카드 배경 톤 키 — 브랜드 톤 변주(레인보우 아님). 아래 3종을 순환 사용. */
-export type TeacherTone = "charcoal" | "cream" | "peach";
-
-/** 선생님 카드 한 개. 모두 실제 정보로 교체. */
-export type TeacherCard = {
-  /** 이름/호칭 (마스킹 가능, 예: "김O영 선생님") */
+export interface Teacher {
+  id: string;
   name: string;
-  /** 선생님 한마디(헤드라인) — 카드 상단 큰 문구 */
-  headline: string;
-  /** 해시태그 3개(# 없이 단어만; 컴포넌트가 # 를 붙임) */
-  tags: string[];
-  /** 학력/소속 한 줄 (카드 하단) */
-  credential: string;
-  /** 누끼 사진 경로 (없으면 회색 플레이스홀더) */
-  photo: string;
-  /** 카드 배경 톤 */
-  tone: TeacherTone;
-};
+  subject: Subject;
+  intro: string;
+  credential: string; // 학력·소속
+  image: string;
+}
 
-export const teachers = {
-  /** 섹션 상단 작은 라벨 */
-  label: "Our Teacher",
-
-  /** 제목 — 마지막 강조 줄만 주황(accent). 타 브랜드 문구 사용 금지. */
-  heading: {
-    title: [
-      { text: "언제 어디서나, 나와 잘 맞는 선생님과 1:1로" },
-    ] satisfies TextSegment[],
-    emphasis: "지식의참견이 연결합니다",
-  },
-
-  /**
-   * 자동재생 간격(ms). 0 이면 끔(기본값 — 사용자가 직접 넘기는 방식 우선).
-   * 켜고 싶으면 6000 정도(느리게)로. 사용자가 조작/호버하면 자동 일시정지.
-   */
-  autoplayMs: 0,
-
-  /**
-   * 선생님 카드 — 전부 교체용 플레이스홀더(이름/학력/한마디에 "교체" 표기).
-   * 실제 선생님 정보로 채우고, 사진은 같은 경로 파일을 교체한다. tone 은 charcoal/cream/peach 중 선택.
-   */
-  list: [
-    {
-      name: "○○○ 선생님",
-      headline: "선생님 한마디를 여기에 적어주세요 (교체)",
-      tags: ["담당과목", "대상학년", "수업스타일"],
-      credential: "학력 · 소속 (교체 필요)",
-      photo: "/images/teacher-1.png",
-      tone: "charcoal",
-    },
-    {
-      name: "○○○ 선생님",
-      headline: "선생님 한마디를 여기에 적어주세요 (교체)",
-      tags: ["담당과목", "대상학년", "수업스타일"],
-      credential: "학력 · 소속 (교체 필요)",
-      photo: "/images/teacher-2.png",
-      tone: "cream",
-    },
-    {
-      name: "○○○ 선생님",
-      headline: "선생님 한마디를 여기에 적어주세요 (교체)",
-      tags: ["담당과목", "대상학년", "수업스타일"],
-      credential: "학력 · 소속 (교체 필요)",
-      photo: "/images/teacher-3.png",
-      tone: "peach",
-    },
-    {
-      name: "○○○ 선생님",
-      headline: "선생님 한마디를 여기에 적어주세요 (교체)",
-      tags: ["담당과목", "대상학년", "수업스타일"],
-      credential: "학력 · 소속 (교체 필요)",
-      photo: "/images/teacher-4.png",
-      tone: "charcoal",
-    },
-    {
-      name: "○○○ 선생님",
-      headline: "선생님 한마디를 여기에 적어주세요 (교체)",
-      tags: ["담당과목", "대상학년", "수업스타일"],
-      credential: "학력 · 소속 (교체 필요)",
-      photo: "/images/teacher-5.png",
-      tone: "cream",
-    },
-    {
-      name: "○○○ 선생님",
-      headline: "선생님 한마디를 여기에 적어주세요 (교체)",
-      tags: ["담당과목", "대상학년", "수업스타일"],
-      credential: "학력 · 소속 (교체 필요)",
-      photo: "/images/teacher-6.png",
-      tone: "peach",
-    },
-  ] satisfies TeacherCard[],
-
-  /** 섹션 하단 공통 CTA — 전환 동선은 #consult(무료 상담 신청). 개별 선택 버튼 없음. */
-  cta: {
-    label: "이런 선생님들과 만나보세요 — 무료 상담 신청",
-    href: "#consult",
-  },
-} as const;
+export const teachers: Teacher[] = [
+  { id: "t01", name: "유O은 선생님", subject: "국어", intro: "공부 습관부터 잡아주는 국어, 개인과외 10년", credential: "사범대 국어교육 학사", image: "/teachers/teacher-01.png" },
+  { id: "t02", name: "김O진 선생님", subject: "국어", intro: "국어국문 전공, 전교 380등→50등을 이끈 국어", credential: "국어국문학과 졸업", image: "/teachers/teacher-02.png" },
+  { id: "t03", name: "송O비 선생님", subject: "국어", intro: "국어교육 전공·2급 정교사, 입시·과외 10년", credential: "한국외대 한국어교육과 졸업", image: "/teachers/teacher-03.png" },
+  { id: "t04", name: "윤O주 선생님", subject: "국어", intro: "목동 국어 전문, 친근하지만 꼼꼼한 지도 10년+", credential: "국문과 전공 · 정교사 2급", image: "/teachers/teacher-04.png" },
+  { id: "t05", name: "박O호 선생님", subject: "국어", intro: "20년 현장 경력, 눈높이로 풀어주는 국어 코칭", credential: "건국대 국어국문학과", image: "/teachers/teacher-05.png" },
+  { id: "t06", name: "김O준 선생님", subject: "국어", intro: "글쓰기 강의 다수, 표현력을 키우는 국어", credential: "동국대 국어국문학과", image: "/teachers/teacher-06.png" },
+  { id: "t07", name: "최O윤 선생님", subject: "국어", intro: "국어·논술 12년, 1등급 향상 사례 다수", credential: "성균관대 대학원 국어국문", image: "/teachers/teacher-07.png" },
+  { id: "t08", name: "권O혁 선생님", subject: "과학", intro: "통합과학·물·화·생·지, 자료 풍부한 과학", credential: "홍익대 전자전기공학부 졸업", image: "/teachers/teacher-08.png" },
+  { id: "t09", name: "이O경 선생님", subject: "국어", intro: "국어국문 전공, 학원·과외 10년", credential: "국어국문·중국어문학 전공", image: "/teachers/teacher-09.png" },
+  { id: "t10", name: "나O랑 선생님", subject: "국어", intro: "아이 마음을 먼저 살피는 든든한 국어", credential: "국어국문학과 · 한국어교원과정 수료", image: "/teachers/teacher-10.png" },
+  { id: "t11", name: "이O원 선생님", subject: "과학", intro: "과학·코딩까지, 기초 원리부터 심화 단계로", credential: "토목공학과 전공 · 경력 8년", image: "/teachers/teacher-11.png" },
+  { id: "t12", name: "안O진 선생님", subject: "영어", intro: "TESOL 영어교사 자격, 자신감을 키우는 영어", credential: "성균관대 생명과학 · TESOL 자격", image: "/teachers/teacher-12.png" },
+  { id: "t13", name: "강O희 선생님", subject: "영어", intro: "활용 능력과 자신감을 함께 키우는 영어", credential: "고려대 생명과학 · 언론대학원 석사", image: "/teachers/teacher-13.png" },
+  { id: "t14", name: "최O렬 선생님", subject: "과학", intro: "스스로 생각·질문·토론하는 재미있는 과학", credential: "대전대 임상병리과 · 제약연구소 출신", image: "/teachers/teacher-14.png" },
+  { id: "t15", name: "노O숙 선생님", subject: "과학", intro: "물리 전공, 단원별 점검이 꼼꼼한 과학", credential: "국립대 물리학과 졸업", image: "/teachers/teacher-15.png" },
+  { id: "t16", name: "오O아 선생님", subject: "영어", intro: "영어학 전공 10년+, 개념을 꼼꼼히 챙기는 수업", credential: "한국외대 영어학과 졸업", image: "/teachers/teacher-16.png" },
+  { id: "t17", name: "조O준 선생님", subject: "과학", intro: "물2·화2까지, 과목별 연계를 짚어주는 과학", credential: "건국대 물리학과 졸업", image: "/teachers/teacher-17.png" },
+  { id: "t18", name: "김O미 선생님", subject: "영어", intro: "단계적 코칭으로 핵심을 잡는 영어, 입시 10년+", credential: "AKS 고전번역학 박사수료", image: "/teachers/teacher-18.png" },
+  { id: "t19", name: "전O민 선생님", subject: "과학", intro: "물리 석사, 질문을 주저하지 않게 하는 과학", credential: "중앙대 물리학 학사 · 성균관대 석사", image: "/teachers/teacher-19.png" },
+  { id: "t20", name: "김O은 선생님", subject: "영어", intro: "약점 맞춤 분석 후 계획을 세우는 영어", credential: "경북대 학사·석사 · 박사수료", image: "/teachers/teacher-20.png" },
+  { id: "t21", name: "김O관 선생님", subject: "사회", intro: "사탐 전문, 몰입감 높은 사회·한국사 10년+", credential: "상명대 사학과 · 교육대학원 역사교육", image: "/teachers/teacher-21.png" },
+  { id: "t22", name: "심O화 선생님", subject: "코딩", intro: "블록코딩부터 웹까지, SSAFY 수료 코딩", credential: "금오공대 메디컬IT융합 · SSAFY 수료", image: "/teachers/teacher-22.png" },
+  { id: "t23", name: "김O훈 선생님", subject: "사회", intro: "국어·사탐·한국사 12년, 시청각 자료로 생동감 있게", credential: "모스크바 국립대 수석졸업 · 경력 12년", image: "/teachers/teacher-23.png" },
+  { id: "t24", name: "강O정 선생님", subject: "영어", intro: "친절하고 긍정적인 분위기의 영어, 중국어도 가능", credential: "중국 절강대 영어전공", image: "/teachers/teacher-24.png" },
+  { id: "t25", name: "김O운 선생님", subject: "사회", intro: "역사·사회·윤리를 원리로 엮는 통합 사회", credential: "인문대 사학과 · 중등 정교사 2급", image: "/teachers/teacher-25.png" },
+  { id: "t26", name: "허O라 선생님", subject: "영어", intro: "언어학 석사, 독해·심화영어 멘토형 코치", credential: "미국 하트포드대 언어학 석사", image: "/teachers/teacher-26.png" },
+  { id: "t27", name: "조O영 선생님", subject: "영어", intro: "어원 중심 단어 학습으로 암기 지속력 강화", credential: "영어전공 대학 수석 졸업", image: "/teachers/teacher-27.png" },
+  { id: "t28", name: "이O우 선생님", subject: "수학", intro: "서울대 공학 출신, 20년 노하우의 편안한 수학", credential: "서울대 기계공학과 졸업 · 경력 20년", image: "/teachers/teacher-28.png" },
+  { id: "t29", name: "박O 선생님", subject: "수학", intro: "중·고 수학 과외 5년, 자기주도 학습력을 키우는 수학", credential: "영남대 수학과 졸업", image: "/teachers/teacher-29.png" },
+  { id: "t30", name: "이O준 선생님", subject: "수학", intro: "교직 정교사 자격, 과외·학원 15년+ 수학", credential: "국립대 기계항공공학 · 정교사 2급", image: "/teachers/teacher-30.png" },
+  { id: "t31", name: "이O진 선생님", subject: "영어", intro: "TESOL, 5→2등급·3→1등급 향상 사례 다수", credential: "이화여대 TESOL · 숙명여대 석사", image: "/teachers/teacher-31.png" },
+  { id: "t32", name: "김O아 선생님", subject: "사회", intro: "표·지도·신문 스크랩으로 살아있는 사회", credential: "경력 10년+ · 명문대 합격생 다수", image: "/teachers/teacher-32.png" },
+  { id: "t33", name: "장O현 선생님", subject: "사회", intro: "개념부터 서술형까지, 스스로 생각하게 하는 수업", credential: "사회복지학 전공 · 동경도립대 석사", image: "/teachers/teacher-33.png" },
+  { id: "t34", name: "나O지 선생님", subject: "국어", intro: "문학·비문학 집중 관리, 5→1등급 향상 사례", credential: "계명대 유럽학·경영학 졸업", image: "/teachers/teacher-34.png" },
+  { id: "t35", name: "허O호 선생님", subject: "수학", intro: "수학 거부감을 흥미로 바꾸는 수학 이야기꾼, 12년", credential: "경희대 수학과 졸업 · 경력 12년", image: "/teachers/teacher-35.png" },
+  { id: "t36", name: "양O름 선생님", subject: "과학", intro: "생명공학 전공, 쾌활하고 정확한 과학", credential: "고려대 생명공학부", image: "/teachers/teacher-36.png" },
+  { id: "t37", name: "이O원 선생님", subject: "수학", intro: "수학·영어 이중전공, 순수전공의 탄탄한 수학", credential: "한국외대 수학·영어학 이중전공", image: "/teachers/teacher-37.png" },
+  { id: "t38", name: "노O성 선생님", subject: "수학", intro: "기초 개념부터 흥미를 붙여주는 수학", credential: "경기대 수학과 전공", image: "/teachers/teacher-38.png" },
+  { id: "t39", name: "권O형 선생님", subject: "과학", intro: "세심하고 차분한 코칭, 편안한 분위기의 과학", credential: "연세대 시스템생물학 전공", image: "/teachers/teacher-39.png" },
+  { id: "t40", name: "이O현 선생님", subject: "수학", intro: "에너지 넘치는 즐거운 수업, 개인과외 10년", credential: "건국대 수학전공 · 개인과외 10년", image: "/teachers/teacher-40.png" },
+  { id: "t41", name: "홍O현 선생님", subject: "수학", intro: "수학 수업 경력 10년+", credential: "한신대 수학과 전공 · 경력 10년+", image: "/teachers/teacher-41.png" },
+  { id: "t42", name: "유O린 선생님", subject: "수학", intro: "학교 선생님 출신, 수학교육 대학원 졸업", credential: "수학과 · 수학교육대학원 졸업", image: "/teachers/teacher-42.png" },
+  { id: "t43", name: "박O화 선생님", subject: "수학", intro: "15년 노하우로 수준과 필요를 빠르게 파악하는 수학", credential: "국립대 수학과 졸업 · 경력 15년", image: "/teachers/teacher-43.png" },
+  { id: "t44", name: "박O현 선생님", subject: "수학", intro: "수능 수리 1등급, 하위권~상위권 맞춤 수학", credential: "국립대 수학과 · 정보통계학 복수전공", image: "/teachers/teacher-44.png" },
+];
