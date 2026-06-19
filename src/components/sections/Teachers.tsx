@@ -262,24 +262,24 @@ export default function Teachers() {
                       isActive ? "" : "cursor-pointer"
                     }`}
                   >
-                    {/* 텍스트(인용부호·한마디·과목 태그) — 사진 위로 올림(z-10) */}
+                    {/* 텍스트(인용부호·한마디·과목 태그) — 사진 위로 올림(z-10). 여백을 줄여 사진 영역 확보. */}
                     <div className="relative z-10">
                       <span
                         aria-hidden
-                        className={`font-serif text-5xl leading-none ${tone.quote}`}
+                        className={`font-serif text-3xl leading-none ${tone.quote}`}
                       >
                         &ldquo;
                       </span>
 
-                      {/* 선생님 한마디(intro) — 길면 3줄 클램프로 높이 균일 */}
+                      {/* 선생님 한마디(intro) — 1줄 고정(말줄임). 2줄이 더 좋으면 line-clamp-2 로. */}
                       <p
-                        className={`mt-1 line-clamp-3 text-lg font-bold leading-snug sm:text-xl ${tone.headline}`}
+                        className={`mt-0.5 line-clamp-1 text-lg font-bold leading-snug sm:text-xl ${tone.headline}`}
                       >
                         {teacher.intro}
                       </p>
 
                       {/* 과목 태그(#과목) 하나만 */}
-                      <ul className="mt-3 flex flex-wrap gap-1.5">
+                      <ul className="mt-2 flex flex-wrap gap-1.5">
                         <li
                           className={`rounded-full px-2.5 py-1 text-xs font-semibold ${tone.tag}`}
                         >
@@ -288,14 +288,14 @@ export default function Teachers() {
                       </ul>
                     </div>
 
-                    {/* 사진 — object-cover. hover 시 살짝 떠오름 */}
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%]">
+                    {/* 사진 — object-cover + object-top(얼굴 상단이 잘리지 않게). 영역을 키움. */}
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[72%]">
                       <Image
                         src={teacher.image}
                         alt={`${teacher.name} 사진`}
                         fill
                         sizes="360px"
-                        className="object-cover object-center transition-transform duration-300 ease-out group-hover:-translate-y-2"
+                        className="object-cover object-top transition-transform duration-300 ease-out group-hover:-translate-y-2"
                         // 개발 서버 이미지 최적화 이슈 회피. 배포 시 최적화를 원하면 제거.
                         unoptimized
                       />
