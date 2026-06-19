@@ -27,8 +27,8 @@ const DESCRIPTION =
  * 하위 페이지는 자체 metadata 를 export 해 title.template 으로 덮어쓸 수 있다.
  */
 export const metadata: Metadata = {
-  // 배포 도메인 확정 시 교체 — OG/canonical 절대경로 생성 기준
-  metadataBase: new URL("https://example.com"),
+  // 절대경로(OG/canonical) 기준 — 도메인은 site.url 한 곳에서 관리
+  metadataBase: new URL(site.url),
   title: {
     default: TITLE,
     template: `%s | ${site.name}`,
