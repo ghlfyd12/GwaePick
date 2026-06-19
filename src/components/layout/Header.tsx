@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import CTAButton from "@/components/ui/CTAButton";
 import { site } from "@/data/site";
 
@@ -15,6 +16,11 @@ import { site } from "@/data/site";
  */
 export default function Header() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+
+  // 라우트형 메뉴(/teachers 등)는 현재 경로와 일치하면 active(주황 강조).
+  const isActive = (href: string) =>
+    href.startsWith("/") && !href.includes("#") && pathname === href;
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-line bg-white/95 backdrop-blur-sm">
@@ -37,7 +43,12 @@ export default function Header() {
             <Link
               key={item.href}
               href={item.href}
-              className="whitespace-nowrap text-base font-medium text-muted transition-colors hover:text-ink lg:text-xl xl:text-2xl"
+              aria-current={isActive(item.href) ? "page" : undefined}
+              className={`whitespace-nowrap text-base font-medium transition-colors lg:text-xl xl:text-2xl ${
+                isActive(item.href)
+                  ? "font-semibold text-accent"
+                  : "text-muted hover:text-ink"
+              }`}
             >
               {item.label}
             </Link>
@@ -110,7 +121,12 @@ export default function Header() {
                 <Link
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className="block rounded-lg px-2 py-3 text-base font-medium text-ink transition-colors hover:bg-surface-alt"
+                  aria-current={isActive(item.href) ? "page" : undefined}
+                  className={`block rounded-lg px-2 py-3 text-base font-medium transition-colors hover:bg-surface-alt ${
+                    isActive(item.href)
+                      ? "font-semibold text-accent"
+                      : "text-ink"
+                  }`}
                 >
                   {item.label}
                 </Link>

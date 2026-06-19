@@ -27,7 +27,12 @@ const FILTERS: ("전체" | Subject)[] = [
   "코딩",
 ];
 
-export default function TeacherPool() {
+export default function TeacherPool({
+  withHeader = true,
+}: {
+  /** 섹션 자체 헤더(eyebrow·제목·설명) 노출 여부. /teachers 처럼 페이지에 h1 을 따로 둘 땐 false. */
+  withHeader?: boolean;
+}) {
   const [active, setActive] = useState<"전체" | Subject>("전체");
   const [expanded, setExpanded] = useState(false);
 
@@ -45,28 +50,31 @@ export default function TeacherPool() {
   return (
     <section
       id="teacher-pool"
-      aria-labelledby="teacher-pool-heading"
+      aria-labelledby={withHeader ? "teacher-pool-heading" : undefined}
+      aria-label={withHeader ? undefined : "소속 선생님 목록"}
       className="border-t border-line bg-white px-4 py-16 sm:px-6 sm:py-20"
     >
-      {/* 헤더 */}
-      <div className="mx-auto max-w-3xl text-center">
-        <p className="text-sm font-semibold uppercase tracking-widest text-accent">
-          검증된 선생님
-        </p>
-        <h2
-          id="teacher-pool-heading"
-          className="mt-2 text-2xl font-bold leading-snug text-ink sm:text-3xl md:text-4xl"
-        >
-          우리 아이를 맡길 선생님들
-        </h2>
-        <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
-          국어·영어·수학·사회·과학부터 코딩까지 — 직접 가르쳐 본 선생님이 실력과
-          성향을 보고 함께하는 선생님들입니다.
-        </p>
-      </div>
+      {/* 헤더 — 페이지(/teachers)에서 h1 을 따로 둘 땐 withHeader={false} 로 숨긴다. */}
+      {withHeader && (
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="text-sm font-semibold uppercase tracking-widest text-accent">
+            검증된 선생님
+          </p>
+          <h2
+            id="teacher-pool-heading"
+            className="mt-2 text-2xl font-bold leading-snug text-ink sm:text-3xl md:text-4xl"
+          >
+            우리 아이를 맡길 선생님들
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
+            국어·영어·수학·사회·과학부터 코딩까지 — 직접 가르쳐 본 선생님이 실력과
+            성향을 보고 함께하는 선생님들입니다.
+          </p>
+        </div>
+      )}
 
       {/* 과목 필터 칩 — 넘치면 가로 스크롤(스크롤바 숨김) */}
-      <div className="mx-auto mt-8 max-w-5xl">
+      <div className={`mx-auto max-w-5xl ${withHeader ? "mt-8" : ""}`}>
         <ul className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {FILTERS.map((f) => {
             const selected = active === f;

@@ -4,7 +4,6 @@ import Curriculum from "@/components/sections/Curriculum";
 import WhyUs from "@/components/sections/WhyUs";
 import TeacherIntro from "@/components/sections/TeacherIntro";
 import Teachers from "@/components/sections/Teachers";
-import TeacherPool from "@/components/TeacherPool";
 import { site } from "@/data/site";
 
 /*
@@ -42,9 +41,6 @@ export default function Home() {
         </h2>
         <p className="text-muted">다음 작업에서 구현</p>
       </section>
-
-      {/* 소속 선생님 소개 (실제 44명 + 과목 필터) — 후기와 상담 폼 사이 */}
-      <TeacherPool />
 
       {/* 무료 상담 신청 폼 — 모든 CTA 의 앵커 목적지(#consult) */}
       <section

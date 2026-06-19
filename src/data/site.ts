@@ -45,6 +45,7 @@ export const site = {
    */
   nav: [
     { label: "1:1과외수업", href: "/#tutoring" },
+    { label: "교사진", href: "/teachers" },
     { label: "학원", href: "/#academy" },
     { label: "코딩", href: "/#coding" },
     { label: "외국어", href: "/#language" },
