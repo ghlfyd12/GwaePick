@@ -5,21 +5,22 @@ import { subjects } from "@/data/categories";
 import { site } from "@/data/site";
 
 /*
- * 서울 자치구 상세 페이지 — /tutoring/by-region/[district] (예: /tutoring/by-region/gangnam)
+ * 구 상세 — /tutoring/by-region/[sido]/[district] (현재 sido=seoul 만 하위 구 보유)
  *
- * districts.ts 의 25개 구를 빌드시 정적 생성(SSG). 잘못된 slug 는 404.
- * h1·인트로·과목 안내·하단 CTA(/#consult). 카피/데이터는 districts.ts·categories.ts 에서 가져온다.
- * 헤더/푸터/플로팅 버튼은 루트 layout 상속.
+ * seoul × 25개 구 SSG. 그 외 조합은 404. h1·인트로(구 이름 포함)·과목 안내·상담 CTA.
+ * 카피/데이터는 districts.ts·categories.ts 에서 가져온다. CTA 는 /#consult.
  */
 
-export const dynamicParams = false; // 정의된 25개 구 외 slug 는 404
+export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return districts.map((d) => ({ district: d.slug }));
+  // 현재 서울만 하위 구를 가진다.
+  return districts.map((d) => ({ sido: "seoul", district: d.slug }));
 }
 
-function getDistrict(slug: string) {
-  return districts.find((d) => d.slug === slug);
+function getGu(sido: string, district: string) {
+  if (sido !== "seoul") return undefined;
+  return districts.find((d) => d.slug === district);
 }
 
 const SUBJECT_LIST = subjects.map((s) => s.title).join("·");
@@ -27,28 +28,27 @@ const SUBJECT_LIST = subjects.map((s) => s.title).join("·");
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ district: string }>;
+  params: Promise<{ sido: string; district: string }>;
 }): Promise<Metadata> {
-  const { district } = await params;
-  const d = getDistrict(district);
+  const { sido, district } = await params;
+  const d = getGu(sido, district);
   if (!d) return {};
-
-  const title = `${d.name} 1:1 과외`; // 루트 template → "{구} 1:1 과외 | 지식의참견"
+  const title = `${d.name} 1:1 과외`;
   const description = `${d.name}에서 시작하는 1:1 과외 — ${SUBJECT_LIST} 과목별로 아이에게 맞는 선생님을 무료 상담으로 연결해 드립니다.`;
   return {
     title,
     description,
-    alternates: { canonical: `/tutoring/by-region/${d.slug}` },
+    alternates: { canonical: `/tutoring/by-region/${sido}/${d.slug}` },
   };
 }
 
-export default async function DistrictPage({
+export default async function GuPage({
   params,
 }: {
-  params: Promise<{ district: string }>;
+  params: Promise<{ sido: string; district: string }>;
 }) {
-  const { district } = await params;
-  const d = getDistrict(district);
+  const { sido, district } = await params;
+  const d = getGu(sido, district);
   if (!d) notFound();
 
   return (
@@ -74,18 +74,18 @@ export default async function DistrictPage({
             {d.name}에서 만나는 과목별 1:1 과외
           </h2>
           <ul className="mt-6 flex flex-wrap justify-center gap-2.5">
-            {subjects.map((s) => (
+            {subjects.map((subject) => (
               <li
-                key={s.id}
+                key={subject.id}
                 className="inline-flex items-center rounded-full bg-accent/10 px-4 py-2 text-base font-semibold text-accent"
               >
-                {s.title}
+                {subject.title}
               </li>
             ))}
           </ul>
           <p className="mx-auto mt-5 max-w-xl text-sm leading-relaxed text-muted sm:text-base">
-            {SUBJECT_LIST}까지, {d.name} 학생에게 맞는 선생님을 상담으로
-            안내해 드립니다.
+            {SUBJECT_LIST}까지, {d.name} 학생에게 맞는 선생님을 상담으로 안내해
+            드립니다.
           </p>
         </div>
 

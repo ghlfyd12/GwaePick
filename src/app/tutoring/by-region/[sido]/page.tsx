@@ -1,0 +1,118 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import RegionMap, { type RegionFeatureCollection } from "@/components/RegionMap";
+import seoulDistricts from "@/data/seoul-districts.json";
+import { sidoList, sidoBySlug } from "@/data/sido";
+import { districts } from "@/data/districts";
+import { site } from "@/data/site";
+
+/*
+ * 시/도 상세 — /tutoring/by-region/[sido]
+ *  - seoul: 서울 25개 구 지도 + 구 링크 그리드.
+ *  - 그 외 16개: 단순 상세(h1·인트로·상담 CTA).
+ * 17개 시/도 SSG. 잘못된 slug 는 404. 데이터는 sido.ts/districts.ts/GeoJSON 에서.
+ */
+
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return sidoList.map((s) => ({ sido: s.slug }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ sido: string }>;
+}): Promise<Metadata> {
+  const { sido } = await params;
+  const s = sidoBySlug[sido];
+  if (!s) return {};
+  const title = `${s.label} 1:1 과외`;
+  const description =
+    sido === "seoul"
+      ? "서울 25개 구 지도에서 우리 동네를 선택해 1:1 과외를 시작하세요. 직접 가르쳐 본 선생님이 아이에게 맞는 선생님을 연결해 드립니다."
+      : `${s.label}에서 시작하는 1:1 과외. 직접 가르쳐 본 선생님이 아이에게 맞는 선생님을 연결해 드립니다.`;
+  return {
+    title,
+    description,
+    alternates: { canonical: `/tutoring/by-region/${s.slug}` },
+  };
+}
+
+export default async function SidoPage({
+  params,
+}: {
+  params: Promise<{ sido: string }>;
+}) {
+  const { sido } = await params;
+  const s = sidoBySlug[sido];
+  if (!s) notFound();
+
+  const isSeoul = sido === "seoul";
+
+  return (
+    <>
+      {/* 헤더 — 유일한 h1 */}
+      <section className="border-b border-line bg-surface px-4 py-14 text-center sm:px-6 sm:py-16">
+        <p className="text-sm font-semibold uppercase tracking-widest text-accent">
+          지역별 · {s.label}
+        </p>
+        <h1 className="mx-auto mt-2 max-w-3xl text-3xl font-bold leading-snug text-ink sm:text-4xl">
+          {s.label} 1:1 과외
+        </h1>
+        <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
+          {isSeoul
+            ? "지도에서 우리 동네(구)를 선택하세요."
+            : `${s.label}에서 시작하는 1:1 과외. 직접 가르쳐 본 선생님이 아이에게 맞는 선생님을 연결해 드립니다.`}
+        </p>
+      </section>
+
+      <section className="px-4 py-12 sm:px-6 sm:py-16">
+        {isSeoul && (
+          <>
+            {/* 서울 25개 구 지도 */}
+            <div className="mx-auto max-w-2xl">
+              <RegionMap
+                geo={seoulDistricts as unknown as RegionFeatureCollection}
+                hrefPrefix="/tutoring/by-region/seoul"
+                ariaLabel="서울 자치구 지도 — 구를 선택하세요"
+              />
+            </div>
+
+            {/* 구 텍스트 링크 그리드(지도와 동일 목적지) */}
+            <nav aria-label="서울 자치구 목록" className="mx-auto mt-10 max-w-3xl">
+              <ul className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 md:grid-cols-5">
+                {districts.map((d) => (
+                  <li key={d.slug}>
+                    <Link
+                      href={`/tutoring/by-region/seoul/${d.slug}`}
+                      className="block rounded-xl border border-line bg-white px-3 py-3 text-center text-base font-semibold text-ink transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                    >
+                      {d.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </>
+        )}
+
+        {/* 하단 공통 CTA — 상담 동선(/#consult) */}
+        <div className="mx-auto mt-12 max-w-2xl rounded-2xl bg-surface px-6 py-8 text-center sm:py-10">
+          <p className="text-base font-medium text-ink sm:text-lg">
+            {s.label}에서 어떤 선생님이 맞을지 모르겠다면, 상담부터 시작하세요.
+          </p>
+          <div className="mt-5">
+            <a
+              href={site.cta.href}
+              className="inline-flex min-h-14 items-center justify-center rounded-full bg-accent px-7 py-3 text-base font-semibold text-white shadow-md transition-colors hover:bg-accent-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:text-lg"
+            >
+              {site.cta.label}
+            </a>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
