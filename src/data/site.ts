@@ -20,7 +20,18 @@ export const site = {
    * 배포 도메인(절대경로 기준). canonical·OG·sitemap·robots 가 이 값을 사용한다.
    * 도메인 확정 시 이 한 줄만 교체하면 메타데이터 전체에 반영된다.
    */
-  url: "https://example.com",
+  url: "https://gwae-pick.vercel.app",
+
+  /**
+   * URL 공유 미리보기(OG/트위터) 이미지 단일 소스.
+   * metadataBase 기준 절대 URL 로 변환된다. 자체 openGraph 를 정의하는 하위 페이지도 이 값을 함께 지정해 상속한다.
+   */
+  ogImage: {
+    url: "/images/whyus-1.png",
+    width: 1024,
+    height: 609,
+    alt: "지식의참견 — 직접 가르쳐 본 선생님이 1:1로 연결하는 맞춤 과외",
+  },
 
   /** 핵심 슬로건 (CLAUDE.md 고정 규칙) */
   slogan: "선생님을 보는 눈은, 선생님이 가장 정확합니다.",

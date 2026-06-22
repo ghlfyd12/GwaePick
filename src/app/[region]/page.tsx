@@ -64,6 +64,8 @@ export async function generateMetadata({
       type: "website",
       locale: "ko_KR",
       siteName: site.name,
+      // 루트 openGraph 를 덮어쓰므로 공유 이미지를 함께 지정(미상속 보완)
+      images: [site.ogImage],
     },
   };
 }
