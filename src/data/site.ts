@@ -10,6 +10,8 @@
 export type NavItem = {
   label: string;
   href: string;
+  /** 있으면 드롭다운(데스크톱)·아코디언(모바일) 트리거가 된다(자체 페이지 이동 없음). */
+  children?: NavItem[];
 };
 
 export const site = {
@@ -55,7 +57,15 @@ export const site = {
    * href 는 임시 앵커 — 추후 실제 페이지/섹션과 연결.
    */
   nav: [
-    { label: "1:1과외수업", href: "/#tutoring" },
+    {
+      label: "1:1과외수업",
+      href: "/#tutoring",
+      children: [
+        { label: "학교별", href: "/tutoring/by-school" },
+        { label: "지역별", href: "/tutoring/by-region" },
+        { label: "과목별", href: "/tutoring/by-subject" },
+      ],
+    },
     { label: "교사진", href: "/teachers" },
     { label: "학원", href: "/#academy" },
     { label: "코딩", href: "/#coding" },
