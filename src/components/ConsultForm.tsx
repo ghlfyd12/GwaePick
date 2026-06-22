@@ -12,16 +12,13 @@ import { schoolLevels, subjects } from "@/data/categories";
  * 학년·과목은 다중 선택(categories.ts 재사용), 주소는 Daum 우편번호로 채운다.
  * 제출은 POST /api/consult → 성공 시 안심 메시지로 교체. (실제 리드 전송 백엔드는 다음 단계)
  *
- * 색 메모: 이 섹션만 레퍼런스의 녹색 계열을 사용한다(전역 브랜드 주황과 별개, 보라 미사용).
+ * 색 메모: 포인트색은 사이트 전역 브랜드 주황 토큰(accent / accent-dark)을 그대로 사용한다.
+ *   메인 "무료 상담 신청"·플로팅 버튼과 동일 색. 카카오 버튼만 카카오 옐로우 유지(브랜드색).
  */
 
 const CONSULT_PHONE = "010-2177-2720";
 // 실제 카카오 채널 주소가 정해지면 이 상수만 교체한다.
 const KAKAO_CHANNEL_URL = "https://pf.kakao.com/_여기에_채널주소";
-
-// 진녹색 팔레트(이 섹션 스코프). 전역 토큰엔 녹색이 없어 여기서만 사용.
-const GREEN = "#1F6B43";
-const GREEN_DARK = "#17532F";
 
 type FormState = {
   name: string;
@@ -128,8 +125,7 @@ export default function ConsultForm() {
     <section
       id="consult"
       aria-labelledby="consult-heading"
-      className="border-t border-line px-4 py-16 sm:px-6 sm:py-20"
-      style={{ backgroundColor: "#F0F7F2" }}
+      className="border-t border-line bg-accent/5 px-4 py-16 sm:px-6 sm:py-20"
     >
       {/* Daum 우편번호 스크립트 — 클라이언트 로드(키 불필요) */}
       <Script
@@ -144,16 +140,14 @@ export default function ConsultForm() {
           <>
             {/* 헤더 */}
             <div className="text-center">
-              <p className="text-sm font-semibold" style={{ color: GREEN }}>
-                문의 및 신청
-              </p>
+              <p className="text-sm font-semibold text-accent">문의 및 신청</p>
               <h2
                 id="consult-heading"
                 className="mt-2 text-4xl font-bold leading-tight text-ink md:text-5xl"
               >
                 체험 수업
                 <br />
-                <span style={{ color: GREEN }}>신청하기</span>
+                <span className="text-accent">신청하기</span>
               </h2>
               <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-muted md:text-lg">
                 데이터로 검증된 우리 학교 맞춤 전략, 지금 바로 확인 가능합니다.
@@ -165,8 +159,7 @@ export default function ConsultForm() {
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <a
                 href={`tel:${CONSULT_PHONE}`}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 bg-white px-4 py-3.5 transition-colors hover:bg-[#F0F7F2]"
-                style={{ borderColor: GREEN, color: GREEN }}
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-accent bg-white px-4 py-3.5 text-accent transition-colors hover:bg-accent/5"
               >
                 <PhoneIcon />
                 <span className="text-xl font-extrabold tracking-tight md:text-2xl">
@@ -259,10 +252,7 @@ export default function ConsultForm() {
                     <button
                       type="button"
                       onClick={openPostcode}
-                      className="shrink-0 rounded-lg px-4 text-base font-semibold text-white transition-colors md:text-lg"
-                      style={{ backgroundColor: GREEN }}
-                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = GREEN_DARK)}
-                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = GREEN)}
+                      className="shrink-0 rounded-lg bg-accent px-4 text-base font-semibold text-white transition-colors hover:bg-accent-dark md:text-lg"
                     >
                       주소 검색
                     </button>
@@ -306,8 +296,7 @@ export default function ConsultForm() {
                     type="checkbox"
                     checked={form.agree}
                     onChange={(e) => set("agree", e.target.checked)}
-                    className="mt-1 h-5 w-5 shrink-0 rounded border-line"
-                    style={{ accentColor: GREEN }}
+                    className="mt-1 h-5 w-5 shrink-0 rounded border-line accent-accent"
                   />
                   <span className="text-sm leading-relaxed text-ink md:text-base">
                     개인정보(이름·연락처·주소) 수집·이용에 동의합니다.
@@ -320,13 +309,7 @@ export default function ConsultForm() {
               <button
                 type="submit"
                 disabled={status === "submitting"}
-                className="mt-1 inline-flex min-h-14 w-full items-center justify-center rounded-xl px-6 text-lg font-bold text-white shadow-md transition-colors disabled:opacity-60 md:text-xl"
-                style={{ backgroundColor: GREEN }}
-                onMouseEnter={(e) => {
-                  if (status !== "submitting")
-                    e.currentTarget.style.backgroundColor = GREEN_DARK;
-                }}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = GREEN)}
+                className="mt-1 inline-flex min-h-14 w-full items-center justify-center rounded-xl bg-accent px-6 text-lg font-bold text-white shadow-md transition-colors hover:bg-accent-dark disabled:opacity-60 md:text-xl"
               >
                 {status === "submitting" ? "접수 중…" : "체험 수업 신청하기 →"}
               </button>
@@ -352,10 +335,7 @@ export default function ConsultForm() {
 function SuccessMessage({ phone }: { phone: string }) {
   return (
     <div className="py-6 text-center">
-      <div
-        className="mx-auto flex h-16 w-16 items-center justify-center rounded-full"
-        style={{ backgroundColor: "#E3F1E8", color: GREEN }}
-      >
+      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-accent/10 text-accent">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
           <polyline points="20 6 9 17 4 12" />
         </svg>
@@ -371,8 +351,7 @@ function SuccessMessage({ phone }: { phone: string }) {
       </p>
       <a
         href={`tel:${phone}`}
-        className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl border-2 bg-white px-5 py-3 transition-colors hover:bg-[#F0F7F2]"
-        style={{ borderColor: GREEN, color: GREEN }}
+        className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl border-2 border-accent bg-white px-5 py-3 text-accent transition-colors hover:bg-accent/5"
       >
         <PhoneIcon />
         <span className="text-base font-semibold md:text-lg">
@@ -459,8 +438,9 @@ function MultiSelect({
                   className="flex w-full items-center gap-2.5 rounded-md px-3 py-2.5 text-left text-base hover:bg-surface-alt md:text-lg"
                 >
                   <span
-                    className="flex h-5 w-5 shrink-0 items-center justify-center rounded border"
-                    style={on ? { backgroundColor: GREEN, borderColor: GREEN } : { borderColor: "#D1D5DB" }}
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border ${
+                      on ? "border-accent bg-accent" : "border-[#D1D5DB]"
+                    }`}
                   >
                     {on && (
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -518,7 +498,7 @@ const inputCls = (invalid: boolean) =>
   `min-h-12 w-full rounded-lg border bg-white px-4 py-3 text-base text-ink placeholder:text-muted focus:outline-none focus:ring-2 md:text-lg ${
     invalid
       ? "border-red-400 focus:ring-red-200"
-      : "border-line focus:ring-[#1F6B43]/30 focus:border-[#1F6B43]"
+      : "border-line focus:ring-accent/30 focus:border-accent"
   }`;
 
 /* ── 아이콘 ──────────────────────────────────────────────────────── */
