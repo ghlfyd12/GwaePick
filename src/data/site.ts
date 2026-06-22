@@ -68,7 +68,6 @@ export const site = {
     },
     { label: "교사진", href: "/teachers" },
     { label: "학원", href: "/#academy" },
-    { label: "코딩", href: "/#coding" },
     { label: "외국어", href: "/#language" },
     { label: "수업후기", href: "/#reviews" },
     { label: "상담안내", href: "/#guide" },
