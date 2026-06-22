@@ -1,11 +1,10 @@
-import CTAButton from "@/components/ui/CTAButton";
 import Hero from "@/components/sections/Hero";
 import Curriculum from "@/components/sections/Curriculum";
 import WhyUs from "@/components/sections/WhyUs";
 import TeacherIntro from "@/components/sections/TeacherIntro";
 import Teachers from "@/components/sections/Teachers";
 import ReviewVideos from "@/components/ReviewVideos";
-import { site } from "@/data/site";
+import ConsultForm from "@/components/ConsultForm";
 
 /*
  * 메인 랜딩.
@@ -54,16 +53,7 @@ export default function Home() {
       </section>
 
       {/* 무료 상담 신청 폼 — 모든 CTA 의 앵커 목적지(#consult) */}
-      <section
-        id="consult"
-        className="flex min-h-[60vh] flex-col items-center justify-center gap-5 border-t border-line bg-primary px-4 py-20 text-center text-white"
-      >
-        <h2 className="text-xl font-bold sm:text-2xl">무료 상담 신청 폼</h2>
-        <p className="text-white/80">다음 작업에서 구현</p>
-        <CTAButton href={site.cta.href} size="lg">
-          {site.cta.label}
-        </CTAButton>
-      </section>
+      <ConsultForm />
     </>
   );
 }
