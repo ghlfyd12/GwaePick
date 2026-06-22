@@ -155,14 +155,14 @@ export default function ConsultForm() {
               </p>
             </div>
 
-            {/* 전화 / 카카오 버튼 — 전화 강조 */}
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+            {/* 전화 / 카카오 버튼 — 전화 강조. 모바일 세로 스택(전화 위) → sm+ 동일폭 2열(50:50). */}
+            <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <a
                 href={`tel:${CONSULT_PHONE}`}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-accent bg-white px-4 py-3.5 text-accent transition-colors hover:bg-accent/5"
+                className="flex min-w-0 items-center justify-center gap-2 rounded-xl border-2 border-accent bg-white px-3 py-3.5 text-accent transition-colors hover:bg-accent/5"
               >
                 <PhoneIcon />
-                <span className="text-xl font-extrabold tracking-tight md:text-2xl">
+                <span className="whitespace-nowrap text-xl font-extrabold leading-none tracking-tight md:text-2xl">
                   {CONSULT_PHONE}
                 </span>
               </a>
@@ -170,10 +170,10 @@ export default function ConsultForm() {
                 href={KAKAO_CHANNEL_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#FEE500] px-4 py-3.5 text-base font-bold text-[#3C1E1E] transition-[filter] hover:brightness-95 sm:text-lg"
+                className="flex min-w-0 items-center justify-center gap-2 rounded-xl bg-[#FEE500] px-3 py-3.5 text-base font-bold text-[#3C1E1E] transition-[filter] hover:brightness-95 sm:text-lg"
               >
                 <ChatIcon />
-                카카오 채널 상담
+                <span className="whitespace-nowrap">카카오 채널 상담</span>
               </a>
             </div>
 
