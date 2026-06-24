@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import RegionMap, { type RegionFeatureCollection } from "@/components/RegionMap";
-import SigunguGrid from "@/components/SigunguGrid";
+import LinkToggleGrid from "@/components/LinkToggleGrid";
+import SubjectChips from "@/components/SubjectChips";
 import seoulDistricts from "@/data/seoul-districts.json";
 import { sidoList, sidoBySlug } from "@/data/sido";
 import { districts } from "@/data/districts";
 import { gyeonggi } from "@/data/gyeonggi";
+import { DEFAULT_SUBJECT, pseoHref } from "@/data/pseo";
 import { site } from "@/data/site";
 
 /*
@@ -106,14 +108,27 @@ export default async function SidoPage({
           </>
         )}
 
-        {/* 경기 시·군·구 그리드 — 가나다 정렬 + 전체 보기 토글(클라이언트) */}
+        {/* 경기 시·군·구 — 과목 선택 칩 + 가나다 정렬/토글 그리드(기본 과목 포함 pSEO 링크) */}
         {isGyeonggi && (
-          <SigunguGrid
-            sigungu={gyeonggi.sigungu.map((sg) => ({
-              name: sg.name,
-              slug: sg.slug,
-            }))}
-          />
+          <div className="mx-auto max-w-4xl">
+            <SubjectChips
+              current={DEFAULT_SUBJECT}
+              makeHref={(s) => pseoHref.sidoSubject(s)}
+            />
+            <div className="mt-8">
+              <LinkToggleGrid
+                items={[...gyeonggi.sigungu]
+                  .sort((a, b) => a.name.localeCompare(b.name, "ko-KR"))
+                  .map((sg) => ({
+                    label: sg.name,
+                    href: pseoHref.sigunguSubject(sg.slug, DEFAULT_SUBJECT),
+                  }))}
+                heading="경기 시군구 선택"
+                badge={`${gyeonggi.sigungu.length}개 지역`}
+                ariaLabel="경기 시·군·구 목록"
+              />
+            </div>
+          </div>
         )}
 
         {/* 하단 공통 CTA — 상담 동선(/#consult) */}

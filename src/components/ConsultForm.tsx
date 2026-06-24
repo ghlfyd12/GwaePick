@@ -58,8 +58,13 @@ declare global {
   }
 }
 
-export default function ConsultForm() {
-  const [form, setForm] = useState<FormState>(EMPTY);
+export default function ConsultForm({
+  defaultMessage = "",
+}: {
+  /** 문의사항 프리필(예: "{지역} {과목} 과외 문의드립니다."). */
+  defaultMessage?: string;
+} = {}) {
+  const [form, setForm] = useState<FormState>({ ...EMPTY, message: defaultMessage });
   const [errors, setErrors] = useState<Errors>({});
   const [status, setStatus] = useState<
     "idle" | "submitting" | "success" | "error"

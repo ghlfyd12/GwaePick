@@ -22,7 +22,8 @@
       "Bash(node -e \"const p=require\\('./package.json'\\);console.log\\('deps:',JSON.stringify\\({...p.dependencies,...p.devDependencies}\\)\\)\")",
       "Bash(node -e \"const g=require\\('./data/korea-sido.json'\\); console.log\\('type:',g.type,'features:',g.features.length\\); console.log\\('sample props:', JSON.stringify\\(g.features.map\\(f=>f.properties\\).slice\\(0,3\\)\\)\\); console.log\\('geomType:', g.features[0].geometry.type\\)\")",
       "Bash(node -e \"const g=require\\('./data/seoul-districts.json'\\); console.log\\('features:',g.features.length\\); console.log\\('sample props:', JSON.stringify\\(g.features.map\\(f=>f.properties\\).slice\\(0,2\\)\\)\\); console.log\\('geomType:', g.features[0].geometry.type\\)\")",
-      "Bash(node -e \"const p=require\\('./package.json'\\);console.log\\(JSON.stringify\\({...p.dependencies,...p.devDependencies},null,1\\)\\)\")"
+      "Bash(node -e \"const p=require\\('./package.json'\\);console.log\\(JSON.stringify\\({...p.dependencies,...p.devDependencies},null,1\\)\\)\")",
+      "Bash(rm -rf \"src/app/tutoring/by-region/[sido]/[district]\" && echo \"deleted [district] \\(+[dong]\\)\" && find src/app/tutoring/by-region -type f | sort)"
     ]
   }
 }
