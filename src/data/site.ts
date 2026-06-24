@@ -38,6 +38,10 @@ export const site = {
   /** 핵심 슬로건 (CLAUDE.md 고정 규칙) */
   slogan: "선생님을 보는 눈은, 선생님이 가장 정확합니다.",
 
+  /** 푸터 태그라인(두 줄, \n 으로 줄바꿈) */
+  footerTagline:
+    "취약과목 집중관리부터 공부습관까지\n체계적인 맞춤관리로 확실한 결과를 만듭니다.",
+
   /** 기본 소개 문구 */
   description:
     "직접 가르쳐 온 선생님이 1:1 상담으로 우리 아이에게 가장 잘 맞는 선생님을 연결해 드립니다.",
@@ -73,12 +77,12 @@ export const site = {
     { label: "상담안내", href: "/#guide" },
   ] satisfies NavItem[],
 
-  /** 연락처 placeholder — 실제 값으로 교체 예정 */
+  /** 연락처 (실제 값) */
   contact: {
-    phone: "010-0000-0000",
-    email: "contact@example.com",
-    hours: "평일 10:00 – 20:00 / 주말 상담 예약",
-    kakao: "@맞춤과외상담",
+    phone: "010-2177-2720",
+    email: "kar9777@naver.com",
+    hours: "매일 09:00 - 23:00 / 주말 상담 가능",
+    kakao: "@studykim",
   },
 
   /** 푸터 저작권 표기 연도 */

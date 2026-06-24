@@ -10,8 +10,8 @@ export default function Footer() {
     <footer className="border-t border-line bg-surface-alt">
       <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
         <p className="text-lg font-bold text-accent">{site.name}</p>
-        <p className="mt-3 max-w-md text-sm leading-relaxed text-ink">
-          {site.slogan}
+        <p className="mt-3 max-w-md whitespace-pre-line break-keep text-sm leading-relaxed text-ink">
+          {site.footerTagline}
         </p>
 
         <dl className="mt-8 grid gap-2 text-sm text-muted sm:grid-cols-2">
