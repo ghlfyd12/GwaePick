@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { geoPath, geoIdentity } from "d3-geo";
 import type {
@@ -14,17 +14,16 @@ import type {
 /*
  * RegionMap — 정적 GeoJSON 을 d3-geo 로 SVG path 로 그리는 범용 지도(외부 지도 API/키 없음).
  *
- * props:
- *  - geo: GeoJSON FeatureCollection (properties = { slug, label, name_full })
- *  - hrefPrefix: 각 지역 링크 prefix. href = `${hrefPrefix}/${slug}`.
- *  - ariaLabel: 지도 그룹 라벨. / pad: SVG 안쪽 여백(라벨 클리핑 방지). / labelNudge: slug→[dx,dy] 위치 보정.
+ * 두 가지 입력 방식:
+ *  - geo: GeoJSON FeatureCollection 직접 전달(전국 시/도 지도 등 SSR 데이터).
+ *  - sidoSlug: `/geo/sigungu/{sidoSlug}.json` 을 클라이언트에서 fetch(17개 시/도 시군구 경계).
+ *    로딩 중엔 스켈레톤, 파일 없음/빈 데이터면 아무것도 렌더하지 않음(부모가 동 브라우저만 노출).
+ *  - hrefMode: "path"(기본) → href=`${hrefPrefix}/${slug}` 이동 / "hash" → `#sg-${slug}` 동일 페이지 앵커
+ *    (시군구 클릭 시 같은 페이지의 동 브라우저가 해당 시군구로 전환).
+ *  - ariaLabel / pad(라벨 클리핑 방지 여백) / labelNudge(slug→[dx,dy] 위치 보정).
  *
- * 처리:
- *  - 본토에서 멀리 떨어진 아주 작은 부속 도형(독도 등)은 분리해 "비인터랙티브 정적 레이어"로 그림
- *    (호버 색변화·커서·링크 없음, 색 고정). 메인 17개 시/도는 정상 인터랙션.
- *  - viewBox 를 실제 투영 bounds 에 타이트하게 맞춰 빈 여백 제거(지도 확대). overflow-visible 로 라벨 클리핑 방지.
- *  - 큰 지역을 먼저, 작은 지역을 나중에 렌더 → 작은 지역 라벨이 인접 큰 지역 위에 또렷하게.
- *  - 호버/포커스 시 라벨 흰색 + 항상 흰색 외곽선(paint-order:stroke)으로 어떤 배경에서도 읽힘.
+ * 처리: 본토에서 먼 아주 작은 부속 도형(독도 등)은 분리해 비인터랙티브 정적 레이어로 그림.
+ *  viewBox 를 투영 bounds 에 타이트하게 맞춤. 큰 지역 먼저 → 작은 지역 라벨이 위에. 라벨 흰 외곽선.
  */
 
 type RegionProps = { slug: string; label: string; name_full?: string };
@@ -38,18 +37,50 @@ const ISLAND_MIN_DIST = 180;
 
 export default function RegionMap({
   geo,
-  hrefPrefix,
+  sidoSlug,
+  hrefPrefix = "",
+  hrefMode = "path",
   ariaLabel,
   pad = 30,
   labelNudge,
 }: {
-  geo: RegionFeatureCollection;
-  hrefPrefix: string;
+  geo?: RegionFeatureCollection;
+  sidoSlug?: string;
+  hrefPrefix?: string;
+  hrefMode?: "path" | "hash";
   ariaLabel?: string;
   pad?: number;
   labelNudge?: Record<string, [number, number]>;
 }) {
+  // sidoSlug 가 있으면 public 의 시군구 GeoJSON 을 fetch. geo prop 이 있으면 그대로 사용.
+  const [fetched, setFetched] = useState<RegionFeatureCollection | null>(null);
+  const [state, setState] = useState<"idle" | "loading" | "ready" | "empty">(
+    geo ? "ready" : sidoSlug ? "loading" : "idle",
+  );
+
+  useEffect(() => {
+    if (geo || !sidoSlug) return;
+    let alive = true;
+    fetch(`/geo/sigungu/${sidoSlug}.json`)
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((d: RegionFeatureCollection) => {
+        if (!alive) return;
+        if (d?.features?.length) {
+          setFetched(d);
+          setState("ready");
+        } else setState("empty");
+      })
+      .catch(() => alive && setState("empty"));
+    return () => {
+      alive = false;
+    };
+  }, [geo, sidoSlug]);
+
+  const data = geo ?? fetched;
+
   const { shapes, islandPath, viewBox } = useMemo(() => {
+    if (!data) return { shapes: [], islandPath: "", viewBox: `0 0 ${W} ${H}` };
+    const geo = data;
     // geoIdentity(평면 좌표)+reflectY: lon/lat 를 화면 좌표로 직접 맞춤(geoMercator 의 구면 winding 이슈 회피).
     const projection = geoIdentity()
       .reflectY(true)
@@ -118,7 +149,18 @@ export default function RegionMap({
     const viewBox = `${bx0 - m} ${by0 - m} ${bx1 - bx0 + 2 * m} ${by1 - by0 + 2 * m}`;
 
     return { shapes, islandPath, viewBox };
-  }, [geo, pad, labelNudge]);
+  }, [data, pad, labelNudge]);
+
+  // fetch 모드: 로딩 스켈레톤 / 데이터 없음(파일 부재)이면 지도 자체를 숨김(부모가 동 브라우저만 노출)
+  if (sidoSlug && state === "loading")
+    return (
+      <div
+        className="aspect-square w-full animate-pulse rounded-2xl bg-surface-alt"
+        role="status"
+        aria-label="지도 불러오는 중"
+      />
+    );
+  if (sidoSlug && (state === "empty" || !data)) return null;
 
   return (
     <svg
@@ -127,37 +169,45 @@ export default function RegionMap({
       role="group"
       aria-label={ariaLabel}
     >
-      {/* 인터랙티브 시/도(큰 지역 → 작은 지역 순) */}
-      {shapes.map((s) => (
-        <Link
-          key={s.slug}
-          href={`${hrefPrefix}/${s.slug}`}
-          aria-label={s.label}
-          className="group/region outline-none"
-        >
-          <path
-            d={s.d}
-            className="cursor-pointer fill-accent/15 stroke-white transition-colors duration-200 group-hover/region:fill-accent group-focus-visible/region:fill-accent"
-            style={{ strokeWidth: 1.2 }}
-          />
-          <text
-            x={s.lx}
-            y={s.ly}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            className="pointer-events-none select-none fill-ink text-[17px] font-semibold group-hover/region:fill-white group-focus-visible/region:fill-white"
-            // 흰색 외곽선으로 라벨이 어떤 배경(주황 포함) 위에서도 또렷하게.
-            style={{
-              paintOrder: "stroke",
-              stroke: "#fff",
-              strokeWidth: 2.5,
-              strokeLinejoin: "round",
-            }}
-          >
-            {s.label}
-          </text>
-        </Link>
-      ))}
+      {/* 인터랙티브 시/도·시군구(큰 지역 → 작은 지역 순) */}
+      {shapes.map((s) => {
+        const href = hrefMode === "hash" ? `#sg-${s.slug}` : `${hrefPrefix}/${s.slug}`;
+        const inner = (
+          <>
+            <path
+              d={s.d}
+              className="cursor-pointer fill-accent/15 stroke-white transition-colors duration-200 group-hover/region:fill-accent group-focus-visible/region:fill-accent"
+              style={{ strokeWidth: 1.2 }}
+            />
+            <text
+              x={s.lx}
+              y={s.ly}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              className="pointer-events-none select-none fill-ink text-[17px] font-semibold group-hover/region:fill-white group-focus-visible/region:fill-white"
+              // 흰색 외곽선으로 라벨이 어떤 배경(주황 포함) 위에서도 또렷하게.
+              style={{
+                paintOrder: "stroke",
+                stroke: "#fff",
+                strokeWidth: 2.5,
+                strokeLinejoin: "round",
+              }}
+            >
+              {s.label}
+            </text>
+          </>
+        );
+        // hash 모드는 동일 페이지 앵커 → 일반 <a>(hashchange 신뢰성). path 모드는 next/link.
+        return hrefMode === "hash" ? (
+          <a key={s.slug} href={href} aria-label={s.label} className="group/region outline-none">
+            {inner}
+          </a>
+        ) : (
+          <Link key={s.slug} href={href} aria-label={s.label} className="group/region outline-none">
+            {inner}
+          </Link>
+        );
+      })}
 
       {/* 비인터랙티브 부속 섬(독도 등) — 색 고정, 호버/커서/링크 없음 */}
       {islandPath && (

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -23,6 +24,24 @@ export default function RegionDongBrowser({ sido }: { sido: Sido }) {
   // null = 전체보기(기본), 그 외 = 시군구 slug
   const [active, setActive] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  // 지도(RegionMap)에서 시군구 폴리곤 클릭 시 `#sg-{slug}` 앵커로 이동 → 해당 시군구 탭 활성 + 스크롤.
+  useEffect(() => {
+    const slugs = new Set(sido.sigungu.map((s) => s.slug));
+    const applyHash = () => {
+      const m = window.location.hash.match(/^#sg-(.+)$/);
+      if (!m) return;
+      const slug = decodeURIComponent(m[1]);
+      if (!slugs.has(slug)) return;
+      setActive(slug);
+      setQuery("");
+      rootRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+    applyHash();
+    window.addEventListener("hashchange", applyHash);
+    return () => window.removeEventListener("hashchange", applyHash);
+  }, [sido]);
 
   // 탭 바 가로 스와이프(데스크톱 드래그). 터치는 네이티브 스크롤 사용.
   const tabBarRef = useRef<HTMLDivElement>(null);
@@ -91,7 +110,7 @@ export default function RegionDongBrowser({ sido }: { sido: Sido }) {
     }`;
 
   return (
-    <div>
+    <div ref={rootRef} style={{ scrollMarginTop: "1.5rem" }}>
       {/* 동 이름 필터 */}
       <div className="mx-auto mb-4 max-w-md">
         <label htmlFor="dong-filter" className="sr-only">
