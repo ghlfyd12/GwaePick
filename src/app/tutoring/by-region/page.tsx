@@ -16,8 +16,11 @@ import { sidoList } from "@/data/sido";
 const EYEBROW = "전국 어디서나";
 // 제목은 화면 폭과 무관하게 항상 이 두 줄로 고정(<br/> 로 강제 줄바꿈).
 const HEADLINE_LINES = ["우리 동네에서 시작하는", "1:1 맞춤 과외"];
-const INTRO =
-  "지역별 맞춤 커리큘럼 상담과 무료 체험. 원하는 지역을 선택하면 해당 시·구가 나타납니다.";
+// 서브카피는 "…무료 체험." 뒤에서 줄을 나눠 두 줄로(문구 동일).
+const INTRO_LINES = [
+  "지역별 맞춤 커리큘럼 상담과 무료 체험.",
+  "원하는 지역을 선택하면 해당 시·구가 나타납니다.",
+];
 
 /** 좁은 광역시 라벨이 인접 도와 겹치지 않게 살짝 위치 보정(viewBox 단위). 데이터는 그대로. */
 const SIDO_LABEL_NUDGE: Record<string, [number, number]> = {
@@ -56,7 +59,9 @@ export default function ByRegionPage() {
               {HEADLINE_LINES[1]}
             </h1>
             <p className="mx-auto mt-4 max-w-md break-keep text-lg leading-relaxed text-muted sm:text-xl md:mx-0 md:text-2xl">
-              {INTRO}
+              {INTRO_LINES[0]}
+              <br />
+              {INTRO_LINES[1]}
             </p>
 
             {/* 우리 지역 빠르게 검색 — 전국 통합(시/도·시군구·동) */}
