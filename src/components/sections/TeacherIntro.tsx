@@ -10,7 +10,7 @@ import { teacherIntro } from "@/data/teacherIntro";
  * 데이터는 teacherIntro.ts 에서만 가져온다(하드코딩 금지).
  */
 export default function TeacherIntro() {
-  const { title, body, highlights, photo } = teacherIntro;
+  const { title, body, blocks, checks, closing, photo } = teacherIntro;
 
   return (
     <section
@@ -18,6 +18,7 @@ export default function TeacherIntro() {
       aria-labelledby="teacher-intro-heading"
       className="border-t border-line bg-white px-4 py-16 sm:px-6 sm:py-20"
     >
+      {/* 데스크톱: 좌(사진)·우(텍스트) 2단(세로 중앙 정렬). 모바일 390px: 세로 스택(사진 위 → 텍스트 아래). */}
       <div className="mx-auto grid max-w-5xl items-center gap-10 md:grid-cols-2 md:gap-14">
         {/* 왼쪽: 헤드샷 사진 — 둥근 프레임, 비율 유지. 회색 배경이 플레이스홀더 역할. */}
         <div className="relative mx-auto aspect-[4/5] w-full max-w-sm overflow-hidden rounded-2xl bg-surface-alt shadow-md ring-1 ring-line md:mx-0">
@@ -33,32 +34,55 @@ export default function TeacherIntro() {
         </div>
 
         {/* 오른쪽: 소개 텍스트 */}
-        <div>
+        <div className="min-w-0">
           <h2
             id="teacher-intro-heading"
-            className="text-2xl font-bold leading-snug text-accent sm:text-3xl"
+            className="break-keep text-2xl font-bold leading-snug text-accent sm:text-3xl"
           >
             {title}
           </h2>
 
-          <p className="mt-5 text-base leading-relaxed text-ink sm:text-lg">
+          <p className="mt-5 break-keep text-base leading-relaxed text-ink sm:text-lg">
             {body}
           </p>
 
-          {/* 강조 항목(주황 포인트 마커) */}
-          <ul className="mt-7 flex flex-col gap-3">
-            {highlights.map((h, i) => (
+          {/* 강조 블록 3개 — 소제목(굵게) + 설명. 시각적 위계 둠. */}
+          <div className="mt-8 flex flex-col gap-5">
+            {blocks.map((b, i) => (
+              <div key={i}>
+                <p className="flex items-start gap-2.5 break-keep text-base font-bold text-ink sm:text-lg">
+                  <span
+                    aria-hidden
+                    className="mt-2 h-2 w-2 shrink-0 rounded-full bg-accent sm:mt-2.5"
+                  />
+                  {b.title}
+                </p>
+                <p className="mt-1.5 break-keep pl-[1.125rem] text-sm leading-relaxed text-muted sm:text-base">
+                  {b.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* 체크 항목 4개 — 주황 점 리스트(강조 블록과 구분되는 묶음) */}
+          <ul className="mt-8 flex flex-col gap-3 border-t border-line pt-8">
+            {checks.map((c, i) => (
               <li key={i} className="flex items-start gap-3">
                 <span
                   aria-hidden
                   className="mt-2 h-2.5 w-2.5 shrink-0 rounded-full bg-accent"
                 />
-                <span className="text-base font-semibold text-ink sm:text-lg">
-                  {h.text}
+                <span className="break-keep text-base font-semibold text-ink sm:text-lg">
+                  {c}
                 </span>
               </li>
             ))}
           </ul>
+
+          {/* 마무리 한 줄 */}
+          <p className="mt-6 break-keep text-base font-semibold text-accent sm:text-lg">
+            {closing}
+          </p>
         </div>
       </div>
     </section>
