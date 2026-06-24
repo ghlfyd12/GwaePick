@@ -84,8 +84,8 @@ export async function generateMetadata({
   }
   const rh = resolveHub(sido, seg2, seg3);
   if (rh) {
-    const title = `${rh.dong.name} 1:1 과외 — ${rh.sg.name} 방문 수업 | 지식의참견`;
-    const description = `${rh.sg.name} ${rh.dong.name} 1:1 맞춤 방문 과외. 과목을 선택해 ${rh.dong.name} 학생에게 맞는 선생님을 만나보세요.`;
+    const title = `${rh.dong.name} 1:1 과외 — ${rh.sg.name} 개인과외 수업 | 지식의참견`;
+    const description = `${rh.sg.name} ${rh.dong.name} 1:1 맞춤 개인과외. 과목을 선택해 ${rh.dong.name} 학생에게 맞는 선생님을 만나보세요.`;
     return {
       title: { absolute: title },
       description,

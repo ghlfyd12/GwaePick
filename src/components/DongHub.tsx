@@ -25,7 +25,7 @@ export default function DongHub({
           {dong.name} 1:1 과외 — 과목을 선택하세요
         </h1>
         <p className="mx-auto mt-4 max-w-xl break-keep text-base leading-relaxed text-muted sm:text-lg">
-          {dong.name}에서 1:1 맞춤 방문 수업이 가능한 선생님을 과목별로 안내해
+          {dong.name}에서 1:1 맞춤 개인과외 수업이 가능한 선생님을 과목별로 안내해
           드립니다.
         </p>
 

@@ -134,7 +134,7 @@ export const TRUST = [
 export function buildFaq(dong: string): { q: string; a: string }[] {
   return [
     {
-      q: `${dong}도 방문 수업이 되나요?`,
+      q: `${dong}도 개인과외(방문) 수업이 되나요?`,
       a: `${dong}과 인근 지역까지 방문이 가능합니다. 정확한 동선은 상담에서 확인해 연결해 드립니다.`,
     },
     {

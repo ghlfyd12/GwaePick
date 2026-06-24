@@ -105,8 +105,8 @@ export async function generateMetadata({
   const rn = resolveNew(sido, seg2, seg3, seg4);
   if (rn) {
     const { sg, dong, subj, sidoSlug } = rn;
-    const title = `${dong.name} ${subj.label} 과외 — ${sg.name} 1:1 맞춤 방문수업 | 지식의참견`;
-    const description = `${sg.name} ${dong.name} ${subj.label} 1:1 맞춤 방문 과외. 직접 가르쳐 온 선생님이 ${dong.name} 학생에게 맞는 ${subj.label} 선생님을 연결해 드립니다. 첫 상담은 무료입니다.`;
+    const title = `${dong.name} ${subj.label} 과외 — ${sg.name} 1:1 맞춤 개인과외 수업 | 지식의참견`;
+    const description = `${sg.name} ${dong.name} ${subj.label} 1:1 맞춤 개인과외. 직접 가르쳐 온 선생님이 ${dong.name} 학생에게 맞는 ${subj.label} 선생님을 연결해 드립니다. 첫 상담은 무료입니다.`;
     const canonical = `/tutoring/by-region/${sidoSlug}/${sg.slug}/${dong.slug}/${subj.slug}`;
     return {
       title: { absolute: title },
