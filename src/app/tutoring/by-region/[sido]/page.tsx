@@ -9,6 +9,8 @@ import { sidoList, sidoBySlug } from "@/data/sido";
 import { districts } from "@/data/districts";
 import { gyeonggi } from "@/data/gyeonggi";
 import { DEFAULT_SUBJECT, pseoHref } from "@/data/pseo";
+import { getSido } from "@/data/sidoRegions";
+import RegionDongBrowser from "@/components/RegionDongBrowser";
 import { site } from "@/data/site";
 
 /*
@@ -58,6 +60,8 @@ export default async function SidoPage({
 
   const isSeoul = sido === "seoul";
   const isGyeonggi = sido === "gyeonggi";
+  // 동(洞) 데이터가 있는 시/도면 지도 아래 동 탐색 블록을 추가(경기는 데이터 미포함 → 미표시).
+  const dongSido = getSido(sido);
 
   return (
     <>
@@ -127,6 +131,21 @@ export default async function SidoPage({
                 badge={`${gyeonggi.sigungu.length}개 지역`}
                 ariaLabel="경기 시·군·구 목록"
               />
+            </div>
+          </div>
+        )}
+
+        {/* 동(洞) 탐색 — 시군구 탭 + 전체보기(지도 아래 추가). 데이터 있는 시/도만. */}
+        {dongSido && (
+          <div className="mx-auto mt-14 max-w-5xl">
+            <h2 className="break-keep text-center text-xl font-bold text-ink sm:text-2xl">
+              {dongSido.label} 동네별 1:1 과외
+            </h2>
+            <p className="mx-auto mt-2 max-w-2xl break-keep text-center text-sm leading-relaxed text-muted sm:text-base">
+              시·군·구를 선택하거나 전체보기에서 우리 동네를 찾아보세요.
+            </p>
+            <div className="mt-7">
+              <RegionDongBrowser sido={dongSido} />
             </div>
           </div>
         )}
