@@ -14,6 +14,10 @@ export interface Subject {
   label: string;
   why: string;
   curriculum: SubjectCurriculumStep[];
+  /** 이런 학생에게(선택) — 있으면 상세 페이지에 노출. */
+  forWhom?: string[];
+  /** 수업 방식 한 단락(선택) — 있으면 상세 페이지에 노출. */
+  teaching?: string;
 }
 
 const DIAGNOSE = (s: string): SubjectCurriculumStep => ({
@@ -81,6 +85,24 @@ export const subjects: Subject[] = [
       { step: "STEP 2", title: "기초", desc: "현상을 관찰하고 원리로 설명하는 습관을 들입니다." },
       { step: "STEP 3", title: "심화", desc: "실험·그래프 데이터 해석을 단계별로 다룹니다." },
       REVIEW("단원별로 이해도를 점검하고 보완합니다."),
+    ],
+  },
+  {
+    slug: "coding",
+    label: "코딩",
+    why: "직접 만들어 보며 익힐 때 코딩이 진짜 사고력이 됩니다.",
+    forWhom: [
+      "논리적으로 생각하는 힘을 기르고 싶은 학생",
+      "학교 정보·SW 수업을 따라가기 어려운 학생",
+      "직접 만들면서 배우는 걸 좋아하는 학생",
+    ],
+    teaching:
+      "문법을 외우는 수업이 아니라, 직접 만들어 보며 원리를 익히는 방식입니다. 작은 결과물을 스스로 완성하는 경험을 통해 논리적 사고력과 자신감을 함께 키웁니다. 초·중·고 정보·SW 교육과 학생 수준에 맞춰 진도를 조절합니다.",
+    curriculum: [
+      { step: "STEP 1", title: "진단", desc: "흥미와 현재 수준을 먼저 파악해 어떤 도구가 맞는지 확인합니다." },
+      { step: "STEP 2", title: "기초", desc: "블록코딩·스크래치로 프로그래밍의 원리와 절차를 이해합니다." },
+      { step: "STEP 3", title: "심화", desc: "파이썬 기초 문법과 알고리즘적 사고를 단계적으로 훈련합니다." },
+      { step: "STEP 4", title: "점검", desc: "작은 프로젝트를 스스로 완성하며 배운 것을 정리합니다." },
     ],
   },
 ];

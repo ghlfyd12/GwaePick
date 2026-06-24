@@ -13,6 +13,7 @@ export const subjects: Subject[] = [
   { slug: "수학", label: "수학" },
   { slug: "사회", label: "사회" },
   { slug: "과학", label: "과학" },
+  { slug: "코딩", label: "코딩" },
 ];
 export const subjectBySlug: Record<string, Subject> = Object.fromEntries(
   subjects.map((s) => [s.slug, s]),

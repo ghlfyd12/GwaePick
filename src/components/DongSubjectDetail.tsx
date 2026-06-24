@@ -153,6 +153,19 @@ export default function DongSubjectDetail({
           </h2>
           <p className="mt-3 break-keep text-base leading-relaxed text-muted sm:text-lg">{WHY_COMMON}</p>
           <p className="mt-3 break-keep text-base font-medium leading-relaxed text-ink sm:text-lg">{subject.why}</p>
+          {subject.forWhom && subject.forWhom.length > 0 && (
+            <div className="mt-4">
+              <p className="text-sm font-semibold text-muted">이런 학생에게 도움이 됩니다</p>
+              <ul className="mt-2 space-y-2">
+                {subject.forWhom.map((w, i) => (
+                  <li key={i} className="flex items-start gap-3 break-keep text-base leading-relaxed text-ink">
+                    <span aria-hidden className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" />
+                    {w}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </section>
 
         {/* 4. 커리큘럼 4단계 */}
@@ -167,6 +180,12 @@ export default function DongSubjectDetail({
               </li>
             ))}
           </ol>
+          {subject.teaching && (
+            <div className="mt-5 rounded-2xl bg-surface p-5">
+              <p className="text-sm font-semibold text-accent">수업 방식</p>
+              <p className="mt-2 break-keep text-base leading-relaxed text-ink">{subject.teaching}</p>
+            </div>
+          )}
         </section>
 
         {/* 5. 진행 순서 STEP */}

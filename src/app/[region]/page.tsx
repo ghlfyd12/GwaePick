@@ -79,7 +79,7 @@ export default async function RegionPage({
   const r = resolveRegion(region);
   if (!r) notFound();
 
-  const subjects = ["수학", "영어", "국어", "과학", "사회"];
+  const subjects = ["수학", "영어", "국어", "과학", "사회", "코딩"];
   const dongLine = r.dongs?.slice(0, 12).join(", ");
   const schoolLine = r.schools?.slice(0, 12).join(", ");
 
