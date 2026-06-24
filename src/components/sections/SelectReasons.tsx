@@ -19,7 +19,10 @@ export default function SelectReasons() {
               className="flex h-full flex-col rounded-2xl border border-line bg-white p-6 shadow-sm"
             >
               <span className="text-2xl font-bold text-accent">{it.no}</span>
-              <p className="mt-3 break-keep text-base leading-relaxed text-ink">
+              <p className="mt-3 break-keep text-lg font-bold text-ink">
+                {it.title}
+              </p>
+              <p className="mt-2 break-keep text-base leading-relaxed text-muted">
                 {it.text}
               </p>
             </li>
