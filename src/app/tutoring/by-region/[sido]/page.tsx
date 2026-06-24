@@ -60,8 +60,11 @@ export default async function SidoPage({
 
   const isSeoul = sido === "seoul";
   const isGyeonggi = sido === "gyeonggi";
-  // 동(洞) 데이터가 있는 시/도면 지도 아래 동 탐색 블록을 추가(경기는 데이터 미포함 → 미표시).
+  // 동(洞) 데이터가 4개 이상인 시/도면 지도 아래 동 탐색 블록을 추가(경기는 데이터 미포함 → 미표시).
   const dongSido = getSido(sido);
+  const totalDong = dongSido
+    ? dongSido.sigungu.flatMap((sg) => sg.dong).length
+    : 0;
 
   return (
     <>
@@ -135,8 +138,8 @@ export default async function SidoPage({
           </div>
         )}
 
-        {/* 동(洞) 탐색 — 시군구 탭 + 전체보기(지도 아래 추가). 데이터 있는 시/도만. */}
-        {dongSido && (
+        {/* 동(洞) 탐색 — 시군구 탭 + 전체보기(지도 아래 추가). 동 4개 이상 시/도만. */}
+        {dongSido && totalDong >= 4 && (
           <div className="mx-auto mt-14 max-w-5xl">
             <h2 className="break-keep text-center text-xl font-bold text-ink sm:text-2xl">
               {dongSido.label} 동네별 1:1 과외

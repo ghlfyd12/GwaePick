@@ -1,6 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import {
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent as ReactMouseEvent,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import Link from "next/link";
 import { allDongOf, type Sido } from "@/data/sidoRegions";
 
@@ -21,6 +27,44 @@ export default function RegionDongBrowser({ sido }: { sido: Sido }) {
   // null = 전체보기(기본), 그 외 = 시군구 slug
   const [active, setActive] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+
+  // 탭 바 가로 스와이프(데스크톱 드래그). 터치는 네이티브 스크롤 사용.
+  const tabBarRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef({ active: false, startX: 0, startScroll: 0 });
+  const draggedRef = useRef(false);
+
+  const onTabPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "touch") return; // 터치는 네이티브 가로 스크롤
+    const el = tabBarRef.current;
+    if (!el) return;
+    dragRef.current = { active: true, startX: e.clientX, startScroll: el.scrollLeft };
+    draggedRef.current = false;
+  };
+  const onTabPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (!dragRef.current.active || !tabBarRef.current) return;
+    const dx = e.clientX - dragRef.current.startX;
+    if (Math.abs(dx) > 5) draggedRef.current = true; // 임계값 — 살짝 끌면 클릭 유지
+    tabBarRef.current.scrollLeft = dragRef.current.startScroll - dx;
+  };
+  const endTabDrag = () => {
+    dragRef.current.active = false;
+  };
+  const selectTab = (
+    slug: string | null,
+    e: ReactMouseEvent<HTMLButtonElement>,
+  ) => {
+    if (draggedRef.current) {
+      draggedRef.current = false;
+      return; // 드래그였으면 탭 선택 무시
+    }
+    setActive(slug);
+    // 선택 탭을 가운데로
+    e.currentTarget.scrollIntoView({
+      inline: "center",
+      behavior: "smooth",
+      block: "nearest",
+    });
+  };
 
   // 시군구 탭(방어적 가나다 재정렬)
   const sigungu = useMemo(
@@ -67,33 +111,50 @@ export default function RegionDongBrowser({ sido }: { sido: Sido }) {
         />
       </div>
 
-      {/* 시군구 탭 바 — 가로 스크롤(스크롤바 숨김) */}
-      <div
-        role="tablist"
-        aria-label={`${sido.label} 시군구`}
-        className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      >
-        <button
-          type="button"
-          role="tab"
-          aria-selected={active === null}
-          onClick={() => setActive(null)}
-          className={tabClass(active === null)}
+      {/* 시군구 탭 바 — 가로 스와이프/드래그, 줄바꿈 금지, 스크롤바 숨김 */}
+      <div className="relative">
+        {/* 양 끝 페이드 힌트(클릭 통과) */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-gradient-to-r from-white to-transparent"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-gradient-to-l from-white to-transparent"
+        />
+        <div
+          ref={tabBarRef}
+          role="tablist"
+          aria-label={`${sido.label} 시군구`}
+          onPointerDown={onTabPointerDown}
+          onPointerMove={onTabPointerMove}
+          onPointerUp={endTabDrag}
+          onPointerLeave={endTabDrag}
+          className="flex flex-nowrap cursor-grab select-none gap-2 overflow-x-auto scroll-smooth pb-1 active:cursor-grabbing [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          style={{ touchAction: "pan-x" }}
         >
-          전체보기
-        </button>
-        {sigungu.map((sg) => (
           <button
-            key={sg.slug}
             type="button"
             role="tab"
-            aria-selected={active === sg.slug}
-            onClick={() => setActive(sg.slug)}
-            className={tabClass(active === sg.slug)}
+            aria-selected={active === null}
+            onClick={(e) => selectTab(null, e)}
+            className={tabClass(active === null)}
           >
-            {sg.name}
+            전체보기
           </button>
-        ))}
+          {sigungu.map((sg) => (
+            <button
+              key={sg.slug}
+              type="button"
+              role="tab"
+              aria-selected={active === sg.slug}
+              onClick={(e) => selectTab(sg.slug, e)}
+              className={tabClass(active === sg.slug)}
+            >
+              {sg.name}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* 동 그리드 */}
