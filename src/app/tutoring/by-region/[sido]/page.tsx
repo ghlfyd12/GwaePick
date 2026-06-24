@@ -62,27 +62,43 @@ export default async function SidoPage({
     ? dongSido.sigungu.flatMap((sg) => sg.dong).length
     : 0;
 
+  // 페이지 제목/지도에 쓰는 라벨 — sidoRegions 라벨 우선, 없으면 sido.ts 라벨로 폴백.
+  const regionLabel = dongSido?.label ?? s.label;
+
   return (
     <>
-      {/* 헤더 — 유일한 h1 */}
-      <section className="border-b border-line bg-surface px-4 py-14 text-center sm:px-6 sm:py-16">
-        <p className="text-sm font-semibold uppercase tracking-widest text-accent">
-          지역별 · {s.label}
-        </p>
-        <h1 className="mx-auto mt-2 max-w-3xl text-3xl font-bold leading-snug text-ink sm:text-4xl">
-          {s.label} 1:1 과외
-        </h1>
-        <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
-          {isGyeonggi
-            ? "지도에서 시·군·구를 선택하거나, 아래 과목별 지역 페이지로 이동하세요."
-            : `지도에서 우리 동네(시·군·구)를 선택하면 그 지역 동 목록으로 이동합니다.`}
-        </p>
-      </section>
-
       <section className="px-4 py-12 sm:px-6 sm:py-16">
+        {/* (B) 승격 — 지도 포함 헤더를 페이지 최상단으로. 유일한 h1. 지도 없는 시/도도 제목/안내는 표시. */}
+        <div className="mx-auto max-w-5xl">
+          <h1 className="break-keep text-center text-2xl font-bold text-ink sm:text-3xl">
+            {regionLabel} 동네별 1:1 과외
+          </h1>
+          <p className="mx-auto mt-3 max-w-2xl break-keep text-center text-sm leading-relaxed text-muted sm:text-base">
+            지도에서 시·군·구를 선택하면 그 지역 동 목록으로 이동합니다. 전체보기에서 바로 찾아도 됩니다.
+          </p>
+
+          {/* 시군구 경계 지도 + 동(洞) 탐색 — 동 4개 이상 시/도만. 지도 폴리곤 클릭 → 해당 시군구 동 목록. */}
+          {dongSido && totalDong >= 4 && (
+            <>
+              {/* 시군구 경계 지도(클라이언트 fetch) — 클릭 시 아래 동 브라우저가 해당 시군구로 전환 */}
+              <div className="mx-auto mt-7 max-w-2xl">
+                <RegionMap
+                  sidoSlug={sido}
+                  hrefMode="hash"
+                  ariaLabel={`${regionLabel} 시·군·구 지도 — 지역을 선택하세요`}
+                />
+              </div>
+
+              <div className="mt-8">
+                <RegionDongBrowser sido={dongSido} />
+              </div>
+            </>
+          )}
+        </div>
+
         {/* 경기 시·군·구 — 과목 선택 칩 + 가나다 정렬/토글 그리드(기본 과목 포함 pSEO 링크) */}
         {isGyeonggi && (
-          <div className="mx-auto max-w-4xl">
+          <div className="mx-auto mt-14 max-w-4xl">
             <SubjectChips
               current={DEFAULT_SUBJECT}
               makeHref={(s) => pseoHref.sidoSubject(s)}
@@ -99,31 +115,6 @@ export default async function SidoPage({
                 badge={`${gyeonggi.sigungu.length}개 지역`}
                 ariaLabel="경기도 시·군·구 목록"
               />
-            </div>
-          </div>
-        )}
-
-        {/* 시군구 경계 지도 + 동(洞) 탐색 — 동 4개 이상 시/도만. 지도 폴리곤 클릭 → 해당 시군구 동 목록. */}
-        {dongSido && totalDong >= 4 && (
-          <div className="mx-auto mt-14 max-w-5xl">
-            <h2 className="break-keep text-center text-xl font-bold text-ink sm:text-2xl">
-              {dongSido.label} 동네별 1:1 과외
-            </h2>
-            <p className="mx-auto mt-2 max-w-2xl break-keep text-center text-sm leading-relaxed text-muted sm:text-base">
-              지도에서 시·군·구를 선택하면 그 지역 동 목록으로 이동합니다. 전체보기에서 바로 찾아도 됩니다.
-            </p>
-
-            {/* 시군구 경계 지도(클라이언트 fetch) — 클릭 시 아래 동 브라우저가 해당 시군구로 전환 */}
-            <div className="mx-auto mt-7 max-w-2xl">
-              <RegionMap
-                sidoSlug={sido}
-                hrefMode="hash"
-                ariaLabel={`${dongSido.label} 시·군·구 지도 — 지역을 선택하세요`}
-              />
-            </div>
-
-            <div className="mt-8">
-              <RegionDongBrowser sido={dongSido} />
             </div>
           </div>
         )}
