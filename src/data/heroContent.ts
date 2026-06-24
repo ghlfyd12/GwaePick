@@ -141,7 +141,7 @@ export const heroContent = {
   trustBadges: [
     { icon: "✓", label: "검증 교사" },
     { icon: "🎁", label: "무료 체험" },
-    { icon: "🔄", label: "교체 무료" },
+    { icon: "🔄", label: "호흡 조율" },
   ] satisfies TrustBadge[],
 
   /** "어떤 학생인가" 공감 블록 4개 */

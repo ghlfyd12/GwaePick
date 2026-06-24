@@ -27,7 +27,7 @@ export function buildSchoolFaq(schoolName: string): { q: string; a: string }[] {
     },
     {
       q: "선생님이 아이와 안 맞으면 어떻게 하나요?",
-      a: "첫 수업 후 잘 맞지 않으면 추가 비용 없이 선생님을 교체해 드립니다.",
+      a: "첫 수업 후 잘 맞지 않으면, 다른 선생님과 호흡을 맞춰볼 수 있도록 조율해 드립니다.",
     },
     {
       q: "상담은 어떻게 진행되나요?",

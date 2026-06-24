@@ -98,7 +98,7 @@ export const whyus = {
       id: "verified-teacher",
       badge: "검증된 선생님 배정",
       title: "검증된 전문 선생님",
-      body: "실력과 경력을 검증한 선생님만 배정합니다. 아이와 호흡이 맞지 않으면 언제든 교체가 가능합니다.",
+      body: "실력과 경력을 검증한 선생님만 배정합니다. 아이와 호흡이 맞지 않으면 다른 선생님과 호흡을 맞춰볼 수 있도록 조율합니다.",
       image: "/images/whyus-2.png",
       imageAlt: "검증된 전문 선생님이 수업을 준비하는 모습",
       imageSide: "right",
