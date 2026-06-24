@@ -130,7 +130,8 @@ export default function DongSubjectDetail({
         </h1>
         <p className="mx-auto mt-4 max-w-2xl break-keep text-base leading-relaxed text-muted sm:text-lg">
           직접 가르쳐 온 선생님이 {dong.name} 학생에게 가장 잘 맞는 {subject.label}{" "}
-          선생님을 연결해 드립니다. 첫 상담은 무료입니다.
+          선생님을 배정하여 취약과목 집중관리부터 공부습관까지 체계적인 맞춤관리로
+          확실한 결과를 만듭니다.
         </p>
         <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <a href="#consult" className="inline-flex min-h-14 w-full max-w-xs items-center justify-center rounded-full bg-accent px-7 py-3 text-base font-semibold text-white shadow-md transition-colors hover:bg-accent-dark sm:w-auto sm:text-lg">
