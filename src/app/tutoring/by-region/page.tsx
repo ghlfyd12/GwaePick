@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import RegionMap, { type RegionFeatureCollection } from "@/components/RegionMap";
+import RegionQuickSearch from "@/components/RegionQuickSearch";
 import koreaSido from "@/data/korea-sido.json";
 import { sidoList } from "@/data/sido";
 
@@ -43,23 +44,26 @@ export default function ByRegionPage() {
     <>
       {/* 헤더 — 텍스트(좌) · 학생 이미지(우, 확대). 베이지 배경으로 사진과 조화. 유일한 h1 */}
       <section className="border-b border-line bg-[#E1CFB8] px-4 py-12 sm:px-6 sm:py-16">
-        <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-8 md:grid-cols-[5fr_7fr] md:gap-12">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 md:grid-cols-[2fr_3fr] md:gap-12">
           {/* 텍스트 — 모바일 가운데, 데스크톱 왼쪽 정렬 */}
           <div className="text-center md:text-left">
-            <p className="text-base font-semibold uppercase tracking-widest text-accent md:text-lg">
+            <p className="text-base font-semibold uppercase tracking-widest text-accent sm:text-lg">
               {EYEBROW}
             </p>
-            <h1 className="mt-2 break-keep text-3xl font-bold leading-snug text-ink sm:text-4xl">
+            <h1 className="mt-2 break-keep text-4xl font-bold leading-tight text-ink sm:text-5xl md:text-6xl">
               {HEADLINE_LINES[0]}
               <br />
               {HEADLINE_LINES[1]}
             </h1>
-            <p className="mx-auto mt-4 max-w-md break-keep text-lg leading-relaxed text-muted sm:text-xl md:mx-0">
+            <p className="mx-auto mt-4 max-w-md break-keep text-lg leading-relaxed text-muted sm:text-xl md:mx-0 md:text-2xl">
               {INTRO}
             </p>
+
+            {/* 우리 지역 빠르게 검색 — 전국 통합(시/도·시군구·동) */}
+            <RegionQuickSearch />
           </div>
 
-          {/* 학생 이미지 — 3:2, 칼럼(7fr)을 꽉 채워 확대. 그림자 없이 베이지 배경에 녹임 */}
+          {/* 학생 이미지 — 3:2, 칼럼을 꽉 채워 확대. 그림자 없이 베이지 배경에 녹임. 인물 상단 유지 */}
           <div className="overflow-hidden rounded-2xl">
             <Image
               src="/images/region-hero.jpg"
@@ -67,8 +71,8 @@ export default function ByRegionPage() {
               width={1024}
               height={677}
               priority
-              sizes="(min-width: 768px) 58vw, 100vw"
-              className="h-auto w-full"
+              sizes="(min-width: 768px) 55vw, 100vw"
+              className="h-auto w-full object-top"
               // 개발 서버 이미지 최적화 이슈 회피. 배포 시 최적화를 원하면 제거.
               unoptimized
             />
