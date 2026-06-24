@@ -13,7 +13,8 @@ import { sidoList } from "@/data/sido";
  *      / 인트로 "지역별 커리큘럼 상담과 무료 체험을 제공합니다. 원하는 지역을 선택해 시·구별로 확인하세요."
  */
 const EYEBROW = "전국 어디서나";
-const HEADLINE = "우리 동네에서 시작하는 1:1 맞춤 과외";
+// 제목은 화면 폭과 무관하게 항상 이 두 줄로 고정(<br/> 로 강제 줄바꿈).
+const HEADLINE_LINES = ["우리 동네에서 시작하는", "1:1 맞춤 과외"];
 const INTRO =
   "지역별 맞춤 커리큘럼 상담과 무료 체험. 원하는 지역을 선택하면 해당 시·구가 나타납니다.";
 
@@ -45,13 +46,15 @@ export default function ByRegionPage() {
         <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-8 md:grid-cols-[5fr_7fr] md:gap-12">
           {/* 텍스트 — 모바일 가운데, 데스크톱 왼쪽 정렬 */}
           <div className="text-center md:text-left">
-            <p className="text-sm font-semibold uppercase tracking-widest text-accent">
+            <p className="text-base font-semibold uppercase tracking-widest text-accent md:text-lg">
               {EYEBROW}
             </p>
             <h1 className="mt-2 break-keep text-3xl font-bold leading-snug text-ink sm:text-4xl">
-              {HEADLINE}
+              {HEADLINE_LINES[0]}
+              <br />
+              {HEADLINE_LINES[1]}
             </h1>
-            <p className="mx-auto mt-4 max-w-md break-keep text-base leading-relaxed text-muted sm:text-lg md:mx-0">
+            <p className="mx-auto mt-4 max-w-md break-keep text-lg leading-relaxed text-muted sm:text-xl md:mx-0">
               {INTRO}
             </p>
           </div>
