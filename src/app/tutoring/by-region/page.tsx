@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import RegionMap, { type RegionFeatureCollection } from "@/components/RegionMap";
-import RegionQuickSearch from "@/components/RegionQuickSearch";
+import HeroSearch from "@/components/HeroSearch";
 import DetailTrustBlock from "@/components/DetailTrustBlock";
 import koreaSido from "@/data/korea-sido.json";
 import { sidoList } from "@/data/sido";
@@ -46,45 +45,15 @@ export const metadata: Metadata = {
 export default function ByRegionPage() {
   return (
     <>
-      {/* 헤더 — 텍스트(좌) · 학생 이미지(우, 확대). 베이지 배경으로 사진과 조화. 유일한 h1 */}
-      <section className="border-b border-line bg-[#E1CFB8] px-4 py-12 sm:px-6 sm:py-16">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 md:grid-cols-[2fr_3fr] md:gap-12">
-          {/* 텍스트 — 모바일 가운데, 데스크톱 왼쪽 정렬 */}
-          <div className="text-center md:text-left">
-            <p className="text-base font-semibold uppercase tracking-widest text-accent sm:text-lg">
-              {EYEBROW}
-            </p>
-            <h1 className="mt-2 break-keep text-4xl font-bold leading-tight text-ink sm:text-5xl md:text-6xl">
-              {HEADLINE_LINES[0]}
-              <br />
-              {HEADLINE_LINES[1]}
-            </h1>
-            <p className="mx-auto mt-4 max-w-md break-keep text-lg leading-relaxed text-muted sm:text-xl md:mx-0 md:text-2xl">
-              {INTRO_LINES[0]}
-              <br />
-              {INTRO_LINES[1]}
-            </p>
-
-            {/* 우리 지역 빠르게 검색 — 전국 통합(시/도·시군구·동) */}
-            <RegionQuickSearch />
-          </div>
-
-          {/* 학생 이미지 — 3:2, 칼럼을 꽉 채워 확대. 그림자 없이 베이지 배경에 녹임. 인물 상단 유지 */}
-          <div className="overflow-hidden rounded-2xl">
-            <Image
-              src="/images/region-hero.jpg"
-              alt="교복 입은 학생들"
-              width={1024}
-              height={677}
-              priority
-              sizes="(min-width: 768px) 55vw, 100vw"
-              className="h-auto w-full object-top"
-              // 개발 서버 이미지 최적화 이슈 회피. 배포 시 최적화를 원하면 제거.
-              unoptimized
-            />
-          </div>
-        </div>
-      </section>
+      {/* 공통 히어로 — 지역 검색. 학교/과목 탭과 동일 구도(워딩·검색대상만 분기) */}
+      <HeroSearch
+        eyebrow={EYEBROW}
+        headlineLines={HEADLINE_LINES}
+        subCopyLines={INTRO_LINES}
+        searchKind="region"
+        searchLabel="우리 지역 빠르게 검색"
+        searchPlaceholder="우리 지역 빠르게 검색 (예: 대치동, 강남구, 일산)"
+      />
 
       <section className="px-4 py-12 sm:px-6 sm:py-16">
         {/* 데스크톱 좌우 2단(지도 3 : 그리드 2) / 모바일·태블릿 1단 스택 */}

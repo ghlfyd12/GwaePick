@@ -15,6 +15,7 @@ export default function CategoryLanding({
   intro,
   items,
   note,
+  hideHeader = false,
 }: {
   eyebrow?: string;
   title: string;
@@ -22,23 +23,27 @@ export default function CategoryLanding({
   items: CategoryItem[];
   /** 그리드 하단 안내 한 줄(선택) */
   note?: string;
+  /** 상단 헤더(eyebrow/h1/intro) 숨김 — 위에 HeroSearch 가 h1 을 제공할 때 사용 */
+  hideHeader?: boolean;
 }) {
   return (
     <>
-      {/* 페이지 헤더 — 유일한 h1 */}
-      <section className="border-b border-line bg-surface px-4 py-14 text-center sm:px-6 sm:py-16">
-        {eyebrow && (
-          <p className="text-sm font-semibold uppercase tracking-widest text-accent">
-            {eyebrow}
+      {/* 페이지 헤더 — h1. HeroSearch 를 쓰는 페이지(학교/과목)는 hideHeader 로 생략(h1 중복 방지) */}
+      {!hideHeader && (
+        <section className="border-b border-line bg-surface px-4 py-14 text-center sm:px-6 sm:py-16">
+          {eyebrow && (
+            <p className="text-sm font-semibold uppercase tracking-widest text-accent">
+              {eyebrow}
+            </p>
+          )}
+          <h1 className="mx-auto mt-2 max-w-3xl text-3xl font-bold leading-snug text-ink sm:text-4xl">
+            {title}
+          </h1>
+          <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
+            {intro}
           </p>
-        )}
-        <h1 className="mx-auto mt-2 max-w-3xl text-3xl font-bold leading-snug text-ink sm:text-4xl">
-          {title}
-        </h1>
-        <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
-          {intro}
-        </p>
-      </section>
+        </section>
+      )}
 
       {/* 카드 그리드 + 하단 CTA */}
       <section className="px-4 py-14 sm:px-6 sm:py-16">

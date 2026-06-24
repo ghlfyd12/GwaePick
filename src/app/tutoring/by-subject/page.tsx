@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import HeroSearch from "@/components/HeroSearch";
 import CategoryLanding from "@/components/CategoryLanding";
 import { subjects } from "@/data/categories";
 
@@ -13,11 +14,22 @@ export const metadata: Metadata = {
 
 export default function BySubjectPage() {
   return (
-    <CategoryLanding
-      eyebrow="과목별"
-      title="과목별 1:1 과외"
-      intro={INTRO}
-      items={subjects}
-    />
+    <>
+      <HeroSearch
+        eyebrow="과목별"
+        headlineLines={["우리 아이 과목에 맞춘", "집중 관리", "1:1 맞춤 과외"]}
+        subCopyLines={[INTRO]}
+        searchKind="subject"
+        searchLabel="과목 빠르게 검색"
+        searchPlaceholder="과목 빠르게 검색 (예: 수학, 영어, 코딩)"
+      />
+      <CategoryLanding
+        hideHeader
+        eyebrow="과목별"
+        title="과목별 1:1 과외"
+        intro={INTRO}
+        items={subjects}
+      />
+    </>
   );
 }

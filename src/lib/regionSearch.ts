@@ -56,14 +56,14 @@ export function buildRegionSearchIndex(): RegionSearchItem[] {
  * 부분일치 검색. 시작 일치 > 포함, 짧은 라벨 우선, 종류(동>시군구>시도) 가중.
  * limit 개까지 반환. 전체 스캔(수천 항목)이라 입력 디바운스와 함께 쓴다.
  */
-export function searchRegions(
-  index: RegionSearchItem[],
+export function searchRegions<T extends { label: string; kind: string }>(
+  index: T[],
   rawQuery: string,
   limit = 8,
-): RegionSearchItem[] {
+): T[] {
   const q = rawQuery.trim();
   if (!q) return [];
-  const matches: { item: RegionSearchItem; score: number }[] = [];
+  const matches: { item: T; score: number }[] = [];
   for (const item of index) {
     const at = item.label.indexOf(q);
     if (at < 0) continue;
