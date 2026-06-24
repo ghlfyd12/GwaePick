@@ -153,7 +153,7 @@ export default function ReviewCardCarousel() {
                   <div className="relative mt-auto aspect-[4/3] w-full bg-surface-alt">
                     <SafeImage
                       src={r.photo}
-                      alt={`${r.school} 합격생`}
+                      alt={`${r.school} 합격 ${r.member} 후기`}
                       sizes="(min-width: 1024px) 22vw, (min-width: 640px) 45vw, 78vw"
                       className="object-cover object-top"
                     />

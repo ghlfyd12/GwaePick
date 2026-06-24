@@ -27,14 +27,14 @@ const CORAL_DARK = "#f4502b";
 const CHARCOAL = "#2b2b2e";
 
 export const reviewCards: ReviewCard[] = [
-  { school: "서울대학교", title: "서울대학교 합격", quote: "학생부 종합 전형도 맞춤 상담과 함께 준비했어요.", member: "이*연 회원", photo: "/images/reviews/seoul.png", badgeColor: CORAL },
-  { school: "포항공과대학교", title: "포항공과대학교 합격", quote: "공부 방법부터 진로 탐색까지 함께 설계했습니다.", member: "인*상 회원", photo: "/images/reviews/postech.png", badgeColor: CHARCOAL },
-  { school: "한양대학교", title: "한양대학교 합격", quote: "국어 6등급에서 1등급 찍고 목표 대학 합격.", member: "장*현 회원", photo: "/images/reviews/hanyang.png", badgeColor: CORAL_DARK },
-  { school: "이화여대", title: "이화여대 합격", quote: "수업 한 학기 만에 1등급으로 성적 수직 상승.", member: "이*운 회원", photo: "/images/reviews/ewha.png", badgeColor: CORAL },
-  { school: "경희대학교", title: "경희대학교 합격", quote: "학원·과외 선택이 어려웠던 지역에서 화상 수업으로 1등급 달성.", member: "김*윤 회원", photo: "/images/reviews/khu1.png", badgeColor: CHARCOAL },
-  { school: "고려대학교", title: "고려대학교 합격", quote: "맞춤 수업 덕분에 수학을 포기하지 않고 성적을 올릴 수 있었어요.", member: "구*아 회원", photo: "/images/reviews/korea.png", badgeColor: CORAL_DARK },
-  { school: "동국대학교 의대", title: "동국대학교 의대 합격", quote: "필요한 부분만 집중적으로 배우며 공부의 밀도를 높였습니다.", member: "임*규 회원", photo: "/images/reviews/dongguk.png", badgeColor: CORAL },
-  { school: "경희대학교", title: "경희대학교 합격", quote: "내게 맞는 공부 방법으로 수학 5등급에서 1등급으로.", member: "전*빈 회원", photo: "/images/reviews/khu2.png", badgeColor: CHARCOAL },
-  { school: "연세대학교", title: "연세대학교 합격", quote: "선생님 권유로 한 번 더 도전해서 목표 대학 합격.", member: "배*준 회원", photo: "/images/reviews/yonsei.png", badgeColor: CORAL_DARK },
-  { school: "건국대학교", title: "건국대학교 합격", quote: "학교에선 어렵다고 했던 대학, 당당히 합격.", member: "엄*원 회원", photo: "/images/reviews/konkuk.png", badgeColor: CORAL },
+  { school: "서울대학교", title: "서울대학교 합격", quote: "학생부 종합 전형도 맞춤 상담과 함께 준비했어요.", member: "이*연 회원", photo: "/images/reviews/review-07.png", badgeColor: CORAL },
+  { school: "포항공과대학교", title: "포항공과대학교 합격", quote: "공부 방법부터 진로 탐색까지 함께 설계했습니다.", member: "인*상 회원", photo: "/images/reviews/review-08.png", badgeColor: CHARCOAL },
+  { school: "한양대학교", title: "한양대학교 합격", quote: "국어 6등급에서 1등급 찍고 목표 대학 합격.", member: "장*현 회원", photo: "/images/reviews/review-09.png", badgeColor: CORAL_DARK },
+  { school: "이화여대", title: "이화여대 합격", quote: "수업 한 학기 만에 1등급으로 성적 수직 상승.", member: "이*운 회원", photo: "/images/reviews/review-10.png", badgeColor: CORAL },
+  { school: "경희대학교", title: "경희대학교 합격", quote: "학원·과외 선택이 어려웠던 지역에서 화상 수업으로 1등급 달성.", member: "김*윤 회원", photo: "/images/reviews/review-01.png", badgeColor: CHARCOAL },
+  { school: "고려대학교", title: "고려대학교 합격", quote: "맞춤 수업 덕분에 수학을 포기하지 않고 성적을 올릴 수 있었어요.", member: "구*아 회원", photo: "/images/reviews/review-02.png", badgeColor: CORAL_DARK },
+  { school: "동국대학교 의대", title: "동국대학교 의대 합격", quote: "필요한 부분만 집중적으로 배우며 공부의 밀도를 높였습니다.", member: "임*규 회원", photo: "/images/reviews/review-03.png", badgeColor: CORAL },
+  { school: "경희대학교", title: "경희대학교 합격", quote: "내게 맞는 공부 방법으로 수학 5등급에서 1등급으로.", member: "전*빈 회원", photo: "/images/reviews/review-04.png", badgeColor: CHARCOAL },
+  { school: "연세대학교", title: "연세대학교 합격", quote: "선생님 권유로 한 번 더 도전해서 목표 대학 합격.", member: "배*준 회원", photo: "/images/reviews/review-05.png", badgeColor: CORAL_DARK },
+  { school: "건국대학교", title: "건국대학교 합격", quote: "학교에선 어렵다고 했던 대학, 당당히 합격.", member: "엄*원 회원", photo: "/images/reviews/review-06.png", badgeColor: CORAL },
 ];
