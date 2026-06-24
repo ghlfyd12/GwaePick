@@ -27,7 +27,20 @@ export default function QuickSearch({
   emptyMessage?: string;
 }) {
   const router = useRouter();
-  const index = useMemo(() => buildHeroIndex(kind), [kind]);
+  // region/subject 인덱스는 작아 즉시 생성. school 은 730KB 라 동적 import 로 지연 로드(초기 번들 보호).
+  const [index, setIndex] = useState<HeroSearchItem[]>(() =>
+    kind === "school" ? [] : buildHeroIndex(kind),
+  );
+  useEffect(() => {
+    if (kind !== "school") return;
+    let alive = true;
+    import("@/lib/schoolSearchIndex").then((m) => {
+      if (alive) setIndex(m.buildSchoolSearchIndex());
+    });
+    return () => {
+      alive = false;
+    };
+  }, [kind]);
 
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
