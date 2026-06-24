@@ -20,10 +20,16 @@ import { dongHref } from "@/data/dongPageCopy";
  * 색: 선택 탭=브랜드 주황(accent) 채움(보라 토큰 미사용 — CLAUDE.md 규칙). 모바일 우선.
  */
 
+// 전체보기 탭 초기 노출 개수 + 더보기 1회당 증가량(개별 시군구·검색 중엔 미적용).
+const INITIAL_COUNT = 24;
+const STEP = 24;
+
 export default function RegionDongBrowser({ sido }: { sido: Sido }) {
   // null = 전체보기(기본), 그 외 = 시군구 slug
   const [active, setActive] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  // 전체보기 동 그리드 노출 개수(탭 전환·검색 변경 시 INITIAL_COUNT 로 리셋)
+  const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
   const rootRef = useRef<HTMLDivElement>(null);
 
   // 지도(RegionMap)에서 시군구 폴리곤 클릭 시 `#sg-{slug}` 앵커로 이동 → 해당 시군구 탭 활성 + 스크롤.
@@ -36,6 +42,7 @@ export default function RegionDongBrowser({ sido }: { sido: Sido }) {
       if (!slugs.has(slug)) return;
       setActive(slug);
       setQuery("");
+      setVisibleCount(INITIAL_COUNT);
       rootRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     };
     applyHash();
@@ -73,6 +80,7 @@ export default function RegionDongBrowser({ sido }: { sido: Sido }) {
       return; // 드래그였으면 탭 선택 무시
     }
     setActive(slug);
+    setVisibleCount(INITIAL_COUNT); // 탭 전환 시 노출 개수 리셋
     // 선택 탭을 가운데로
     e.currentTarget.scrollIntoView({
       inline: "center",
@@ -102,6 +110,11 @@ export default function RegionDongBrowser({ sido }: { sido: Sido }) {
   const q = query.trim();
   const filtered = q ? items.filter((d) => d.name.includes(q)) : items;
 
+  // 노출 개수 제한은 전체보기 탭 + 검색 없을 때만(개별 시군구는 동 수가 적어 전체 표시).
+  const limited = active === null && !q;
+  const visibleDongs = limited ? filtered.slice(0, visibleCount) : filtered;
+  const hasMore = limited && visibleCount < filtered.length;
+
   const tabClass = (selected: boolean) =>
     `shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
       selected
@@ -120,7 +133,10 @@ export default function RegionDongBrowser({ sido }: { sido: Sido }) {
           id="dong-filter"
           type="text"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setVisibleCount(INITIAL_COUNT); // 검색어 변경 시 노출 개수 리셋
+          }}
           placeholder="동 이름으로 찾기"
           className="min-h-12 w-full rounded-xl border border-line bg-white px-4 text-base text-ink placeholder:text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
         />
@@ -182,25 +198,40 @@ export default function RegionDongBrowser({ sido }: { sido: Sido }) {
           드립니다.
         </p>
       ) : (
-        <ul className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
-          {filtered.map((d) => (
-            <li key={`${d.sigunguSlug}-${d.slug}`}>
-              <Link
-                href={dongHref(sido.slug, d.sigunguSlug, d.slug)}
-                className="flex h-full flex-col items-center justify-center rounded-xl border border-line bg-white px-3 py-3 text-center transition-colors hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-              >
-                <span className="break-keep text-sm font-semibold text-ink">
-                  {d.name}
-                </span>
-                {active === null && (
-                  <span className="mt-0.5 break-keep text-xs text-muted">
-                    {d.sigungu}
+        <>
+          <ul className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
+            {visibleDongs.map((d) => (
+              <li key={`${d.sigunguSlug}-${d.slug}`}>
+                <Link
+                  href={dongHref(sido.slug, d.sigunguSlug, d.slug)}
+                  className="flex h-full flex-col items-center justify-center rounded-xl border border-line bg-white px-3 py-3 text-center transition-colors hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                >
+                  <span className="break-keep text-sm font-semibold text-ink">
+                    {d.name}
                   </span>
-                )}
-              </Link>
-            </li>
-          ))}
-        </ul>
+                  {active === null && (
+                    <span className="mt-0.5 break-keep text-xs text-muted">
+                      {d.sigungu}
+                    </span>
+                  )}
+                </Link>
+              </li>
+            ))}
+          </ul>
+
+          {/* 동 더보기 — 전체보기 탭에서 아직 안 보인 동이 남았을 때만(보조 스타일, CTA 와 구분). */}
+          {hasMore && (
+            <div className="mt-6 text-center">
+              <button
+                type="button"
+                onClick={() => setVisibleCount((c) => c + STEP)}
+                className="inline-flex min-h-12 items-center justify-center rounded-full border border-accent/40 bg-white px-6 py-2.5 text-sm font-semibold text-accent transition-colors hover:bg-accent/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:text-base"
+              >
+                동 더보기
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
