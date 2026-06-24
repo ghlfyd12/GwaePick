@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import RegionMap, { type RegionFeatureCollection } from "@/components/RegionMap";
+import SigunguGrid from "@/components/SigunguGrid";
 import seoulDistricts from "@/data/seoul-districts.json";
 import { sidoList, sidoBySlug } from "@/data/sido";
 import { districts } from "@/data/districts";
@@ -105,22 +106,14 @@ export default async function SidoPage({
           </>
         )}
 
-        {/* 경기 시·군·구 링크 그리드 */}
+        {/* 경기 시·군·구 그리드 — 가나다 정렬 + 전체 보기 토글(클라이언트) */}
         {isGyeonggi && (
-          <nav aria-label="경기 시·군·구 목록" className="mx-auto max-w-4xl">
-            <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4">
-              {gyeonggi.sigungu.map((sg) => (
-                <li key={sg.slug}>
-                  <Link
-                    href={`/tutoring/by-region/gyeonggi/${sg.slug}`}
-                    className="block rounded-xl border border-line bg-white px-3 py-3 text-center text-sm font-semibold text-ink transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:text-base"
-                  >
-                    {sg.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
+          <SigunguGrid
+            sigungu={gyeonggi.sigungu.map((sg) => ({
+              name: sg.name,
+              slug: sg.slug,
+            }))}
+          />
         )}
 
         {/* 하단 공통 CTA — 상담 동선(/#consult) */}
