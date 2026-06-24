@@ -141,12 +141,15 @@ export default function ReviewCardCarousel() {
                 className="w-[78%] shrink-0 snap-start sm:w-[45%] lg:w-[31%] xl:w-[23%]"
               >
                 <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-sm">
-                  <div className="flex flex-1 flex-col p-5">
+                  {/* 텍스트 블록 — min-height 로 카드 높이 정렬(자르지 않음). 사진은 mt-auto 로 하단 고정. */}
+                  <div className="flex min-h-[176px] flex-col p-5">
                     <p className="break-keep text-lg font-bold text-ink">{r.title}</p>
                     <p className="mt-2 break-keep text-sm leading-relaxed text-muted">
                       “{r.quote}”
                     </p>
-                    <p className="mt-3 text-sm font-semibold text-ink">{r.member}</p>
+                    <p className="mt-3 break-keep text-sm font-semibold text-ink">
+                      {r.member}
+                    </p>
                   </div>
 
                   {/* 인물 사진 — 없으면 SafeImage 가 null → 연한 배경만(깨짐 없음) */}
