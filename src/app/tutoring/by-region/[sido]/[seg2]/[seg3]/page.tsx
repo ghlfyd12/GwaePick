@@ -12,17 +12,36 @@ import {
   pseoHref,
 } from "@/data/pseo";
 import { gyeonggi, sigunguBySlug } from "@/data/gyeonggi";
+import { getSido } from "@/data/sidoRegions";
+import { PILOT } from "@/data/dongPageCopy";
+import DongHub from "@/components/DongHub";
 
 /*
- * 3-seg — /경기/[시군구]/[과목]. ISR. 잘못된 시군구/과목 404.
+ * 3-seg — 두 갈래:
+ *  - sido="경기"(한글): 경기 시군구×과목(기존).
+ *  - sido=영문 slug + seg2=시군구 + seg3=동: sidoRegions 동 허브(과목 5선택, 신규).
+ * ISR. 파일럿만 정적 생성. 잘못된 조합 404.
  */
 export const dynamicParams = true;
 export const revalidate = 86400;
 
 export function generateStaticParams() {
-  // 시드: 첫 시군구 × 기본 과목 1개만. 나머지 ISR.
+  const params: { sido: string; seg2: string; seg3: string }[] = [];
   const first = gyeonggi.sigungu[0]?.slug;
-  return first ? [{ sido: PSEO_SIDO, seg2: first, seg3: DEFAULT_SUBJECT }] : [];
+  if (first) params.push({ sido: PSEO_SIDO, seg2: first, seg3: DEFAULT_SUBJECT });
+
+  // 파일럿 동 허브 정적 생성
+  for (const p of PILOT) {
+    const sd = getSido(p.sido);
+    if (!sd) continue;
+    for (const sgSlug of p.sigungu) {
+      const sg = sd.sigungu.find((s) => s.slug === sgSlug);
+      if (!sg) continue;
+      for (const dong of sg.dong)
+        params.push({ sido: p.sido, seg2: sg.slug, seg3: dong.slug });
+    }
+  }
+  return params;
 }
 
 function resolve(sido: string, seg2: string, seg3: string) {
@@ -33,6 +52,16 @@ function resolve(sido: string, seg2: string, seg3: string) {
   return { sg, subj };
 }
 
+/** 신규 동 허브 해석(sidoRegions, seg2=시군구·seg3=동). */
+function resolveHub(sido: string, seg2: string, seg3: string) {
+  const sd = getSido(slugKey(sido));
+  if (!sd) return null;
+  const sg = sd.sigungu.find((s) => s.slug === slugKey(seg2));
+  const dong = sg?.dong.find((d) => d.slug === slugKey(seg3));
+  if (!sg || !dong) return null;
+  return { sidoSlug: slugKey(sido), sidoLabel: sd.label, sg, dong };
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -40,18 +69,32 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { sido, seg2, seg3 } = await params;
   const r = resolve(sido, seg2, seg3);
-  if (!r) return {};
-  const c = buildRegionContent({
-    sidoLabel: gyeonggi.sidoLabel,
-    sigunguLabel: r.sg.name,
-    subjectLabel: r.subj.label,
-  });
-  return {
-    title: { absolute: c.metaTitle },
-    description: c.metaDescription,
-    alternates: { canonical: pseoHref.sigunguSubject(r.sg.slug, r.subj.slug) },
-    openGraph: { title: c.ogTitle, description: c.metaDescription },
-  };
+  if (r) {
+    const c = buildRegionContent({
+      sidoLabel: gyeonggi.sidoLabel,
+      sigunguLabel: r.sg.name,
+      subjectLabel: r.subj.label,
+    });
+    return {
+      title: { absolute: c.metaTitle },
+      description: c.metaDescription,
+      alternates: { canonical: pseoHref.sigunguSubject(r.sg.slug, r.subj.slug) },
+      openGraph: { title: c.ogTitle, description: c.metaDescription },
+    };
+  }
+  const rh = resolveHub(sido, seg2, seg3);
+  if (rh) {
+    const title = `${rh.dong.name} 1:1 과외 — ${rh.sg.name} 방문 수업 | 지식의참견`;
+    const description = `${rh.sg.name} ${rh.dong.name} 1:1 맞춤 방문 과외. 과목을 선택해 ${rh.dong.name} 학생에게 맞는 선생님을 만나보세요.`;
+    return {
+      title: { absolute: title },
+      description,
+      alternates: {
+        canonical: `/tutoring/by-region/${rh.sidoSlug}/${rh.sg.slug}/${rh.dong.slug}`,
+      },
+    };
+  }
+  return {};
 }
 
 export default async function Seg3Page({
@@ -60,6 +103,13 @@ export default async function Seg3Page({
   params: Promise<{ sido: string; seg2: string; seg3: string }>;
 }) {
   const { sido, seg2, seg3 } = await params;
+
+  // 신규 동 허브
+  const rh = resolveHub(sido, seg2, seg3);
+  if (rh) {
+    return <DongHub sidoSlug={rh.sidoSlug} sigungu={rh.sg} dong={rh.dong} />;
+  }
+
   const r = resolve(sido, seg2, seg3);
   if (!r) notFound();
   const { sg, subj } = r;

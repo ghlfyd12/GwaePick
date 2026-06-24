@@ -3,6 +3,9 @@ import { regions } from "@/data/regions";
 import { site } from "@/data/site";
 import { subjects } from "@/data/pseo";
 import { gyeonggi } from "@/data/gyeonggi";
+import { getSido } from "@/data/sidoRegions";
+import { subjects as detailSubjects } from "@/data/subjects";
+import { PILOT } from "@/data/dongPageCopy";
 
 /*
  * 동적 sitemap.xml — /sitemap.xml 로 노출.
@@ -46,5 +49,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }
   }
 
-  return [...home, ...regionPages, ...pseoPages];
+  // 동×과목 상세 — 파일럿(서울 4구·고양 3구)만 등록(전국 일괄 금지)
+  const pilotDetail: MetadataRoute.Sitemap = [];
+  for (const p of PILOT) {
+    const sd = getSido(p.sido);
+    if (!sd) continue;
+    for (const sgSlug of p.sigungu) {
+      const sg = sd.sigungu.find((s) => s.slug === sgSlug);
+      if (!sg) continue;
+      for (const dong of sg.dong)
+        for (const subj of detailSubjects)
+          pilotDetail.push({
+            url: `${base}/tutoring/by-region/${p.sido}/${sg.slug}/${dong.slug}/${subj.slug}`,
+            lastModified,
+            changeFrequency: "weekly",
+            priority: 0.5,
+          });
+    }
+  }
+
+  return [...home, ...regionPages, ...pseoPages, ...pilotDetail];
 }

@@ -37,6 +37,12 @@ export const metadata: Metadata = {
     template: `%s | ${site.name}`,
   },
   description: DESCRIPTION,
+  // 구버전 favicon.ico 제거 후 icon.png 를 명시적으로 등록 + 캐시 무력화(?v=3)
+  icons: {
+    icon: "/icon.png?v=3",
+    shortcut: "/icon.png?v=3",
+    apple: "/icon.png?v=3",
+  },
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
@@ -52,8 +58,9 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     images: [OG_IMAGE],
   },
-  // 네이버 서치어드바이저 사이트 소유확인
+  // 검색엔진 사이트 소유확인 (구글 서치 콘솔 + 네이버 서치어드바이저)
   verification: {
+    google: "hfkp_kAxEHCCREYFvXyIolwrMGIGGj1VEkFwvwvKAKk",
     other: {
       "naver-site-verification": "2f393506335df66451949dbd43a2539457e1517c",
     },

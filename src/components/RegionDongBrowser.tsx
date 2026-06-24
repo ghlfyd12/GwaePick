@@ -9,19 +9,15 @@ import {
 } from "react";
 import Link from "next/link";
 import { allDongOf, type Sido } from "@/data/sidoRegions";
+import { dongHref } from "@/data/dongPageCopy";
 
 /*
  * RegionDongBrowser — 시/도의 동(洞) 탐색 UI.
  *
  * 시군구 "탭"(맨 앞 전체보기) + 동 그리드. 모두 가나다순. 클라이언트 상태 전환(URL 미변경).
- * 동 클릭 → dongHref(/#consult?sido&sigungu&dong). 데이터는 sidoRegions.ts 에서만.
+ * 동 클릭 → dongHref(과목 컨텍스트 없으면 동 허브). 데이터는 sidoRegions.ts 에서만.
  * 색: 선택 탭=브랜드 주황(accent) 채움(보라 토큰 미사용 — CLAUDE.md 규칙). 모바일 우선.
  */
-
-/** 동 링크 생성(추후 pSEO 상세로 교체하기 쉽게 한 함수로 분리). */
-export function dongHref(sidoSlug: string, sigunguSlug: string, dongSlug: string) {
-  return `/#consult?sido=${sidoSlug}&sigungu=${sigunguSlug}&dong=${dongSlug}`;
-}
 
 export default function RegionDongBrowser({ sido }: { sido: Sido }) {
   // null = 전체보기(기본), 그 외 = 시군구 slug
