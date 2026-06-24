@@ -40,7 +40,7 @@ export async function generateMetadata({
     sido === "seoul"
       ? "서울 25개 구 지도에서 우리 동네를 선택해 1:1 과외를 시작하세요. 직접 가르쳐 본 선생님이 아이에게 맞는 선생님을 연결해 드립니다."
       : sido === "gyeonggi"
-        ? "경기 시·군·구를 선택해 우리 동네 1:1 과외를 시작하세요. 직접 가르쳐 본 선생님이 아이에게 맞는 선생님을 연결해 드립니다."
+        ? "경기도 시·군·구를 선택해 우리 동네 1:1 과외를 시작하세요. 직접 가르쳐 본 선생님이 아이에게 맞는 선생님을 연결해 드립니다."
         : `${s.label}에서 시작하는 1:1 과외. 직접 가르쳐 본 선생님이 아이에게 맞는 선생님을 연결해 드립니다.`;
   return {
     title,
@@ -80,7 +80,7 @@ export default async function SidoPage({
           {isSeoul
             ? "지도에서 우리 동네(구)를 선택하세요."
             : isGyeonggi
-              ? "경기 지역 시·군·구를 선택하세요."
+              ? "경기도 지역 시·군·구를 선택하세요."
               : `${s.label}에서 시작하는 1:1 과외. 직접 가르쳐 본 선생님이 아이에게 맞는 선생님을 연결해 드립니다.`}
         </p>
       </section>
@@ -130,9 +130,9 @@ export default async function SidoPage({
                     label: sg.name,
                     href: pseoHref.sigunguSubject(sg.slug, DEFAULT_SUBJECT),
                   }))}
-                heading="경기 시군구 선택"
+                heading="경기도 시군구 선택"
                 badge={`${gyeonggi.sigungu.length}개 지역`}
-                ariaLabel="경기 시·군·구 목록"
+                ariaLabel="경기도 시·군·구 목록"
               />
             </div>
           </div>

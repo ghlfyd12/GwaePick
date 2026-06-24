@@ -13,7 +13,7 @@ export const sidoList: Sido[] = [
   { slug: "daegu", label: "대구" }, { slug: "incheon", label: "인천" },
   { slug: "gwangju", label: "광주" }, { slug: "daejeon", label: "대전" },
   { slug: "ulsan", label: "울산" }, { slug: "sejong", label: "세종" },
-  { slug: "gyeonggi", label: "경기" }, { slug: "gangwon", label: "강원" },
+  { slug: "gyeonggi", label: "경기도" }, { slug: "gangwon", label: "강원" },
   { slug: "chungbuk", label: "충북" }, { slug: "chungnam", label: "충남" },
   { slug: "jeonbuk", label: "전북" }, { slug: "jeonnam", label: "전남" },
   { slug: "gyeongbuk", label: "경북" }, { slug: "gyeongnam", label: "경남" },
