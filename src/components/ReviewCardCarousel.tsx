@@ -141,15 +141,7 @@ export default function ReviewCardCarousel() {
                 className="w-[78%] shrink-0 snap-start sm:w-[45%] lg:w-[31%] xl:w-[23%]"
               >
                 <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-sm">
-                  {/* 합격 뱃지(우측 상단) */}
-                  <span
-                    className="absolute right-3 top-3 z-10 rounded-full px-3 py-1 text-xs font-bold text-white shadow-sm"
-                    style={{ backgroundColor: r.badgeColor ?? "#ff6b4a" }}
-                  >
-                    {r.school} 합격
-                  </span>
-
-                  <div className="flex flex-1 flex-col p-5 pr-20">
+                  <div className="flex flex-1 flex-col p-5">
                     <p className="break-keep text-lg font-bold text-ink">{r.title}</p>
                     <p className="mt-2 break-keep text-sm leading-relaxed text-muted">
                       “{r.quote}”
