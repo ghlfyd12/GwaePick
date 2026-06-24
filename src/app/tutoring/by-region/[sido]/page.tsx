@@ -5,13 +5,15 @@ import RegionMap, { type RegionFeatureCollection } from "@/components/RegionMap"
 import seoulDistricts from "@/data/seoul-districts.json";
 import { sidoList, sidoBySlug } from "@/data/sido";
 import { districts } from "@/data/districts";
+import { gyeonggi } from "@/data/gyeonggi";
 import { site } from "@/data/site";
 
 /*
  * 시/도 상세 — /tutoring/by-region/[sido]
  *  - seoul: 서울 25개 구 지도 + 구 링크 그리드.
- *  - 그 외 16개: 단순 상세(h1·인트로·상담 CTA).
- * 17개 시/도 SSG. 잘못된 slug 는 404. 데이터는 sido.ts/districts.ts/GeoJSON 에서.
+ *  - gyeonggi: 경기 시/군/구 링크 그리드.
+ *  - 그 외 15개: 단순 상세(h1·인트로·상담 CTA).
+ * 17개 시/도 SSG. 잘못된 slug 는 404. 데이터는 sido.ts/districts.ts/gyeonggi.ts/GeoJSON 에서.
  */
 
 export const dynamicParams = false;
@@ -32,7 +34,9 @@ export async function generateMetadata({
   const description =
     sido === "seoul"
       ? "서울 25개 구 지도에서 우리 동네를 선택해 1:1 과외를 시작하세요. 직접 가르쳐 본 선생님이 아이에게 맞는 선생님을 연결해 드립니다."
-      : `${s.label}에서 시작하는 1:1 과외. 직접 가르쳐 본 선생님이 아이에게 맞는 선생님을 연결해 드립니다.`;
+      : sido === "gyeonggi"
+        ? "경기 시·군·구를 선택해 우리 동네 1:1 과외를 시작하세요. 직접 가르쳐 본 선생님이 아이에게 맞는 선생님을 연결해 드립니다."
+        : `${s.label}에서 시작하는 1:1 과외. 직접 가르쳐 본 선생님이 아이에게 맞는 선생님을 연결해 드립니다.`;
   return {
     title,
     description,
@@ -50,6 +54,7 @@ export default async function SidoPage({
   if (!s) notFound();
 
   const isSeoul = sido === "seoul";
+  const isGyeonggi = sido === "gyeonggi";
 
   return (
     <>
@@ -64,7 +69,9 @@ export default async function SidoPage({
         <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
           {isSeoul
             ? "지도에서 우리 동네(구)를 선택하세요."
-            : `${s.label}에서 시작하는 1:1 과외. 직접 가르쳐 본 선생님이 아이에게 맞는 선생님을 연결해 드립니다.`}
+            : isGyeonggi
+              ? "경기 지역 시·군·구를 선택하세요."
+              : `${s.label}에서 시작하는 1:1 과외. 직접 가르쳐 본 선생님이 아이에게 맞는 선생님을 연결해 드립니다.`}
         </p>
       </section>
 
@@ -96,6 +103,24 @@ export default async function SidoPage({
               </ul>
             </nav>
           </>
+        )}
+
+        {/* 경기 시·군·구 링크 그리드 */}
+        {isGyeonggi && (
+          <nav aria-label="경기 시·군·구 목록" className="mx-auto max-w-4xl">
+            <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4">
+              {gyeonggi.sigungu.map((sg) => (
+                <li key={sg.slug}>
+                  <Link
+                    href={`/tutoring/by-region/gyeonggi/${sg.slug}`}
+                    className="block rounded-xl border border-line bg-white px-3 py-3 text-center text-sm font-semibold text-ink transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:text-base"
+                  >
+                    {sg.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
         )}
 
         {/* 하단 공통 CTA — 상담 동선(/#consult) */}
