@@ -1,5 +1,6 @@
 import { site } from "@/data/site";
 import type { CategoryItem } from "@/data/categories";
+import DetailTrustBlock from "@/components/DetailTrustBlock";
 
 /*
  * CategoryLanding — 과외 상위 카테고리 안내 페이지 공통 레이아웃.
@@ -70,9 +71,14 @@ export default function CategoryLanding({
             {note}
           </p>
         )}
+      </section>
 
+      {/* 공통 상세 신뢰 블록 — 3가지 이유 · 자질/역량 · 합격 후기 캐러셀 */}
+      <DetailTrustBlock />
+
+      <section className="px-4 pb-14 sm:px-6 sm:pb-16">
         {/* 하단 공통 CTA — 상담 동선(/#consult) */}
-        <div className="mx-auto mt-12 max-w-2xl rounded-2xl bg-surface px-6 py-8 text-center sm:py-10">
+        <div className="mx-auto mt-4 max-w-2xl rounded-2xl bg-surface px-6 py-8 text-center sm:py-10">
           <p className="text-base font-medium text-ink sm:text-lg">
             어떤 선생님이 맞을지 모르겠다면, 상담부터 시작하세요.
           </p>

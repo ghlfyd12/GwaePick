@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import RegionMap, { type RegionFeatureCollection } from "@/components/RegionMap";
 import RegionQuickSearch from "@/components/RegionQuickSearch";
+import DetailTrustBlock from "@/components/DetailTrustBlock";
 import koreaSido from "@/data/korea-sido.json";
 import { sidoList } from "@/data/sido";
 
@@ -115,6 +116,9 @@ export default function ByRegionPage() {
           </nav>
         </div>
       </section>
+
+      {/* 공통 상세 신뢰 블록 — 3가지 이유 · 자질/역량 · 합격 후기 캐러셀(학교/과목 탭과 동일) */}
+      <DetailTrustBlock />
     </>
   );
 }
