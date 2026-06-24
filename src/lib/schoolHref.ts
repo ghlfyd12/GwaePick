@@ -1,19 +1,21 @@
 import type { SchoolLevel } from "@/data/schools";
 
 /*
- * schoolHref — 학교 카드 클릭 목적지. 현재는 상담 신청(/#consult)에 학교 컨텍스트를 쿼리로 담아 이동.
- * 추후 학교×과목 상세 페이지가 생기면 이 함수만 바꿔 끼우면 된다. (타입만 import — 데이터 미포함)
+ * 학교 링크 헬퍼(타입만 import — 데이터 미포함, 클라이언트 번들 안전).
+ * - schoolDetailHref: 학교×과목 상세 페이지 경로.
+ * - schoolHref: 학교 목록 카드 클릭 → 기본 과목(math) 상세로. 과목 전환은 상세의 '다른 과목'에서.
  */
+const BASE = "/tutoring/by-school";
+const DEFAULT_SUBJECT = "math";
+
+export function schoolDetailHref(schoolSlug: string, subjectSlug: string) {
+  return `${BASE}/${encodeURIComponent(schoolSlug)}/${subjectSlug}`;
+}
+
 export function schoolHref(
-  sidoSlug: string,
-  sigunguSlug: string,
+  _sidoSlug: string,
+  _sigunguSlug: string,
   school: { slug: string; level: SchoolLevel },
 ) {
-  const q = new URLSearchParams({
-    sido: sidoSlug,
-    sigungu: sigunguSlug,
-    school: school.slug,
-    level: school.level,
-  });
-  return `/#consult?${q.toString()}`;
+  return schoolDetailHref(school.slug, DEFAULT_SUBJECT);
 }
