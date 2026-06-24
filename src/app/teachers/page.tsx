@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import TeacherPool from "@/components/TeacherPool";
 import { site } from "@/data/site";
 
@@ -34,18 +35,35 @@ export const metadata: Metadata = {
 export default function TeachersPage() {
   return (
     <>
-      {/* 페이지 헤더 — 유일한 h1 */}
-      <section className="border-b border-line bg-surface px-4 py-14 text-center sm:px-6 sm:py-16">
-        <p className="text-sm font-semibold uppercase tracking-widest text-accent">
-          검증된 선생님
-        </p>
-        <h1 className="mx-auto mt-2 max-w-3xl text-3xl font-bold leading-snug text-ink sm:text-4xl">
-          우리 아이를 맡길 선생님들
-        </h1>
-        <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
-          국어·영어·수학·사회·과학부터 코딩까지 — 직접 가르쳐 본 선생님이 실력과
-          성향을 보고 함께하는 선생님들입니다.
-        </p>
+      {/* 상단 히어로 — 단체 사진 위에 헤더 문구 오버레이(유일한 h1) */}
+      <section className="px-4 pt-10 sm:px-6 sm:pt-12">
+        <div className="relative mx-auto max-w-[1180px] overflow-hidden rounded-2xl shadow-md ring-1 ring-line">
+          <Image
+            src="/images/teachers-hero.jpg"
+            alt="지식의참견 선생님들 단체 사진"
+            width={1024}
+            height={677}
+            priority
+            sizes="(min-width: 1180px) 1180px, 100vw"
+            className="h-auto w-full"
+            // 개발 서버 이미지 최적화 이슈 회피. 배포 시 최적화를 원하면 제거.
+            unoptimized
+          />
+
+          {/* 가독성용 그라데이션 + 텍스트 레이어(가로·세로 가운데) */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center break-keep bg-gradient-to-t from-black/55 via-black/25 to-black/10 px-5 text-center sm:px-8">
+            <p className="text-xs font-semibold uppercase tracking-widest text-accent sm:text-sm">
+              검증된 선생님
+            </p>
+            <h1 className="mt-1.5 text-2xl font-bold text-white drop-shadow-md sm:mt-2 md:text-4xl">
+              우리 아이를 맡길 선생님들
+            </h1>
+            <p className="mx-auto mt-2.5 max-w-2xl text-sm leading-relaxed text-white/90 drop-shadow md:mt-3 md:text-base">
+              국어·영어·수학·사회·과학부터 코딩까지 — 직접 가르쳐 본 선생님이
+              실력과 성향을 보고 함께하는 선생님들입니다.
+            </p>
+          </div>
+        </div>
       </section>
 
       {/* 과목 필터 + 카드 그리드 + 더보기 (헤더는 위에서 별도로 노출하므로 숨김) */}
