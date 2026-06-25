@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import HeroSearch from "@/components/HeroSearch";
 import CategoryLanding from "@/components/CategoryLanding";
-import { schoolLevels } from "@/data/categories";
 import { SCHOOLS } from "@/data/schools";
 
 const INTRO =
@@ -58,7 +57,6 @@ export default function BySchoolPage() {
         eyebrow="학교별"
         title="학교별 1:1 과외"
         intro={INTRO}
-        items={schoolLevels}
       />
     </>
   );

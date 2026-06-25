@@ -20,7 +20,8 @@ export default function CategoryLanding({
   eyebrow?: string;
   title: string;
   intro: string;
-  items: CategoryItem[];
+  /** 카드 그리드 항목. 생략/빈 배열이면 그리드 섹션 자체를 렌더하지 않는다. */
+  items?: CategoryItem[];
   /** 그리드 하단 안내 한 줄(선택) */
   note?: string;
   /** 상단 헤더(eyebrow/h1/intro) 숨김 — 위에 HeroSearch 가 h1 을 제공할 때 사용 */
@@ -45,7 +46,8 @@ export default function CategoryLanding({
         </section>
       )}
 
-      {/* 카드 그리드 + 하단 CTA */}
+      {/* 카드 그리드 + 하단 안내 — items 가 있을 때만(없으면 섹션 자체를 생략) */}
+      {items && items.length > 0 && (
       <section className="px-4 py-14 sm:px-6 sm:py-16">
         <ul className="mx-auto grid max-w-5xl grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5">
           {items.map((item) => (
@@ -77,6 +79,7 @@ export default function CategoryLanding({
           </p>
         )}
       </section>
+      )}
 
       {/* 공통 상세 신뢰 블록 — 3가지 이유 · 자질/역량 · 합격 후기 캐러셀 */}
       <DetailTrustBlock />
