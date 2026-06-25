@@ -24,7 +24,12 @@
       "Bash(node -e \"const g=require\\('./data/seoul-districts.json'\\); console.log\\('features:',g.features.length\\); console.log\\('sample props:', JSON.stringify\\(g.features.map\\(f=>f.properties\\).slice\\(0,2\\)\\)\\); console.log\\('geomType:', g.features[0].geometry.type\\)\")",
       "Bash(node -e \"const p=require\\('./package.json'\\);console.log\\(JSON.stringify\\({...p.dependencies,...p.devDependencies},null,1\\)\\)\")",
       "Bash(rm -rf \"src/app/tutoring/by-region/[sido]/[district]\" && echo \"deleted [district] \\(+[dong]\\)\" && find src/app/tutoring/by-region -type f | sort)",
-      "Bash(grep -vE \"^\\\\s*\\\\*|//|상담|체험|무료 상담|첫 상담\")"
+      "Bash(grep -vE \"^\\\\s*\\\\*|//|상담|체험|무료 상담|첫 상담\")",
+      "PowerShell(npm install 2>&1)",
+      "Bash(git push *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git check-ignore *)"
     ]
   }
 }
