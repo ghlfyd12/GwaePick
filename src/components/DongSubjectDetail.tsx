@@ -126,7 +126,7 @@ export default function DongSubjectDetail({
           {sigungu.name} · {dong.name}
         </p>
         <h1 className="mx-auto mt-2 max-w-3xl break-keep text-3xl font-bold leading-snug text-ink sm:text-4xl">
-          {dong.name} {subject.label} 과외 — 1:1 맞춤 개인과외 수업
+          {dong.name} {subject.label} 과외 — {sigungu.name} 1:1 맞춤 개인과외 수업
         </h1>
         <p className="mx-auto mt-4 max-w-2xl break-keep text-base leading-relaxed text-muted sm:text-lg">
           직접 가르쳐 온 선생님이 {dong.name} 학생에게 가장 잘 맞는 {subject.label}{" "}
