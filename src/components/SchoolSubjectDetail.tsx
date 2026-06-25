@@ -14,6 +14,7 @@ import { schoolDetailHref } from "@/lib/schoolHref";
 export default function SchoolSubjectDetail({
   schoolSlug,
   schoolName,
+  schoolFullName,
   levelLabel,
   sidoLabel,
   sidoSlug,
@@ -23,6 +24,8 @@ export default function SchoolSubjectDetail({
 }: {
   schoolSlug: string;
   schoolName: string;
+  /** 약칭→정식명(page.tsx 에서 expandSchoolName 으로 계산). 변환 불가 시 null. */
+  schoolFullName: string | null;
   levelLabel: string;
   sidoLabel: string;
   sidoSlug: string;
@@ -31,6 +34,8 @@ export default function SchoolSubjectDetail({
   otherSchools: { name: string; slug: string }[];
 }) {
   const region = `${sidoLabel} ${sigunguName}`;
+  // H1 의 지역 파트 — 정식명이 있으면 "{시군구} {정식명}", 없으면 "{시군구}"만(메타 title 과 동일 규칙).
+  const h1RegionPart = schoolFullName ? `${sigunguName} ${schoolFullName}` : sigunguName;
   const intro = buildSchoolIntro(schoolName, subject.label);
   const why = buildWhySchool(schoolName);
   const faq = buildSchoolFaq(schoolName);
@@ -102,7 +107,7 @@ export default function SchoolSubjectDetail({
           {region} · {levelLabel}
         </p>
         <h1 className="mx-auto mt-2 max-w-3xl break-keep text-3xl font-bold leading-snug text-ink sm:text-4xl">
-          {schoolName} {subject.label} 과외 — 1:1 맞춤 개인과외 수업
+          {schoolName} {subject.label} 과외 — {h1RegionPart} 1:1 맞춤 개인과외 수업
         </h1>
         <p className="mx-auto mt-4 max-w-2xl break-keep text-base leading-relaxed text-muted sm:text-lg">
           직접 가르쳐 온 선생님이 {schoolName} 학생에게 가장 잘 맞는 {subject.label}{" "}
