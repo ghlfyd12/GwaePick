@@ -133,7 +133,7 @@ export default function ReviewCardCarousel() {
             onTouchStart={pause}
             onTouchEnd={resume}
             aria-label="합격·성장 후기 목록"
-            className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex snap-x snap-mandatory items-start gap-4 overflow-x-auto scroll-smooth pb-2 [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {reviewCards.map((r, i) => (
               <li
@@ -141,8 +141,8 @@ export default function ReviewCardCarousel() {
                 className="w-[78%] shrink-0 snap-start sm:w-[45%] lg:w-[31%] xl:w-[23%]"
               >
                 <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-sm">
-                  {/* 텍스트 블록 — min-height 로 카드 높이 정렬(자르지 않음). 사진은 mt-auto 로 하단 고정. */}
-                  <div className="flex min-h-[176px] flex-col p-5">
+                  {/* 텍스트 블록 — 내용 높이에 맞춤(여백 없이 사진이 바로 이어짐). */}
+                  <div className="flex flex-col p-5">
                     <p className="break-keep text-lg font-bold text-ink">{r.title}</p>
                     <p className="mt-2 break-keep text-sm leading-relaxed text-muted">
                       “{r.quote}”
@@ -152,8 +152,8 @@ export default function ReviewCardCarousel() {
                     </p>
                   </div>
 
-                  {/* 인물 사진 — 없으면 SafeImage 가 null → 연한 배경만(깨짐 없음) */}
-                  <div className="relative mt-auto aspect-[4/3] w-full bg-surface-alt">
+                  {/* 인물 사진 — 텍스트 바로 아래 붙음. 없으면 SafeImage 가 null → 연한 배경만(깨짐 없음) */}
+                  <div className="relative aspect-[3/4] w-full bg-surface-alt">
                     <SafeImage
                       src={r.photo}
                       alt={`${r.school} 합격 ${r.member} 후기`}
