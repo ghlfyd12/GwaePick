@@ -22,7 +22,7 @@ export const site = {
    * 배포 도메인(절대경로 기준). canonical·OG·sitemap·robots 가 이 값을 사용한다.
    * 도메인 확정 시 이 한 줄만 교체하면 메타데이터 전체에 반영된다.
    */
-  url: "https://gwae-pick.vercel.app",
+  url: "https://xn--l89av43blfdm0cm7d.com",
 
   /**
    * URL 공유 미리보기(OG/트위터) 이미지 단일 소스.
