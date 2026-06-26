@@ -13,6 +13,8 @@ export const subjects: Subject[] = [
   { slug: "수학", label: "수학" },
   { slug: "사회", label: "사회" },
   { slug: "과학", label: "과학" },
+  { slug: "역사", label: "역사" },
+  { slug: "논술", label: "논술" },
   { slug: "코딩", label: "코딩" },
 ];
 export const subjectBySlug: Record<string, Subject> = Object.fromEntries(

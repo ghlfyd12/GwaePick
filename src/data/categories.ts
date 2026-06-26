@@ -15,6 +15,8 @@ export const subjects: CategoryItem[] = [
   { id: "math",    title: "수학", desc: "개념 원리부터 오답 관리까지" },
   { id: "social",  title: "사회", desc: "흐름으로 이해하는 암기 과목" },
   { id: "science", title: "과학", desc: "현상 관찰에서 문제 적용까지" },
+  { id: "history", title: "역사", desc: "흐름으로 꿰는 한국사·세계사" },
+  { id: "essay",   title: "논술", desc: "읽고 생각을 글로 정리하는 힘" },
   { id: "coding",  title: "코딩", desc: "스스로 만들며 배우는 코딩" },
 ];
 
