@@ -154,22 +154,26 @@ export default function Hero() {
           <div className="max-w-md">
             <h1
               id="hero-heading"
-              className="text-[1.75rem] font-bold leading-snug text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.45)] sm:text-[2.5rem] md:leading-[1.3] lg:text-5xl lg:leading-[1.25]"
+              className="text-[1.3rem] font-bold leading-snug text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.45)] md:text-[2.5rem] md:leading-[1.3] lg:text-5xl lg:leading-[1.25]"
             >
-              {headline.map((seg, i) =>
-                seg.emphasis ? (
-                  <strong key={i} className="font-extrabold text-accent">
-                    {seg.text}
-                  </strong>
-                ) : (
-                  <span key={i}>{seg.text}</span>
-                ),
-              )}
+              {/* break:true 조각 뒤에는 모바일에서만(md:hidden) 줄바꿈 — 데스크톱은 자연 줄바꿈 유지. */}
+              {headline.map((seg, i) => (
+                <span key={i}>
+                  {seg.emphasis ? (
+                    <strong className="font-extrabold text-accent">
+                      {seg.text}
+                    </strong>
+                  ) : (
+                    seg.text
+                  )}
+                  {seg.break && <br className="md:hidden" />}
+                </span>
+              ))}
             </h1>
 
-            {/* CTA — 첫 화면 유일한 신청 진입점. 오버레이가 보일 때만 클릭 가능. */}
+            {/* CTA — 데스크톱만(모바일은 상단 헤더 '무료상담'으로 이동). 오버레이 보일 때만 클릭 가능. */}
             <div
-              className="pointer-events-auto mt-7"
+              className="pointer-events-auto mt-7 hidden md:block"
               onClick={(e) => e.stopPropagation()}
             >
               <CTAButton

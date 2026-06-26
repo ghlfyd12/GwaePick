@@ -14,6 +14,8 @@ export type HeadlineSegment = {
   text: string;
   /** 강조 단어 — 포인트(코랄·오렌지) 컬러 + 볼드 */
   emphasis?: boolean;
+  /** 이 조각 뒤에서 모바일(md 미만)만 줄바꿈. 데스크톱은 무시(자연 줄바꿈). */
+  break?: boolean;
 };
 
 /** 서브 카피 한 조각. strong 이 true 면 볼드 강조(컬러는 본문색 유지). */
@@ -84,20 +86,23 @@ export type SideBanner = {
  */
 export const headlineVariants = {
   A: [
-    { text: "공부를 해도 성적이 그대로인 아이, 문제는 " },
+    // 모바일 3줄: ① 공부를…아이, / ② 문제는 방법이 아니라 / ③ 맞는 선생님입니다.
+    // (break 는 md:hidden 줄바꿈 — 데스크톱은 trailing space 로 자연스럽게 이어진다)
+    { text: "공부를 해도 성적이 그대로인 아이, ", break: true },
+    { text: "문제는 " },
     { text: "방법", emphasis: true },
-    { text: "이 아니라 " },
+    { text: "이 아니라 ", break: true },
     { text: "맞는 선생님", emphasis: true },
     { text: "입니다." },
-  ],
+  ] as HeadlineSegment[],
   B: [
     { text: "기초가 흔들리는 " },
     { text: "지금", emphasis: true },
     { text: "이, 다시 잡을 수 있는 " },
     { text: "마지막 골든타임", emphasis: true },
     { text: "입니다." },
-  ],
-} satisfies Record<string, HeadlineSegment[]>;
+  ] as HeadlineSegment[],
+};
 
 export type HeadlineVariant = keyof typeof headlineVariants;
 

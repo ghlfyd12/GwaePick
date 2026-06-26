@@ -46,7 +46,7 @@ export default function Header() {
           <div className="flex shrink-0 items-baseline gap-2">
             <Link
               href="/"
-              className="text-xl font-bold text-accent md:text-3xl lg:text-4xl xl:text-5xl"
+              className="text-lg font-bold text-accent md:text-3xl lg:text-4xl xl:text-5xl"
               onClick={closeAll}
             >
               {site.name}
@@ -89,19 +89,26 @@ export default function Header() {
 
         {/* 우측: 모바일 빠른 메뉴 + CTA(데스크톱만) + 모바일 햄버거 */}
         <div className="flex shrink-0 items-center gap-2">
-          {/* 모바일 전용 — 학교별/지역별 과외 (햄버거 옆) */}
-          <div className="flex items-center gap-2 md:hidden">
+          {/* 모바일 전용 — 학교별/지역별(짧게) + 무료상담 (햄버거 옆) */}
+          <div className="flex items-center gap-1.5 md:hidden">
             {mobileQuick.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={closeAll}
                 aria-current={isActive(item.href) ? "page" : undefined}
-                className="whitespace-nowrap rounded-full border border-accent/40 px-3 py-2 text-sm font-semibold text-ink transition-colors hover:border-accent hover:text-accent"
+                className="whitespace-nowrap rounded-full border border-accent/40 px-2.5 py-1.5 text-sm font-semibold text-ink transition-colors hover:border-accent hover:text-accent"
               >
-                {item.label}
+                {item.label.replace(/\s*과외$/, "")}
               </Link>
             ))}
+            <Link
+              href={site.cta.href}
+              onClick={closeAll}
+              className="whitespace-nowrap rounded-full bg-accent px-2.5 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-accent-dark"
+            >
+              무료상담
+            </Link>
           </div>
 
           {/* CTA — Hero 안 무료상담 버튼과 중복이라 모바일에선 숨김 */}
