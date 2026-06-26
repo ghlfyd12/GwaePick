@@ -16,13 +16,13 @@ export interface HeroSearchItem {
   key: string;
 }
 
-/** 과목 인덱스 — subjects.ts 6과목. 목적지 = 과목 페이지의 상담 폼(전환 동선). */
+/** 과목 인덱스 — subjects.ts 8과목. 목적지 = 과목별 독립 상세 페이지(/by-subject/{slug}). */
 function buildSubjectSearchIndex(): HeroSearchItem[] {
   return subjects.map((s) => ({
     kind: "subject",
     label: s.label,
     sub: "과목",
-    href: `/tutoring/by-subject#consult`,
+    href: `/tutoring/by-subject/${s.slug}`,
     key: `subject:${s.slug}`,
   }));
 }

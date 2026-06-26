@@ -2,7 +2,7 @@ import Link from "next/link";
 import ConsultForm from "@/components/ConsultForm";
 import type { Subject } from "@/data/subjects";
 import { site } from "@/data/site";
-import { CONSULT_PHONE } from "@/data/dongPageCopy";
+import { CONSULT_PHONE, STEPS, TRUST } from "@/data/dongPageCopy";
 import { buildSubjectFaq } from "@/data/subjectDetailCopy";
 import { buildSubjectKeywords } from "@/data/subjectKeywords";
 
@@ -124,6 +124,35 @@ export default function SubjectDetail({ subject }: { subject: Subject }) {
               <p className="mt-2 break-keep text-base leading-relaxed text-ink">{subject.teaching}</p>
             </div>
           )}
+        </section>
+
+        {/* 3-1. 진행 순서 STEP — 학교/지역 상세와 동일(학교명 비의존, 그대로 재사용) */}
+        <section>
+          <h2 className="break-keep text-xl font-bold text-ink sm:text-2xl">상담부터 첫 수업까지</h2>
+          <ol className="mt-5 space-y-3">
+            {STEPS.map((s) => (
+              <li key={s.no} className="flex items-start gap-4 rounded-2xl border border-line bg-white p-4">
+                <span className="shrink-0 rounded-full bg-accent/10 px-3 py-1 text-sm font-bold text-accent">STEP {s.no}</span>
+                <div>
+                  <p className="text-base font-bold text-ink">{s.title}</p>
+                  <p className="mt-0.5 break-keep text-sm leading-relaxed text-muted">{s.desc}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        {/* 3-2. 믿어도 되는 이유 3가지 — 학교/지역 상세와 동일(재사용) */}
+        <section>
+          <h2 className="break-keep text-xl font-bold text-ink sm:text-2xl">지식의참견을 믿어도 되는 이유</h2>
+          <ul className="mt-5 space-y-3">
+            {TRUST.map((t, i) => (
+              <li key={i} className="flex items-start gap-3 break-keep text-base leading-relaxed text-ink sm:text-lg">
+                <span aria-hidden className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" />
+                {t}
+              </li>
+            ))}
+          </ul>
         </section>
 
         {/* 4. FAQ */}
