@@ -45,8 +45,8 @@ export default function SchoolSubjectDetail({
   const intro = buildSchoolIntro(schoolName, subject.label);
   const why = buildWhySchool(schoolName);
   const faq = buildSchoolFaq(schoolName);
-  const strategyCards = buildStrategyCards(schoolName, levelLabel, subject.label, subject.why);
-  const relatedKeywords = buildRelatedKeywords(schoolName, sigunguName, sidoSlug, subject.label);
+  const strategyCards = buildStrategyCards(schoolName, schoolFullName, levelLabel, subject.label, subject.why);
+  const relatedKeywords = buildRelatedKeywords(schoolName);
   const consultMessage = `${schoolName} ${subject.label} 과외 문의드립니다.`;
 
   // 내부 링크
@@ -254,20 +254,21 @@ export default function SchoolSubjectDetail({
         <section>
           <h2 className="break-keep text-xl font-bold text-ink sm:text-2xl">관련 검색어</h2>
           <ul className="mt-4 flex flex-wrap gap-2.5">
-            {relatedKeywords.links.map((k) => (
-              <li key={k.href}>
-                <Link href={k.href} className="inline-flex rounded-full border border-accent/30 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-accent hover:text-accent sm:text-base">
-                  {k.label}
-                </Link>
-              </li>
-            ))}
-            {relatedKeywords.plain.map((t) => (
-              <li key={t}>
-                <span className="inline-flex rounded-full bg-surface-alt px-4 py-2 text-sm font-medium text-muted sm:text-base">
-                  {t}
-                </span>
-              </li>
-            ))}
+            {relatedKeywords.map((k) =>
+              k.href ? (
+                <li key={k.label}>
+                  <Link href={k.href} className="inline-flex rounded-full border border-accent/30 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-accent hover:text-accent sm:text-base">
+                    {k.label}
+                  </Link>
+                </li>
+              ) : (
+                <li key={k.label}>
+                  <span className="inline-flex rounded-full bg-surface-alt px-4 py-2 text-sm font-medium text-muted sm:text-base">
+                    {k.label}
+                  </span>
+                </li>
+              ),
+            )}
           </ul>
         </section>
 

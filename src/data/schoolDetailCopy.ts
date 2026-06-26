@@ -44,19 +44,30 @@ export function buildSchoolFaq(schoolName: string): { q: string; a: string }[] {
 
 export type StrategyCard = { title: string; body: string };
 
-/** 학교급(초·중·고) 단위 학습 목표 — 세부 학년(중1·중2·중3)은 쓰지 않는다. */
-function levelGoal(levelLabel: string, subjectLabel: string): string {
+/**
+ * 학교급(초·중·고) 단위 학습 목표.
+ * 중·고는 1/2/3학년 목표를 자연스러운 한 문단으로(키워드 나열 금지). 약칭·정식명을 문맥 속에 한 번씩 섞는다.
+ * 정식명(fullName)이 없으면(대부고/상고/사대부고) 양쪽 모두 약칭 사용. 초등은 학년 구분 없이 단일 문장.
+ */
+function levelGoal(
+  schoolName: string,
+  fullName: string | null,
+  levelLabel: string,
+  subjectLabel: string,
+): string {
+  const formal = fullName ?? schoolName; // 정식명 없으면 약칭으로 대체
   if (levelLabel === "초등학교")
     return `초등 시기에는 ${subjectLabel}의 기초 개념과 공부 습관을 탄탄히 잡아, 스스로 학습하는 힘을 기르는 것이 목표입니다.`;
   if (levelLabel === "고등학교")
-    return `고등 시기에는 ${subjectLabel}의 내신과 수능을 함께 대비하며, 약한 단원을 집중 보완해 실전 적용력을 끌어올리는 것이 목표입니다.`;
+    return `${schoolName} 1학년은 고등 ${subjectLabel}의 내신 기반을 다지며 학습 습관을 자리잡는 시기이고, 2학년은 모의고사와 내신을 함께 끌고 가는 균형이 중요합니다. ${formal} 3학년은 약한 단원을 집중 보완하고 수능과 내신을 마무리하는 데 집중합니다. 학년에 따라 달라지는 목표를 1:1로 맞춰 갑니다.`;
   // 그 외(중학교)
-  return `중등 시기에는 ${subjectLabel}의 개념 빈틈을 줄이고, 풀이 과정을 스스로 설명할 수 있는 힘을 기르는 것이 목표입니다. 내신을 관리하는 습관까지 함께 잡아 다음 단계로 무리 없이 이어 갑니다.`;
+  return `${schoolName} 1학년은 ${subjectLabel}의 기초 개념을 빠짐없이 다지는 시기이고, 2학년은 범위가 넓어지는 만큼 빈틈이 생기지 않도록 관리하는 것이 중요합니다. ${formal} 3학년은 고등 과정과 이어지는 내용을 단단히 마무리하며 내신과 진학을 함께 준비합니다. 학년마다 달라지는 목표에 맞춰, 지금 단계에 꼭 필요한 부분부터 1:1로 채워 갑니다.`;
 }
 
-/** "학습 전략" 카드 4개 — 학교명·학교급·과목 메타만으로 구성. */
+/** "학습 전략" 카드 4개 — 학교명·정식명·학교급·과목 메타만으로 구성. */
 export function buildStrategyCards(
   schoolName: string,
+  schoolFullName: string | null,
   levelLabel: string,
   subjectLabel: string,
   subjectWhy: string,
@@ -64,7 +75,7 @@ export function buildStrategyCards(
   return [
     {
       title: "학년별 학습 목표",
-      body: levelGoal(levelLabel, subjectLabel),
+      body: levelGoal(schoolName, schoolFullName, levelLabel, subjectLabel),
     },
     {
       title: "과목별 학습 포인트",
@@ -85,23 +96,28 @@ export function buildStrategyCards(
  * "관련 검색어" 태그 — 실제 페이지가 있는 것만 링크, 나머지는 장식(non-link).
  * 죽은 링크(가짜 href) 금지. "다른 과목" 링크는 (라) 내부링크 섹션과 중복되므로 넣지 않는다.
  */
-export function buildRelatedKeywords(
-  schoolName: string,
-  sigunguName: string,
-  sidoSlug: string,
-  subjectLabel: string,
-): { links: { label: string; href: string }[]; plain: string[] } {
-  return {
-    links: [
-      { label: `${sigunguName} 학교`, href: `/tutoring/by-school/${sidoSlug}` },
-    ],
-    plain: [
-      `${schoolName} ${subjectLabel}과외`,
-      `${schoolName} 기출`,
-      `${schoolName} 내신`,
-      `${schoolName} 시험`,
-      `${schoolName} 과외 추천`,
-      `${sigunguName} ${subjectLabel} 과외`,
-    ],
-  };
+export type KeywordTag = { label: string; href?: string };
+
+/**
+ * 관련 검색어 15개 — 전부 장식 태그(non-link). 실제 내부 링크는 (라) "다른 과목/다른 학교"에만 둔다.
+ * 죽은 링크(가짜 href) 금지 — 여기서는 href 자체를 만들지 않는다.
+ */
+export function buildRelatedKeywords(schoolName: string): KeywordTag[] {
+  return [
+    "기출",
+    "내신",
+    "시험",
+    "과외 추천",
+    "과외 비용",
+    "1:1 과외 선생님",
+    "수학과외",
+    "영어과외",
+    "국어과외",
+    "과학과외",
+    "사회과외",
+    "수학 기출",
+    "영어 기출",
+    "전문과외",
+    "내신대비",
+  ].map((s) => ({ label: `${schoolName} ${s}` }));
 }
