@@ -10,6 +10,7 @@ import {
   buildSchoolFaq,
   buildStrategyCards,
   buildRelatedKeywords,
+  buildSubjectOverview,
 } from "@/data/schoolDetailCopy";
 import { schoolDetailHref } from "@/lib/schoolHref";
 
@@ -47,6 +48,9 @@ export default function SchoolSubjectDetail({
   const faq = buildSchoolFaq(schoolName);
   const strategyCards = buildStrategyCards(schoolName, schoolFullName, levelLabel, subject.label, subject.why);
   const relatedKeywords = buildRelatedKeywords(schoolName);
+  // "과목별 1:1 과외"는 중·고등(초등 제외)에만. 표시명 = 정식명(없으면 약칭).
+  const subjectOverview =
+    levelLabel === "초등학교" ? null : buildSubjectOverview(schoolFullName ?? schoolName);
   const consultMessage = `${schoolName} ${subject.label} 과외 문의드립니다.`;
 
   // 내부 링크
@@ -250,7 +254,23 @@ export default function SchoolSubjectDetail({
           </ul>
         </section>
 
-        {/* 8-2. 관련 검색어 — 실제 페이지 있는 것만 링크, 나머지 장식 태그(클릭 불가) */}
+        {/* 8-1b. 과목별 1:1 과외 — 중·고등만. 전부 장식 태그(클릭 불가). 표시명=정식명(없으면 약칭) */}
+        {subjectOverview && (
+          <section>
+            <h2 className="break-keep text-xl font-bold text-ink sm:text-2xl">{subjectOverview.title}</h2>
+            <ul className="mt-4 flex flex-wrap gap-2.5">
+              {subjectOverview.tags.map((t) => (
+                <li key={t}>
+                  <span className="inline-flex rounded-full bg-surface-alt px-4 py-2 text-sm font-medium text-muted sm:text-base">
+                    {t}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {/* 8-2. 관련 검색어 — 전부 장식 태그(클릭 불가) */}
         <section>
           <h2 className="break-keep text-xl font-bold text-ink sm:text-2xl">관련 검색어</h2>
           <ul className="mt-4 flex flex-wrap gap-2.5">

@@ -121,3 +121,19 @@ export function buildRelatedKeywords(schoolName: string): KeywordTag[] {
     "내신대비",
   ].map((s) => ({ label: `${schoolName} ${s}` }));
 }
+
+/**
+ * "과목별 1:1 과외" — 중·고등 전용. 표시명(정식명, 없으면 약칭)으로 5과목 태그 구성.
+ * 전부 장식(non-link). 실제 과목 내부 링크는 (라) "다른 과목"에만 둔다(중복 회피).
+ */
+export function buildSubjectOverview(displayName: string): {
+  title: string;
+  tags: string[];
+} {
+  return {
+    title: `${displayName} 과목별 1:1 과외`,
+    tags: ["국어과외", "수학과외", "영어과외", "과학과외", "사회과외"].map(
+      (s) => `${displayName} ${s}`,
+    ),
+  };
+}
