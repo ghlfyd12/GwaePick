@@ -35,14 +35,19 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-line bg-white/95 backdrop-blur-sm">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-2 sm:gap-3 sm:px-3 md:h-20 lg:h-24 lg:gap-4">
-        {/* 브랜드 로고 */}
-        <Link
-          href="/"
-          className="shrink-0 text-2xl font-bold text-accent md:text-3xl lg:text-4xl xl:text-5xl"
-          onClick={closeAll}
-        >
-          {site.name}
-        </Link>
+        {/* 브랜드 로고 + 태그라인(데스크톱만) */}
+        <div className="flex shrink-0 items-baseline gap-2">
+          <Link
+            href="/"
+            className="text-2xl font-bold text-accent md:text-3xl lg:text-4xl xl:text-5xl"
+            onClick={closeAll}
+          >
+            {site.name}
+          </Link>
+          <span className="hidden whitespace-nowrap text-sm font-medium text-muted md:inline lg:text-base">
+            {site.headerTagline}
+          </span>
+        </div>
 
         {/* 데스크톱 네비 (md 이상) */}
         <nav

@@ -18,6 +18,9 @@ export const site = {
   /** 사이트명(브랜드명) — 이 한 줄만 수정하면 헤더·푸터·메타 전체에 반영된다. */
   name: "지식의참견",
 
+  /** 로고 옆 태그라인 — 데스크톱에서만 작게 노출(모바일 숨김). */
+  headerTagline: "일대일 과외",
+
   /**
    * 배포 도메인(절대경로 기준). canonical·OG·sitemap·robots 가 이 값을 사용한다.
    * 도메인 확정 시 이 한 줄만 교체하면 메타데이터 전체에 반영된다.
@@ -61,21 +64,12 @@ export const site = {
    * href 는 임시 앵커 — 추후 실제 페이지/섹션과 연결.
    */
   nav: [
-    {
-      label: "1:1과외수업",
-      href: "/#tutoring",
-      children: [
-        { label: "학교별", href: "/tutoring/by-school" },
-        { label: "지역별", href: "/tutoring/by-region" },
-        { label: "과목별", href: "/tutoring/by-subject" },
-      ],
-    },
+    { label: "지역별 과외", href: "/tutoring/by-region" },
+    { label: "학교별 과외", href: "/tutoring/by-school" },
+    { label: "과목별 과외", href: "/tutoring/by-subject" },
     { label: "교사진", href: "/teachers" },
-    { label: "학원", href: "/#academy" },
-    { label: "외국어", href: "/#language" },
     { label: "수업후기", href: "/#reviews" },
-    { label: "상담안내", href: "/#guide" },
-  ] satisfies NavItem[],
+  ] as NavItem[],
 
   /** 연락처 (실제 값) */
   contact: {
