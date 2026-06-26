@@ -64,10 +64,11 @@ export default function Hero() {
   };
 
   return (
+    <>
     <section
       id="hero"
       aria-labelledby="hero-heading"
-      className="relative flex min-h-[90svh] items-start overflow-hidden md:min-h-[88vh] md:items-center"
+      className="relative flex min-h-[58svh] items-start overflow-hidden md:min-h-[88vh] md:items-center"
       onMouseEnter={handleEnter}
       onMouseLeave={handleLeave}
       onClick={handleTap}
@@ -151,26 +152,6 @@ export default function Hero() {
         {/* 전경 콘텐츠 — 상단·좌측, 폭 제한으로 중앙/우측 인물 회피 */}
         <div className="relative mx-auto w-full max-w-6xl px-5 pt-24 sm:px-6 md:pt-20">
           <div className="max-w-md">
-            {/* 모바일 전용 — 제목 위 빠른 검색(학교/지역). 데스크톱은 전용 페이지에 존재하므로 숨김.
-                오버레이가 pointer-events-none 이라 자식에 auto 부여 + 탭이 슬라이드 토글로 새지 않게 stopPropagation.
-                공유 QuickSearch 의 라벨(text-ink)은 어두운 배경에서 안 보이므로 부모에서 흰색+그림자로만 보정. */}
-            <div
-              className="pointer-events-auto mb-7 md:hidden [&_label]:text-white [&_label]:[text-shadow:0_1px_6px_rgba(0,0,0,0.55)]"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <QuickSearch
-                kind="school"
-                label="학교 빠르게 검색"
-                placeholder="학교 빠르게 검색 (예: ○○중학교, ○○고등학교)"
-                emptyMessage="학교 데이터에서 찾지 못했습니다. 바로 상담받으시면 학교에 맞춰 안내해 드립니다."
-              />
-              <QuickSearch
-                kind="region"
-                label="우리 지역 빠르게 검색"
-                placeholder="우리 지역 빠르게 검색 (예: 대치동, 강남구, 일산)"
-              />
-            </div>
-
             <h1
               id="hero-heading"
               className="text-[2rem] font-bold leading-snug text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.45)] sm:text-[2.5rem] md:leading-[1.3] lg:text-5xl lg:leading-[1.25]"
@@ -244,5 +225,23 @@ export default function Hero() {
         ))}
       </div>
     </section>
+
+      {/* 모바일 전용 — 사진 아래 흰 배경 빠른 검색(학교/지역). 흰 배경이라 라벨 보정 불필요. 데스크톱은 전용 페이지. */}
+      <div className="border-b border-line bg-white px-5 py-5 md:hidden">
+        <QuickSearch
+          kind="school"
+          label="학교 빠르게 검색"
+          placeholder="학교 빠르게 검색 (예: ○○중학교, ○○고등학교)"
+          emptyMessage="학교 데이터에서 찾지 못했습니다. 바로 상담받으시면 학교에 맞춰 안내해 드립니다."
+        />
+        <div className="mt-3">
+          <QuickSearch
+            kind="region"
+            label="우리 지역 빠르게 검색"
+            placeholder="우리 지역 빠르게 검색 (예: 대치동, 강남구, 일산)"
+          />
+        </div>
+      </div>
+    </>
   );
 }
