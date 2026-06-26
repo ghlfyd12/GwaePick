@@ -99,10 +99,23 @@ export function buildStrategyCards(
 export type KeywordTag = { label: string; href?: string };
 
 /**
- * 관련 검색어 15개 — 전부 장식 태그(non-link). 실제 내부 링크는 (라) "다른 과목/다른 학교"에만 둔다.
- * 죽은 링크(가짜 href) 금지 — 여기서는 href 자체를 만들지 않는다.
+ * 관련 검색어 — 전부 장식 태그(non-link). 실제 내부 링크는 (라) "다른 과목/다른 학교"에만 둔다.
+ * 죽은 링크(가짜 href) 금지. 초등(elem)은 약칭6+정식명8 (14개), 중·고등은 약칭 기반 15개.
  */
-export function buildRelatedKeywords(schoolName: string): KeywordTag[] {
+export function buildRelatedKeywords(
+  schoolName: string,
+  displayName: string,
+  isElem: boolean,
+): KeywordTag[] {
+  if (isElem) {
+    const abbr = ["사고력수학", "영어에세이", "파닉스", "논술수업", "저학년", "고학년"].map(
+      (s) => ({ label: `${schoolName} ${s}` }),
+    );
+    const formal = ["국어", "수학", "영어", "과학", "사회", "역사", "논술", "코딩"].map(
+      (s) => ({ label: `${displayName} ${s}` }),
+    );
+    return [...abbr, ...formal];
+  }
   return [
     "기출",
     "내신",
@@ -123,17 +136,18 @@ export function buildRelatedKeywords(schoolName: string): KeywordTag[] {
 }
 
 /**
- * "과목별 1:1 과외" — 중·고등 전용. 표시명(정식명, 없으면 약칭)으로 5과목 태그 구성.
- * 전부 장식(non-link). 실제 과목 내부 링크는 (라) "다른 과목"에만 둔다(중복 회피).
+ * "과목별 1:1 과외" — 표시명(정식명, 없으면 약칭)으로 과목 태그 구성.
+ * 초등(elem)은 8과목(+역사·논술·코딩), 중·고등은 5과목. 전부 장식(non-link).
+ * 실제 과목 내부 링크는 (라) "다른 과목"에만 둔다(중복 회피).
  */
-export function buildSubjectOverview(displayName: string): {
-  title: string;
-  tags: string[];
-} {
+export function buildSubjectOverview(
+  displayName: string,
+  isElem: boolean,
+): { title: string; tags: string[] } {
+  const base = ["국어과외", "수학과외", "영어과외", "과학과외", "사회과외"];
+  const subjects = isElem ? [...base, "역사과외", "논술과외", "코딩과외"] : base;
   return {
     title: `${displayName} 과목별 1:1 과외`,
-    tags: ["국어과외", "수학과외", "영어과외", "과학과외", "사회과외"].map(
-      (s) => `${displayName} ${s}`,
-    ),
+    tags: subjects.map((s) => `${displayName} ${s}`),
   };
 }

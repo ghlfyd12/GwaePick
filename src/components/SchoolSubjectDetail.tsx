@@ -46,11 +46,12 @@ export default function SchoolSubjectDetail({
   const intro = buildSchoolIntro(schoolName, subject.label);
   const why = buildWhySchool(schoolName);
   const faq = buildSchoolFaq(schoolName);
+  const isElem = levelLabel === "초등학교";
+  const displayName = schoolFullName ?? schoolName; // 정식명, 없으면 약칭
   const strategyCards = buildStrategyCards(schoolName, schoolFullName, levelLabel, subject.label, subject.why);
-  const relatedKeywords = buildRelatedKeywords(schoolName);
-  // "과목별 1:1 과외"는 중·고등(초등 제외)에만. 표시명 = 정식명(없으면 약칭).
-  const subjectOverview =
-    levelLabel === "초등학교" ? null : buildSubjectOverview(schoolFullName ?? schoolName);
+  const relatedKeywords = buildRelatedKeywords(schoolName, displayName, isElem);
+  // "과목별 1:1 과외" — 전 학교급. 초등 8과목 / 중·고등 5과목.
+  const subjectOverview = buildSubjectOverview(displayName, isElem);
   const consultMessage = `${schoolName} ${subject.label} 과외 문의드립니다.`;
 
   // 내부 링크
