@@ -40,35 +40,20 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-line bg-white/95 backdrop-blur-sm">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-2 sm:gap-3 sm:px-3 md:h-20 lg:h-24 lg:gap-4">
-        {/* 좌측: 로고(+태그라인) + 모바일 빠른 메뉴 */}
+        {/* 좌측: 로고 + 태그라인(데스크톱만). min-w-0 래퍼 — xl 좁은 폭에서 태그라인이 먼저 양보해
+            가로 스크롤 방지(데스크톱 기존 동작과 동일). 모바일 빠른 메뉴는 우측으로 이동. */}
         <div className="flex min-w-0 items-center gap-2">
-          {/* 브랜드 로고 + 태그라인(데스크톱만) */}
           <div className="flex shrink-0 items-baseline gap-2">
             <Link
               href="/"
-              className="text-2xl font-bold text-accent md:text-3xl lg:text-4xl xl:text-5xl"
+              className="text-xl font-bold text-accent md:text-3xl lg:text-4xl xl:text-5xl"
               onClick={closeAll}
             >
               {site.name}
             </Link>
-            <span className="hidden whitespace-nowrap text-sm font-medium text-muted md:inline lg:text-base">
+            <span className="hidden min-w-0 truncate whitespace-nowrap text-sm font-medium text-muted md:inline lg:text-base">
               {site.headerTagline}
             </span>
-          </div>
-
-          {/* 모바일 전용 — 로고 옆 빠른 메뉴(학교별/지역별 과외) */}
-          <div className="flex items-center gap-1.5 md:hidden">
-            {mobileQuick.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={closeAll}
-                aria-current={isActive(item.href) ? "page" : undefined}
-                className="whitespace-nowrap rounded-full border border-accent/40 px-2 py-1.5 text-xs font-semibold text-ink transition-colors hover:border-accent hover:text-accent"
-              >
-                {item.label}
-              </Link>
-            ))}
           </div>
         </div>
 
@@ -102,8 +87,23 @@ export default function Header() {
           )}
         </nav>
 
-        {/* 우측: CTA(데스크톱만) + 모바일 햄버거 */}
+        {/* 우측: 모바일 빠른 메뉴 + CTA(데스크톱만) + 모바일 햄버거 */}
         <div className="flex shrink-0 items-center gap-2">
+          {/* 모바일 전용 — 학교별/지역별 과외 (햄버거 옆) */}
+          <div className="flex items-center gap-2 md:hidden">
+            {mobileQuick.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={closeAll}
+                aria-current={isActive(item.href) ? "page" : undefined}
+                className="whitespace-nowrap rounded-full border border-accent/40 px-3 py-2 text-sm font-semibold text-ink transition-colors hover:border-accent hover:text-accent"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+
           {/* CTA — Hero 안 무료상담 버튼과 중복이라 모바일에선 숨김 */}
           <div className="hidden md:block">
             <CTAButton

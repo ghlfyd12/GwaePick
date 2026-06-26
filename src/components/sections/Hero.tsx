@@ -149,12 +149,12 @@ export default function Hero() {
         {/* 가독성용 국소 중립 스크림 — 좌측만 옅게(검정), 전체 색 오버레이 아님 */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/35 via-black/10 to-transparent md:from-black/40 md:via-transparent" />
 
-        {/* 전경 콘텐츠 — 상단·좌측, 폭 제한으로 중앙/우측 인물 회피 */}
-        <div className="relative mx-auto w-full max-w-6xl px-5 pt-24 sm:px-6 md:pt-20">
+        {/* 전경 콘텐츠 — 상단·좌측, 폭 제한으로 중앙/우측 인물 회피. 모바일은 더 위로(인물 얼굴 회피). */}
+        <div className="relative mx-auto w-full max-w-6xl px-5 pt-8 sm:px-6 md:pt-20">
           <div className="max-w-md">
             <h1
               id="hero-heading"
-              className="text-[2rem] font-bold leading-snug text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.45)] sm:text-[2.5rem] md:leading-[1.3] lg:text-5xl lg:leading-[1.25]"
+              className="text-[1.75rem] font-bold leading-snug text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.45)] sm:text-[2.5rem] md:leading-[1.3] lg:text-5xl lg:leading-[1.25]"
             >
               {headline.map((seg, i) =>
                 seg.emphasis ? (
