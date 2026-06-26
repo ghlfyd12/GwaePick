@@ -49,6 +49,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }
   }
 
+  // 과목 단독 상세 — /tutoring/by-subject/[과목] 8개(영문 slug)
+  const subjectDetailPages: MetadataRoute.Sitemap = detailSubjects.map((subj) => ({
+    url: `${base}/tutoring/by-subject/${subj.slug}`,
+    lastModified,
+    changeFrequency: "weekly",
+    priority: 0.7,
+  }));
+
   // 동×과목 상세 — 파일럿(서울 4구·고양 3구)만 등록(전국 일괄 금지)
   const pilotDetail: MetadataRoute.Sitemap = [];
   for (const p of PILOT) {
@@ -68,5 +76,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }
   }
 
-  return [...home, ...regionPages, ...pseoPages, ...pilotDetail];
+  return [...home, ...regionPages, ...subjectDetailPages, ...pseoPages, ...pilotDetail];
 }

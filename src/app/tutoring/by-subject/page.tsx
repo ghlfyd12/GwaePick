@@ -29,6 +29,7 @@ export default function BySubjectPage() {
         title="과목별 1:1 과외"
         intro={INTRO}
         items={subjects}
+        makeHref={(item) => `/tutoring/by-subject/${item.id}`}
       />
     </>
   );

@@ -16,6 +16,7 @@ export default function CategoryLanding({
   items,
   note,
   hideHeader = false,
+  makeHref,
 }: {
   eyebrow?: string;
   title: string;
@@ -26,6 +27,8 @@ export default function CategoryLanding({
   note?: string;
   /** 상단 헤더(eyebrow/h1/intro) 숨김 — 위에 HeroSearch 가 h1 을 제공할 때 사용 */
   hideHeader?: boolean;
+  /** 카드별 링크 빌더(선택). 주면 상세 페이지로 연결, 없으면 상담(/#consult) 동선. */
+  makeHref?: (item: CategoryItem) => string;
 }) {
   return (
     <>
@@ -50,11 +53,17 @@ export default function CategoryLanding({
       {items && items.length > 0 && (
       <section className="px-4 py-14 sm:px-6 sm:py-16">
         <ul className="mx-auto grid max-w-5xl grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5">
-          {items.map((item) => (
+          {items.map((item) => {
+            const href = makeHref ? makeHref(item) : "/#consult";
+            const linkLabel = makeHref ? "자세히 보기" : "상담 신청";
+            const aria = makeHref
+              ? `${item.title} 과외 자세히 보기`
+              : `${item.title} — 무료 상담 신청`;
+            return (
             <li key={item.id}>
               <a
-                href="/#consult"
-                aria-label={`${item.title} — 무료 상담 신청`}
+                href={href}
+                aria-label={aria}
                 className="group flex h-full flex-col rounded-2xl border border-line bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
               >
                 <p className="text-lg font-bold text-ink sm:text-xl">
@@ -64,12 +73,13 @@ export default function CategoryLanding({
                   {item.desc}
                 </p>
                 <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-accent">
-                  상담 신청
+                  {linkLabel}
                   <span aria-hidden>→</span>
                 </span>
               </a>
             </li>
-          ))}
+            );
+          })}
         </ul>
 
         {/* 그리드 하단 안내 */}
