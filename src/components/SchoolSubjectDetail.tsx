@@ -4,7 +4,13 @@ import type { Subject } from "@/data/subjects";
 import { subjects } from "@/data/subjects";
 import { site } from "@/data/site";
 import { CONSULT_PHONE, STEPS, TRUST, REVIEW_PLACEHOLDERS } from "@/data/dongPageCopy";
-import { buildSchoolIntro, buildWhySchool, buildSchoolFaq } from "@/data/schoolDetailCopy";
+import {
+  buildSchoolIntro,
+  buildWhySchool,
+  buildSchoolFaq,
+  buildStrategyCards,
+  buildRelatedKeywords,
+} from "@/data/schoolDetailCopy";
 import { schoolDetailHref } from "@/lib/schoolHref";
 
 /*
@@ -39,6 +45,8 @@ export default function SchoolSubjectDetail({
   const intro = buildSchoolIntro(schoolName, subject.label);
   const why = buildWhySchool(schoolName);
   const faq = buildSchoolFaq(schoolName);
+  const strategyCards = buildStrategyCards(schoolName, levelLabel, subject.label, subject.why);
+  const relatedKeywords = buildRelatedKeywords(schoolName, sigunguName, sidoSlug, subject.label);
   const consultMessage = `${schoolName} ${subject.label} 과외 문의드립니다.`;
 
   // 내부 링크
@@ -227,6 +235,40 @@ export default function SchoolSubjectDetail({
               </details>
             ))}
           </div>
+        </section>
+
+        {/* 8-1. 학습 전략 카드 4개 (SEO 콘텐츠, 학교명·학교급·과목 기반) */}
+        <section>
+          <h2 className="break-keep text-xl font-bold text-ink sm:text-2xl">{schoolName} {subject.label} 학습 전략</h2>
+          <ul className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {strategyCards.map((c, i) => (
+              <li key={i} className="rounded-2xl border border-line bg-white p-5">
+                <p className="text-base font-bold text-ink">{c.title}</p>
+                <p className="mt-2 break-keep text-sm leading-relaxed text-muted">{c.body}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* 8-2. 관련 검색어 — 실제 페이지 있는 것만 링크, 나머지 장식 태그(클릭 불가) */}
+        <section>
+          <h2 className="break-keep text-xl font-bold text-ink sm:text-2xl">관련 검색어</h2>
+          <ul className="mt-4 flex flex-wrap gap-2.5">
+            {relatedKeywords.links.map((k) => (
+              <li key={k.href}>
+                <Link href={k.href} className="inline-flex rounded-full border border-accent/30 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-accent hover:text-accent sm:text-base">
+                  {k.label}
+                </Link>
+              </li>
+            ))}
+            {relatedKeywords.plain.map((t) => (
+              <li key={t}>
+                <span className="inline-flex rounded-full bg-surface-alt px-4 py-2 text-sm font-medium text-muted sm:text-base">
+                  {t}
+                </span>
+              </li>
+            ))}
+          </ul>
         </section>
 
         {/* 9. 내부 링크 블록 */}
