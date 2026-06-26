@@ -1,7 +1,7 @@
 import Link from "next/link";
 import ConsultForm from "@/components/ConsultForm";
 import type { Subject } from "@/data/subjects";
-import { subjects } from "@/data/subjects";
+import SubjectTabs from "@/components/SubjectTabs";
 import { site } from "@/data/site";
 import {
   CONSULT_PHONE,
@@ -59,12 +59,6 @@ export default function DongSubjectDetail({
     .map((d) => ({
       label: d.name,
       href: dongHref(sidoSlug, sigungu.slug, d.slug, subject.slug),
-    }));
-  const otherSubjects = subjects
-    .filter((s) => s.slug !== subject.slug)
-    .map((s) => ({
-      label: s.label,
-      href: dongHref(sidoSlug, sigungu.slug, dong.slug, s.slug),
     }));
 
   // JSON-LD
@@ -142,6 +136,12 @@ export default function DongSubjectDetail({
           </a>
         </div>
       </section>
+
+      {/* 과목 선택 탭 — 같은 동의 다른 과목 페이지로 전환(현재 과목 활성) */}
+      <SubjectTabs
+        currentSlug={subject.slug}
+        makeHref={(s) => dongHref(sidoSlug, sigungu.slug, dong.slug, s)}
+      />
 
       <div className="mx-auto max-w-3xl space-y-12 px-4 py-12 sm:px-6 sm:py-16">
         {/* 2. 지역 맞춤 도입(변주) */}
@@ -266,18 +266,6 @@ export default function DongSubjectDetail({
                 <Link href={`/tutoring/by-region/${sidoSlug}/${sigungu.slug}/${dong.slug}`} className="font-semibold text-accent hover:underline">더보기 →</Link>
               </p>
             )}
-          </div>
-          <div>
-            <h2 className="break-keep text-xl font-bold text-ink sm:text-2xl">{dong.name}의 다른 과목</h2>
-            <ul className="mt-4 flex flex-wrap gap-2.5">
-              {otherSubjects.map((l) => (
-                <li key={l.href}>
-                  <Link href={l.href} className="inline-flex rounded-full border border-accent/30 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-accent hover:text-accent sm:text-base">
-                    {l.label} 과외
-                  </Link>
-                </li>
-              ))}
-            </ul>
           </div>
         </section>
 

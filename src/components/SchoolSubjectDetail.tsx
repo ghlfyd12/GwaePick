@@ -1,7 +1,7 @@
 import Link from "next/link";
 import ConsultForm from "@/components/ConsultForm";
 import type { Subject } from "@/data/subjects";
-import { subjects } from "@/data/subjects";
+import SubjectTabs from "@/components/SubjectTabs";
 import { site } from "@/data/site";
 import { CONSULT_PHONE, STEPS, TRUST, REVIEW_PLACEHOLDERS } from "@/data/dongPageCopy";
 import {
@@ -58,9 +58,6 @@ export default function SchoolSubjectDetail({
   const otherSchoolLinks = otherSchools
     .slice(0, 12)
     .map((s) => ({ label: s.name, href: schoolDetailHref(s.slug, subject.slug) }));
-  const otherSubjects = subjects
-    .filter((s) => s.slug !== subject.slug)
-    .map((s) => ({ label: s.label, href: schoolDetailHref(schoolSlug, s.slug) }));
 
   // JSON-LD
   const base = site.url.replace(/\/$/, "");
@@ -136,6 +133,12 @@ export default function SchoolSubjectDetail({
           </a>
         </div>
       </section>
+
+      {/* 과목 선택 탭 — 같은 학교의 다른 과목 페이지로 전환(현재 과목 활성) */}
+      <SubjectTabs
+        currentSlug={subject.slug}
+        makeHref={(s) => schoolDetailHref(schoolSlug, s)}
+      />
 
       <div className="mx-auto max-w-3xl space-y-12 px-4 py-12 sm:px-6 sm:py-16">
         {/* 2. 학교 맞춤 도입 */}
@@ -314,18 +317,6 @@ export default function SchoolSubjectDetail({
               )}
             </div>
           )}
-          <div>
-            <h2 className="break-keep text-xl font-bold text-ink sm:text-2xl">{schoolName}의 다른 과목</h2>
-            <ul className="mt-4 flex flex-wrap gap-2.5">
-              {otherSubjects.map((l) => (
-                <li key={l.href}>
-                  <Link href={l.href} className="inline-flex rounded-full border border-accent/30 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-accent hover:text-accent sm:text-base">
-                    {l.label} 과외
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
         </section>
 
         {/* 10. 최종 CTA */}
