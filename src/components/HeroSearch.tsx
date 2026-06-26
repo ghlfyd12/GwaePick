@@ -35,7 +35,9 @@ export default function HeroSearch({
           <p className="text-base font-semibold uppercase tracking-widest text-accent sm:text-lg">
             {eyebrow}
           </p>
-          <h1 className="mt-2 break-keep text-4xl font-bold leading-tight text-ink sm:text-5xl md:text-6xl">
+          {/* md:text-5xl(6xl 에서 한 단계↓) + text-balance — 좁은 제목칸에서도 1번 줄이
+              "…과목에 / 맞춘"처럼 외톨이로 접히지 않고 균형있게 줄바꿈된다. 모바일은 영향 없음. */}
+          <h1 className="mt-2 text-balance break-keep text-4xl font-bold leading-tight text-ink sm:text-5xl">
             {headlineLines.map((line, i) => (
               <Fragment key={i}>
                 {i > 0 && <br />}
