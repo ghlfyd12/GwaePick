@@ -1,5 +1,3 @@
-import { subjects } from "@/data/subjects";
-
 /*
  * RelatedKeywords — 지역 상세(구/동) 하단의 장식용 연관 키워드 블록.
  *
@@ -8,23 +6,46 @@ import { subjects } from "@/data/subjects";
  * 문자열 생성 로직만 담고, 인접 동 데이터 조회는 페이지 쪽에서 해 props 로 넘긴다.
  */
 
-// 학년+과목 조합 15종 — 고정 문자열(요청 순서 그대로). {지역}만 치환.
-const GRADE_SUBJECT = [
-  "초등수학과외",
-  "중등영어과외",
-  "고등수학과외",
-  "초등영어과외",
-  "중등수학과외",
-  "고등영어과외",
-  "초등과학과외",
-  "중등과학과외",
-  "고등과학과외",
-  "중등사회과외",
-  "고등사회과외",
-  "중등역사과외",
-  "고등역사과외",
-  "초등코딩과외",
-  "고등학생코딩과외",
+// 과목+학년 조합 8종 — 고정 문자열(순서 그대로). 지역명과 공백 없이 붙인다.
+const SUBJECT_GRADE = [
+  "고1국어과외",
+  "고1영어과외",
+  "중3수학과외",
+  "고1사회과외",
+  "고1과학과외",
+  "중2역사과외",
+  "초등논술과외",
+  "고1코딩과외",
+];
+
+// 학년+과목 조합 15종 — 고정 문자열(순서 그대로). {지역}만 치환.
+// 대부분 "{지역} {접미사}"(공백 포함)이나, 한국사과외만 공백 없이 붙인다(glued).
+const GRADE_SUBJECT: { label: string; glued?: boolean }[] = [
+  { label: "초등수학과외" },
+  { label: "중등영어과외" },
+  { label: "고등수학과외" },
+  { label: "초등영어과외" },
+  { label: "중등수학과외" },
+  { label: "고등영어과외" },
+  { label: "초등과학과외" },
+  { label: "중등과학과외" },
+  { label: "고등과학과외" },
+  { label: "중등사회과외" },
+  { label: "고등사회과외" },
+  { label: "중등역사과외" },
+  { label: "한국사과외", glued: true }, // 이전 "고등역사과외" 대체 — 지역명과 붙여 표기
+  { label: "초등코딩과외" },
+  { label: "고등학생코딩과외" },
+];
+
+// 인접 동 접미사 풀 — 동 순서대로 i % 6 으로 순환 적용. 동 이름과 공백 없이 붙인다.
+const SUFFIX_POOL = [
+  "초등학생과외",
+  "중학생과외",
+  "고등학생과외",
+  "영어과외",
+  "수학과외",
+  "고등국어과외",
 ];
 
 // 인접 동 키워드 최대 노출 개수.
@@ -42,16 +63,18 @@ export default function RelatedKeywords({
   /** 같은 구의 인접 동 이름(현재 동 제외). 비면 인접 동 그룹 생략. */
   neighborDongs?: string[];
 }) {
-  // 1) 과목 8종 — subjects 데이터 순서로 {지역} {과목}과외.
-  const subjectKeywords = subjects.map((s) => `${regionName} ${s.label}과외`);
-  // 2) 학년+과목 조합 15종.
-  const gradeKeywords = GRADE_SUBJECT.map((k) => `${regionName} ${k}`);
-  // 3) 인접 동 키워드(최대 6) — {동} 과외.
+  // 1) 과목+학년 조합 8종 — {지역}+접미사(공백 없이).
+  const subjectGradeKeywords = SUBJECT_GRADE.map((k) => `${regionName}${k}`);
+  // 2) 학년+과목 조합 15종 — 한국사과외만 공백 없이, 나머지는 "{지역} {접미사}".
+  const gradeKeywords = GRADE_SUBJECT.map(({ label, glued }) =>
+    glued ? `${regionName}${label}` : `${regionName} ${label}`,
+  );
+  // 3) 인접 동 + 접미사 조합(최대 6) — {동}+SUFFIX_POOL[i % 6](공백 없이).
   const neighborKeywords = neighborDongs
     .slice(0, MAX_NEIGHBORS)
-    .map((d) => `${d} 과외`);
+    .map((d, i) => `${d}${SUFFIX_POOL[i % SUFFIX_POOL.length]}`);
 
-  const keywords = [...subjectKeywords, ...gradeKeywords, ...neighborKeywords];
+  const keywords = [...subjectGradeKeywords, ...gradeKeywords, ...neighborKeywords];
 
   return (
     <section
