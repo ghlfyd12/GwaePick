@@ -50,17 +50,17 @@ export default function TeachersPage() {
             unoptimized
           />
 
-          {/* 가독성용 그라데이션 + 텍스트 레이어(가로·세로 가운데) */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center break-keep bg-gradient-to-t from-black/55 via-black/25 to-black/10 px-5 text-center sm:px-8">
-            <p className="text-xs font-semibold uppercase tracking-widest text-accent sm:text-sm">
+          {/* 가독성용 상단 스크림 + 텍스트 레이어(가로 가운데·세로 상단) */}
+          <div className="absolute inset-0 flex flex-col items-center justify-start break-keep bg-gradient-to-b from-black/55 via-black/20 to-transparent px-5 pt-10 text-center sm:px-8 md:pt-14">
+            <p className="text-base font-semibold uppercase tracking-widest text-accent md:text-lg">
               검증된 선생님
             </p>
             <h1 className="mt-1.5 text-2xl font-bold text-white drop-shadow-md sm:mt-2 md:text-4xl">
               우리 아이를 맡길 선생님들
             </h1>
             <p className="mx-auto mt-2.5 max-w-2xl text-sm leading-relaxed text-white/90 drop-shadow md:mt-3 md:text-base">
-              국어·영어·수학·사회·과학부터 코딩까지 — 직접 가르쳐 본 선생님이
-              실력과 성향을 보고 함께하는 선생님들입니다.
+              국어·영어·수학·사회·과학부터 코딩까지 —<br />
+              직접 가르쳐 본 선생님이 실력과 성향을 보고 함께하는 선생님들입니다.
             </p>
           </div>
         </div>
