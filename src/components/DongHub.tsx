@@ -105,10 +105,10 @@ export default function DongHub({
         </ol>
       </nav>
 
-      {/* 1. Hero (사진 없음) */}
-      <section className="border-b border-line bg-surface px-4 py-12 text-center sm:px-6 sm:py-16">
+      {/* 1. Hero (사진 없음) — 배경 음영 없이 흰 바탕에 텍스트만 */}
+      <section className="border-b border-line bg-white px-4 py-12 text-center sm:px-6 sm:py-16">
         <p className="text-sm font-semibold uppercase tracking-widest text-accent">
-          {sidoLabel} {sigungu.name} · 동
+          {sidoLabel} {sigungu.name}
         </p>
         <h1 className="mx-auto mt-2 max-w-3xl break-keep text-3xl font-bold leading-snug text-ink sm:text-4xl">
           {dong.name} 1:1 과외 — 과목을 선택하세요
