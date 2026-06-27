@@ -86,6 +86,8 @@ export default async function SidoPage({
                   sidoSlug={sido}
                   hrefMode="hash"
                   ariaLabel={`${regionLabel} 시·군·구 지도 — 지역을 선택하세요`}
+                  // 인천: 서해5도(백령·대청·소청 등) 원거리 섬이 bbox 를 넓혀 본토 라벨이 겹침 → 본토 기준으로 보정.
+                  trimFarIslands={sido === "incheon"}
                 />
               </div>
 
