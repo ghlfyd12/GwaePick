@@ -107,7 +107,19 @@ export default async function Seg3Page({
   // 신규 동 허브
   const rh = resolveHub(sido, seg2, seg3);
   if (rh) {
-    return <DongHub sidoSlug={rh.sidoSlug} sigungu={rh.sg} dong={rh.dong} />;
+    // 같은 구의 다른 동(현재 동 제외, 앞에서 최대 6개) — 연관 키워드 블록용.
+    const neighborDongs = rh.sg.dong
+      .filter((d) => d.slug !== rh.dong.slug)
+      .slice(0, 6)
+      .map((d) => d.name);
+    return (
+      <DongHub
+        sidoSlug={rh.sidoSlug}
+        sigungu={rh.sg}
+        dong={rh.dong}
+        neighborDongs={neighborDongs}
+      />
+    );
   }
 
   const r = resolve(sido, seg2, seg3);

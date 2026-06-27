@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { subjects } from "@/data/subjects";
 import { dongHref } from "@/data/dongPageCopy";
+import RelatedKeywords from "@/components/RelatedKeywords";
 
 /*
  * DongHub — 동 허브(경량). 과목 컨텍스트 없이 동을 눌렀을 때, 과목 상세로 가는 선택 화면.
@@ -18,12 +19,16 @@ export default function DongHub({
   sidoSlug,
   sigungu,
   dong,
+  neighborDongs = [],
 }: {
   sidoSlug: string;
   sigungu: { name: string; slug: string };
   dong: { name: string; slug: string };
+  /** 같은 구의 다른 동 이름(현재 동 제외) — 연관 키워드 블록용. */
+  neighborDongs?: string[];
 }) {
   return (
+    <>
     <section className="px-4 py-14 sm:px-6 sm:py-20">
       <div className="relative mx-auto max-w-5xl overflow-hidden rounded-2xl shadow-md ring-1 ring-line md:min-h-[460px]">
         {/* 배경 사진 — 모바일: 위쪽 4:3 블록 / 데스크톱: 영역 전체 채움 */}
@@ -75,5 +80,12 @@ export default function DongHub({
         </div>
       </div>
     </section>
+
+    <RelatedKeywords
+      regionName={dong.name}
+      level="dong"
+      neighborDongs={neighborDongs}
+    />
+    </>
   );
 }

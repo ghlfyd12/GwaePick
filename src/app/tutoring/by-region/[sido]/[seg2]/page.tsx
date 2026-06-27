@@ -4,6 +4,8 @@ import PseoLanding from "@/components/PseoLanding";
 import LinkToggleGrid from "@/components/LinkToggleGrid";
 import SubjectChips from "@/components/SubjectChips";
 import ConsultForm from "@/components/ConsultForm";
+import RelatedKeywords from "@/components/RelatedKeywords";
+import { getSido } from "@/data/sidoRegions";
 import { buildRegionContent } from "@/lib/regionContent";
 import {
   subjects,
@@ -118,6 +120,10 @@ export default async function Seg2Page({
   if (sidoKey === "seoul") {
     const gu = districts.find((d) => d.slug === slugKey(seg2));
     if (!gu) notFound();
+    // 같은 구의 동 목록(앞에서 최대 6개) — 연관 키워드 블록용. 이름으로 매칭.
+    const guDongs =
+      getSido("seoul")?.sigungu.find((s) => s.name === gu.name)?.dong ?? [];
+    const neighborDongs = guDongs.slice(0, 6).map((d) => d.name);
     return (
       <>
         <section className="border-b border-line bg-surface px-4 py-14 text-center sm:px-6 sm:py-16">
@@ -133,6 +139,11 @@ export default async function Seg2Page({
           </p>
         </section>
         <ConsultForm defaultMessage={`${gu.name} 과외 문의드립니다.`} />
+        <RelatedKeywords
+          regionName={gu.name}
+          level="gu"
+          neighborDongs={neighborDongs}
+        />
       </>
     );
   }
