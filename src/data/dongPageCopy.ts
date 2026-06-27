@@ -6,6 +6,7 @@
  * 톤: 차분한 동료 교사. 과장·느낌표·미확정 수치 금지.
  */
 import { getSido } from "@/data/sidoRegions";
+import type { SubjectCurriculumStep } from "@/data/subjects";
 
 export const CONSULT_PHONE = "010-2177-2720";
 
@@ -129,6 +130,43 @@ export const TRUST = [
   "성적뿐 아니라 아이와의 호흡까지 보고 연결합니다.",
   "첫 수업이 잘 맞지 않으면, 다른 선생님과 호흡을 맞춰볼 수 있도록 조율합니다.",
 ];
+
+/* ───────── 동 허브(과목 선택) 카피 — 과목 미선택 상태(subject-agnostic) ───────── */
+
+/** 동 허브 도입 문단 — 특정 과목 없이 동 맥락만. */
+export function buildHubIntro(sigungu: string, dong: string): string {
+  return `${sigungu} ${dong}에서 1:1 과외 선생님을 찾고 계신가요? 같은 학년이라도 학생마다 막히는 지점은 다릅니다. 아이에게 맞는 과외는 진도를 빨리 빼는 수업이 아니라, 지금 어디서 멈췄는지를 먼저 짚고 거기서부터 차근히 쌓아 올리는 수업입니다. 지식의참견은 ${dong}과 인근 지역까지 방문이 가능한 선생님을 직접 연결합니다. 아래에서 과목을 선택하면 해당 과목 1:1 과외를 자세히 안내해 드립니다.`;
+}
+
+/** 동 허브 커리큘럼 4단계 — 과목 공통(진단·기초·심화·점검). */
+export const HUB_CURRICULUM: SubjectCurriculumStep[] = [
+  { step: "STEP 1", title: "진단", desc: "지금 어디서 막히는지, 현재 수준과 약한 부분을 먼저 확인합니다." },
+  { step: "STEP 2", title: "기초", desc: "과목의 기본 개념과 공부 습관을 다져 흔들리지 않는 토대를 만듭니다." },
+  { step: "STEP 3", title: "심화", desc: "유형별 문제와 응용으로 확장하고, 학교 진도와 시험 범위에 맞춰 깊이를 더합니다." },
+  { step: "STEP 4", title: "점검", desc: "틀린 문제의 이유를 함께 짚고 다음 수업의 디딤돌로 삼아 반복을 줄입니다." },
+];
+
+/** 동 허브 학습 전략 카드 4개 — 동 맥락, 과목 공통. */
+export function buildHubStrategy(dong: string): { title: string; body: string }[] {
+  return [
+    {
+      title: "학년별 학습 목표",
+      body: "초등은 기초 개념과 공부 습관을, 중등은 넓어지는 범위의 빈틈 관리를, 고등은 내신과 수능의 균형을 목표로 합니다. 학년에 따라 달라지는 목표를 1:1로 맞춰 갑니다.",
+    },
+    {
+      title: "과목별 학습 포인트",
+      body: "국어·영어·수학·과학·사회부터 역사·논술·코딩까지, 과목마다 막히는 지점이 다릅니다. 지금 어디서 멈췄는지부터 짚어 그 지점을 메우는 데 수업의 초점을 둡니다.",
+    },
+    {
+      title: "학교 시험 대응",
+      body: `${dong} 인근 학교의 내신 진도와 시험 범위, 출제 경향에 맞춰 시험 대비를 준비합니다. 학교 일정에 맞춰 약한 단원을 먼저 짚고 1:1로 보완해 드립니다.`,
+    },
+    {
+      title: "1:1 과외의 강점",
+      body: "여러 학생이 같은 진도를 나가는 수업과 달리, 1:1은 우리 아이가 어디서 멈췄는지에 집중합니다. 모르는 것을 바로 묻고 그 자리에서 메우며, 성향과 호흡에 맞춰 진도를 조절합니다.",
+    },
+  ];
+}
 
 /** FAQ(동명 슬롯). 가격 단정 금지. */
 export function buildFaq(dong: string): { q: string; a: string }[] {

@@ -115,6 +115,7 @@ export default async function Seg3Page({
     return (
       <DongHub
         sidoSlug={rh.sidoSlug}
+        sidoLabel={rh.sidoLabel}
         sigungu={rh.sg}
         dong={rh.dong}
         neighborDongs={neighborDongs}
