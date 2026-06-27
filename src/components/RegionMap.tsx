@@ -124,145 +124,112 @@ function trimFarWestIslands(
   return { ...fc, features };
 }
 
-export default function RegionMap({
-  geo,
-  sidoSlug,
-  hrefPrefix = "",
-  hrefMode = "path",
-  ariaLabel,
-  pad = 30,
-  labelNudge,
-  trimFarIslands = false,
-}: {
-  geo?: RegionFeatureCollection;
-  sidoSlug?: string;
-  hrefPrefix?: string;
-  hrefMode?: "path" | "hash";
-  ariaLabel?: string;
-  pad?: number;
-  labelNudge?: Record<string, [number, number]>;
-  /** 본토에서 경도상 멀리 떨어진 소수 섬을 제거해 투영/viewBox 를 본토에 맞춤(예: 인천 서해5도). */
-  trimFarIslands?: boolean;
-}) {
-  // sidoSlug 가 있으면 public 의 시군구 GeoJSON 을 fetch. geo prop 이 있으면 그대로 사용.
-  const [fetched, setFetched] = useState<RegionFeatureCollection | null>(null);
-  const [state, setState] = useState<"idle" | "loading" | "ready" | "empty">(
-    geo ? "ready" : sidoSlug ? "loading" : "idle",
-  );
+type Shape = {
+  slug: string;
+  label: string;
+  d: string;
+  area: number;
+  lx: number;
+  ly: number;
+};
+type Layout = { shapes: Shape[]; islandPath: string; viewBox: string };
 
-  useEffect(() => {
-    if (geo || !sidoSlug) return;
-    let alive = true;
-    fetch(`/geo/sigungu/${sidoSlug}.json`)
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then((d: RegionFeatureCollection) => {
-        if (!alive) return;
-        if (d?.features?.length) {
-          setFetched(d);
-          setState("ready");
-        } else setState("empty");
-      })
-      .catch(() => alive && setState("empty"));
-    return () => {
-      alive = false;
-    };
-  }, [geo, sidoSlug]);
-
-  const data = geo ?? fetched;
-
-  const { shapes, islandPath, viewBox } = useMemo(() => {
-    if (!data) return { shapes: [], islandPath: "", viewBox: `0 0 ${W} ${H}` };
-    // 인천 서해5도처럼 본토에서 멀리 떨어진 소수 섬은 fit/viewBox 전에 제거(본토 라벨 겹침 방지).
-    const geo = trimFarIslands ? trimFarWestIslands(data) : data;
-    // geoIdentity(평면 좌표)+reflectY: lon/lat 를 화면 좌표로 직접 맞춤(geoMercator 의 구면 winding 이슈 회피).
-    const projection = geoIdentity()
-      .reflectY(true)
-      .fitExtent(
-        [
-          [pad, pad],
-          [W - pad, H - pad],
-        ],
-        geo as never,
-      );
-    const path = geoPath(projection);
-
-    // 본토 / 분리 섬 분할
-    const splitPolys = (geom: Geometry) => {
-      if (geom.type !== "MultiPolygon")
-        return { main: geom, islands: [] as Position[][][] };
-      const polys = (geom as MultiPolygon).coordinates.map(
-        (coordinates): Polygon => ({ type: "Polygon", coordinates }),
-      );
-      const metas = polys.map((p) => ({
-        p,
-        a: path.area(p as never),
-        c: path.centroid(p as never),
-      }));
-      const main = metas.reduce((m, x) => (x.a > m.a ? x : m), metas[0]);
-      const mainCoords: Position[][][] = [];
-      const islands: Position[][][] = [];
-      for (const m of metas) {
-        const detached =
-          m.a < ISLAND_MAX_REL * main.a &&
-          Math.hypot(m.c[0] - main.c[0], m.c[1] - main.c[1]) > ISLAND_MIN_DIST;
-        (detached ? islands : mainCoords).push(m.p.coordinates);
-      }
-      return {
-        main: { type: "MultiPolygon", coordinates: mainCoords } as MultiPolygon,
-        islands,
-      };
-    };
-
-    const islandRingsAll: Position[][][] = [];
-    const shapes = geo.features.map((f) => {
-      const { main, islands } = splitPolys(f.geometry);
-      islandRingsAll.push(...islands);
-      const [cx, cy] = path.centroid(main as never);
-      const nudge = labelNudge?.[f.properties.slug] ?? [0, 0];
-      return {
-        slug: f.properties.slug,
-        label: f.properties.label,
-        d: path(main as never) ?? "",
-        area: path.area(main as never),
-        lx: (Number.isFinite(cx) ? cx : 0) + nudge[0],
-        ly: (Number.isFinite(cy) ? cy : 0) + nudge[1],
-      };
-    });
-    // 큰 지역 먼저 → 작은 지역(라벨) 나중. 작은 지역 라벨이 위에 올라와 끊기지 않음.
-    shapes.sort((a, b) => b.area - a.area);
-
-    const islandPath = islandRingsAll.length
-      ? (path({ type: "MultiPolygon", coordinates: islandRingsAll } as never) ??
-        "")
-      : "";
-
-    // 타이트 viewBox(빈 여백 제거 → 지도 확대)
-    const [[bx0, by0], [bx1, by1]] = path.bounds(geo as never);
-    const m = 10;
-    const viewBox = `${bx0 - m} ${by0 - m} ${bx1 - bx0 + 2 * m} ${by1 - by0 + 2 * m}`;
-
-    return { shapes, islandPath, viewBox };
-  }, [data, pad, labelNudge, trimFarIslands]);
-
-  // fetch 모드: 로딩 스켈레톤 / 데이터 없음(파일 부재)이면 지도 자체를 숨김(부모가 동 브라우저만 노출)
-  if (sidoSlug && state === "loading")
-    return (
-      <div
-        className="aspect-square w-full animate-pulse rounded-2xl bg-surface-alt"
-        role="status"
-        aria-label="지도 불러오는 중"
-      />
+/** FeatureCollection → 투영·path·라벨 centroid·타이트 viewBox 계산(메인/인셋 공용). */
+function buildLayout(
+  geo: RegionFeatureCollection,
+  pad: number,
+  labelNudge?: Record<string, [number, number]>,
+): Layout {
+  if (!geo.features.length)
+    return { shapes: [], islandPath: "", viewBox: `0 0 ${W} ${H}` };
+  // geoIdentity(평면 좌표)+reflectY: lon/lat 를 화면 좌표로 직접 맞춤(geoMercator 구면 winding 회피).
+  const projection = geoIdentity()
+    .reflectY(true)
+    .fitExtent(
+      [
+        [pad, pad],
+        [W - pad, H - pad],
+      ],
+      geo as never,
     );
-  if (sidoSlug && (state === "empty" || !data)) return null;
+  const path = geoPath(projection);
 
+  // 본토 / 분리 섬 분할
+  const splitPolys = (geom: Geometry) => {
+    if (geom.type !== "MultiPolygon")
+      return { main: geom, islands: [] as Position[][][] };
+    const polys = (geom as MultiPolygon).coordinates.map(
+      (coordinates): Polygon => ({ type: "Polygon", coordinates }),
+    );
+    const metas = polys.map((p) => ({
+      p,
+      a: path.area(p as never),
+      c: path.centroid(p as never),
+    }));
+    const main = metas.reduce((m, x) => (x.a > m.a ? x : m), metas[0]);
+    const mainCoords: Position[][][] = [];
+    const islands: Position[][][] = [];
+    for (const m of metas) {
+      const detached =
+        m.a < ISLAND_MAX_REL * main.a &&
+        Math.hypot(m.c[0] - main.c[0], m.c[1] - main.c[1]) > ISLAND_MIN_DIST;
+      (detached ? islands : mainCoords).push(m.p.coordinates);
+    }
+    return {
+      main: { type: "MultiPolygon", coordinates: mainCoords } as MultiPolygon,
+      islands,
+    };
+  };
+
+  const islandRingsAll: Position[][][] = [];
+  const shapes = geo.features.map((f) => {
+    const { main, islands } = splitPolys(f.geometry);
+    islandRingsAll.push(...islands);
+    const [cx, cy] = path.centroid(main as never);
+    const nudge = labelNudge?.[f.properties.slug] ?? [0, 0];
+    return {
+      slug: f.properties.slug,
+      label: f.properties.label,
+      d: path(main as never) ?? "",
+      area: path.area(main as never),
+      lx: (Number.isFinite(cx) ? cx : 0) + nudge[0],
+      ly: (Number.isFinite(cy) ? cy : 0) + nudge[1],
+    };
+  });
+  // 큰 지역 먼저 → 작은 지역(라벨) 나중. 작은 지역 라벨이 위에 올라와 끊기지 않음.
+  shapes.sort((a, b) => b.area - a.area);
+
+  const islandPath = islandRingsAll.length
+    ? (path({ type: "MultiPolygon", coordinates: islandRingsAll } as never) ?? "")
+    : "";
+
+  // 타이트 viewBox(빈 여백 제거 → 지도 확대)
+  const [[bx0, by0], [bx1, by1]] = path.bounds(geo as never);
+  const m = 10;
+  const viewBox = `${bx0 - m} ${by0 - m} ${bx1 - bx0 + 2 * m} ${by1 - by0 + 2 * m}`;
+
+  return { shapes, islandPath, viewBox };
+}
+
+/** 한 레이어(메인 또는 인셋)의 SVG 렌더 — 구·군 path+라벨(클릭 가능) + 부속섬(정적). */
+function MapLayer({
+  layout,
+  hrefMode,
+  hrefPrefix,
+  ariaLabel,
+  labelPx = 17,
+  className = "h-auto w-full overflow-visible",
+}: {
+  layout: Layout;
+  hrefMode: "path" | "hash";
+  hrefPrefix: string;
+  ariaLabel?: string;
+  labelPx?: number;
+  className?: string;
+}) {
+  const { shapes, islandPath, viewBox } = layout;
   return (
-    <svg
-      viewBox={viewBox}
-      className="h-auto w-full overflow-visible"
-      role="group"
-      aria-label={ariaLabel}
-    >
-      {/* 인터랙티브 시/도·시군구(큰 지역 → 작은 지역 순) */}
+    <svg viewBox={viewBox} className={className} role="group" aria-label={ariaLabel}>
       {shapes.map((s) => {
         const href = hrefMode === "hash" ? `#sg-${s.slug}` : `${hrefPrefix}/${s.slug}`;
         const inner = (
@@ -277,9 +244,10 @@ export default function RegionMap({
               y={s.ly}
               textAnchor="middle"
               dominantBaseline="middle"
-              className="pointer-events-none select-none fill-ink text-[17px] font-semibold group-hover/region:fill-white group-focus-visible/region:fill-white"
+              className="pointer-events-none select-none fill-ink font-semibold group-hover/region:fill-white group-focus-visible/region:fill-white"
               // 흰색 외곽선으로 라벨이 어떤 배경(주황 포함) 위에서도 또렷하게.
               style={{
+                fontSize: labelPx,
                 paintOrder: "stroke",
                 stroke: "#fff",
                 strokeWidth: 2.5,
@@ -312,5 +280,126 @@ export default function RegionMap({
         />
       )}
     </svg>
+  );
+}
+
+export default function RegionMap({
+  geo,
+  sidoSlug,
+  hrefPrefix = "",
+  hrefMode = "path",
+  ariaLabel,
+  pad = 30,
+  labelNudge,
+  trimFarIslands = false,
+  insetSlugs,
+}: {
+  geo?: RegionFeatureCollection;
+  sidoSlug?: string;
+  hrefPrefix?: string;
+  hrefMode?: "path" | "hash";
+  ariaLabel?: string;
+  pad?: number;
+  labelNudge?: Record<string, [number, number]>;
+  /** 본토에서 경도상 멀리 떨어진 소수 섬을 제거해 투영/viewBox 를 본토에 맞춤(예: 인천 서해5도). */
+  trimFarIslands?: boolean;
+  /** 이 slug 들을 본토에서 분리해 좌측 상단 인셋(미니맵)으로 렌더(예: 인천 강화군·옹진군). */
+  insetSlugs?: string[];
+}) {
+  // sidoSlug 가 있으면 public 의 시군구 GeoJSON 을 fetch. geo prop 이 있으면 그대로 사용.
+  const [fetched, setFetched] = useState<RegionFeatureCollection | null>(null);
+  const [state, setState] = useState<"idle" | "loading" | "ready" | "empty">(
+    geo ? "ready" : sidoSlug ? "loading" : "idle",
+  );
+
+  useEffect(() => {
+    if (geo || !sidoSlug) return;
+    let alive = true;
+    fetch(`/geo/sigungu/${sidoSlug}.json`)
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((d: RegionFeatureCollection) => {
+        if (!alive) return;
+        if (d?.features?.length) {
+          setFetched(d);
+          setState("ready");
+        } else setState("empty");
+      })
+      .catch(() => alive && setState("empty"));
+    return () => {
+      alive = false;
+    };
+  }, [geo, sidoSlug]);
+
+  const data = geo ?? fetched;
+
+  const { main, inset } = useMemo(() => {
+    if (!data) return { main: null as Layout | null, inset: null as Layout | null };
+    const insetSet = new Set(insetSlugs ?? []);
+    // 인셋 모드(예: 인천): 지정 slug(강화·옹진)는 분리, 나머지 본토를 메인에 크게 확대.
+    if (insetSet.size) {
+      const mainFc: RegionFeatureCollection = {
+        ...data,
+        features: data.features.filter((f) => !insetSet.has(f.properties.slug)),
+      };
+      // 인셋 그룹 — 옹진 서해5도는 트리밍해 강화·옹진 모두 인셋 박스 안에서 읽히게.
+      const insetFc = trimFarWestIslands({
+        ...data,
+        features: data.features.filter((f) => insetSet.has(f.properties.slug)),
+      });
+      return {
+        main: buildLayout(mainFc, pad, labelNudge),
+        inset: insetFc.features.length ? buildLayout(insetFc, 18) : null,
+      };
+    }
+    // 기본: 단일 레이어(서해5도 트리밍 옵션 유지).
+    const geo = trimFarIslands ? trimFarWestIslands(data) : data;
+    return { main: buildLayout(geo, pad, labelNudge), inset: null };
+  }, [data, pad, labelNudge, trimFarIslands, insetSlugs]);
+
+  // fetch 모드: 로딩 스켈레톤 / 데이터 없음(파일 부재)이면 지도 자체를 숨김(부모가 동 브라우저만 노출)
+  if (sidoSlug && state === "loading")
+    return (
+      <div
+        className="aspect-square w-full animate-pulse rounded-2xl bg-surface-alt"
+        role="status"
+        aria-label="지도 불러오는 중"
+      />
+    );
+  if ((sidoSlug && (state === "empty" || !data)) || !main) return null;
+
+  // 인셋 모드: 본토(메인) + 좌측 상단 섬 미니맵.
+  if (inset) {
+    return (
+      <div className="relative w-full">
+        <MapLayer
+          layout={main}
+          hrefMode={hrefMode}
+          hrefPrefix={hrefPrefix}
+          ariaLabel={ariaLabel}
+        />
+        <div className="absolute left-0 top-0 w-[34%] max-w-[190px] rounded-lg border border-line bg-white/85 px-1.5 pb-1 pt-0.5 shadow-sm">
+          <p className="select-none break-keep text-center text-[10px] font-semibold text-muted sm:text-xs">
+            섬 지역
+          </p>
+          <MapLayer
+            layout={inset}
+            hrefMode={hrefMode}
+            hrefPrefix={hrefPrefix}
+            ariaLabel="인천 섬 지역(강화군·옹진군) — 지역을 선택하세요"
+            labelPx={34}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // 기본: 단일 레이어
+  return (
+    <MapLayer
+      layout={main}
+      hrefMode={hrefMode}
+      hrefPrefix={hrefPrefix}
+      ariaLabel={ariaLabel}
+    />
   );
 }
