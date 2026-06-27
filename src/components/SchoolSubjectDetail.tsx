@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import ConsultForm from "@/components/ConsultForm";
 import type { Subject } from "@/data/subjects";
@@ -18,6 +19,10 @@ import { schoolDetailHref } from "@/lib/schoolHref";
  * SchoolSubjectDetail — 학교×과목 상세(서버 컴포넌트). 지역 상세(DongSubjectDetail)와 동일 골격·디자인.
  * 콘텐츠 맥락만 '지역' → '학교'. 공통 데이터(STEP·믿는 이유·후기)는 dongPageCopy.ts 재사용.
  */
+
+// 학교 Hero 학생 사진 — 동 페이지와 별개 에셋. 한 곳에서 관리(전 학교 공용).
+const SCHOOL_HERO_IMAGE = "/images/school-students.png";
+
 export default function SchoolSubjectDetail({
   schoolSlug,
   schoolName,
@@ -111,26 +116,44 @@ export default function SchoolSubjectDetail({
         </ol>
       </nav>
 
-      {/* 1. Hero */}
-      <section className="border-b border-line bg-surface px-4 py-12 text-center sm:px-6 sm:py-16">
-        <p className="text-sm font-semibold uppercase tracking-widest text-accent">
-          {region} · {levelLabel}
-        </p>
-        <h1 className="mx-auto mt-2 max-w-3xl break-keep text-3xl font-bold leading-snug text-ink sm:text-4xl">
-          {schoolName} {subject.label} 과외 — {h1RegionPart} 1:1 맞춤 개인과외 수업
-        </h1>
-        <p className="mx-auto mt-4 max-w-2xl break-keep text-base leading-relaxed text-muted sm:text-lg">
-          직접 가르쳐 온 선생님이 {schoolName} 학생에게 가장 잘 맞는 {subject.label}{" "}
-          선생님을 배정하여 취약과목 집중관리부터 공부습관까지 체계적인 맞춤관리로
-          확실한 결과를 만듭니다.
-        </p>
-        <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <a href="#consult" className="inline-flex min-h-14 w-full max-w-xs items-center justify-center rounded-full bg-accent px-7 py-3 text-base font-semibold text-white shadow-md transition-colors hover:bg-accent-dark sm:w-auto sm:text-lg">
-            무료 상담 신청
-          </a>
-          <a href={`tel:${CONSULT_PHONE}`} className="inline-flex min-h-14 w-full max-w-xs items-center justify-center rounded-full border-2 border-accent bg-white px-7 py-3 text-base font-bold text-accent transition-colors hover:bg-accent/5 sm:w-auto sm:text-lg">
-            {CONSULT_PHONE}
-          </a>
+      {/* 1. Hero — 좌: 학생 사진 / 우: 텍스트(모바일은 사진 위·텍스트 아래) */}
+      <section className="border-b border-line bg-surface px-5 py-10 sm:px-6 md:px-10 md:py-14">
+        <div className="mx-auto grid max-w-5xl items-center gap-8 md:grid-cols-2 md:gap-10">
+          {/* 왼쪽 — 교복 입은 학생들 사진(고정 비율, 인물 중심) */}
+          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl shadow-md">
+            <Image
+              src={SCHOOL_HERO_IMAGE}
+              alt="교복을 입은 학생들"
+              fill
+              priority
+              sizes="(min-width: 768px) 512px, 100vw"
+              className="object-cover object-center"
+              unoptimized
+            />
+          </div>
+
+          {/* 오른쪽 — 텍스트(모바일 가운데 / 데스크톱 왼쪽 정렬) */}
+          <div className="text-center md:text-left">
+            <p className="text-sm font-semibold uppercase tracking-widest text-accent">
+              {region} · {levelLabel}
+            </p>
+            <h1 className="mt-2 break-keep text-3xl font-bold leading-snug text-ink sm:text-4xl">
+              {schoolName} {subject.label} 과외 — {h1RegionPart} 1:1 맞춤 개인과외 수업
+            </h1>
+            <p className="mt-4 break-keep text-base leading-relaxed text-muted sm:text-lg">
+              직접 가르쳐 온 선생님이 {schoolName} 학생에게 가장 잘 맞는 {subject.label}{" "}
+              선생님을 배정하여 취약과목 집중관리부터 공부습관까지 체계적인 맞춤관리로
+              확실한 결과를 만듭니다.
+            </p>
+            <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row md:justify-start">
+              <a href="#consult" className="inline-flex min-h-14 w-full max-w-xs items-center justify-center rounded-full bg-accent px-7 py-3 text-base font-semibold text-white shadow-md transition-colors hover:bg-accent-dark sm:w-auto sm:text-lg">
+                무료 상담 신청
+              </a>
+              <a href={`tel:${CONSULT_PHONE}`} className="inline-flex min-h-14 w-full max-w-xs items-center justify-center rounded-full border-2 border-accent bg-white px-7 py-3 text-base font-bold text-accent transition-colors hover:bg-accent/5 sm:w-auto sm:text-lg">
+                {CONSULT_PHONE}
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 
