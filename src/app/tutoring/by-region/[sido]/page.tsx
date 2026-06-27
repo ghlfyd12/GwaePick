@@ -81,12 +81,13 @@ export default async function SidoPage({
           {dongSido && totalDong >= 4 && (
             <>
               {/* 시군구 경계 지도(클라이언트 fetch) — 클릭 시 아래 동 브라우저가 해당 시군구로 전환 */}
-              <div className="mx-auto mt-7 max-w-2xl">
+              {/* 인천은 본토+섬 2단 패널이라 더 넓은 폭을 사용. */}
+              <div className={`mx-auto mt-7 ${sido === "incheon" ? "max-w-4xl" : "max-w-2xl"}`}>
                 <RegionMap
                   sidoSlug={sido}
                   hrefMode="hash"
                   ariaLabel={`${regionLabel} 시·군·구 지도 — 지역을 선택하세요`}
-                  // 인천: 강화군·옹진군(섬)을 좌측 상단 인셋으로 분리 → 본토 8개 구를 서울 수준으로 확대.
+                  // 인천: 강화군·옹진군(섬)을 별도 패널로 분리(2단) → 본토 8개 구를 크게 확대.
                   insetSlugs={sido === "incheon" ? ["ganghwagun", "ongjingun"] : undefined}
                 />
               </div>

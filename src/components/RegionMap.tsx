@@ -367,18 +367,25 @@ export default function RegionMap({
     );
   if ((sidoSlug && (state === "empty" || !data)) || !main) return null;
 
-  // 인셋 모드: 본토(메인) + 좌측 상단 섬 미니맵.
+  // 인셋 모드: 본토(메인)·섬을 좌우 2단 패널로 나란히(모바일은 세로 스택). 겹침/가림 없음.
   if (inset) {
     return (
-      <div className="relative w-full">
-        <MapLayer
-          layout={main}
-          hrefMode={hrefMode}
-          hrefPrefix={hrefPrefix}
-          ariaLabel={ariaLabel}
-        />
-        <div className="absolute left-0 top-0 w-[34%] max-w-[190px] rounded-lg border border-line bg-white/85 px-1.5 pb-1 pt-0.5 shadow-sm">
-          <p className="select-none break-keep text-center text-[10px] font-semibold text-muted sm:text-xs">
+      <div className="flex flex-col gap-5 md:flex-row md:items-stretch">
+        {/* 본토 패널(6) */}
+        <div className="md:basis-3/5">
+          <p className="mb-1 select-none break-keep text-center text-xs font-semibold text-muted">
+            본토
+          </p>
+          <MapLayer
+            layout={main}
+            hrefMode={hrefMode}
+            hrefPrefix={hrefPrefix}
+            ariaLabel={ariaLabel}
+          />
+        </div>
+        {/* 섬 패널(4) — 작은 오버레이가 아니라 동등하게 큰 별도 패널 */}
+        <div className="rounded-xl border border-line bg-surface p-2 md:basis-2/5">
+          <p className="mb-1 select-none break-keep text-center text-xs font-semibold text-muted">
             섬 지역
           </p>
           <MapLayer
@@ -386,7 +393,7 @@ export default function RegionMap({
             hrefMode={hrefMode}
             hrefPrefix={hrefPrefix}
             ariaLabel="인천 섬 지역(강화군·옹진군) — 지역을 선택하세요"
-            labelPx={34}
+            labelPx={26}
           />
         </div>
       </div>
