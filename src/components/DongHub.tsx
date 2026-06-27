@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import ConsultForm from "@/components/ConsultForm";
 import SubjectTabs from "@/components/SubjectTabs";
@@ -23,6 +24,9 @@ import {
  * 과목 의존 섹션은 과목 공통(subject-agnostic) 카피로 채운다(dongPageCopy.ts).
  * h1 1개. 지역=sidoRegions, 과목=subjects, 링크=dongHref, 공통 카피=dongPageCopy.
  */
+
+// 교실 학생 사진 — 한 곳에서 관리(기존 에셋 재사용).
+const HERO_IMAGE = "/images/classroom-student.png";
 
 type SgLite = { name: string; slug: string; dong: { name: string; slug: string }[] };
 
@@ -105,24 +109,42 @@ export default function DongHub({
         </ol>
       </nav>
 
-      {/* 1. Hero (사진 없음) — 배경 음영 없이 흰 바탕에 텍스트만 */}
-      <section className="border-b border-line bg-white px-4 py-12 text-center sm:px-6 sm:py-16">
-        <p className="text-sm font-semibold uppercase tracking-widest text-accent">
-          {sidoLabel} {sigungu.name}
-        </p>
-        <h1 className="mx-auto mt-2 max-w-3xl break-keep text-3xl font-bold leading-snug text-ink sm:text-4xl">
-          {dong.name} 1:1 과외 — 과목을 선택하세요
-        </h1>
-        <p className="mx-auto mt-4 max-w-2xl break-keep text-base leading-relaxed text-muted sm:text-lg">
-          {dong.name}에서 1:1 맞춤 개인과외 수업이 가능한 선생님을 과목별로 안내해 드립니다.
-        </p>
-        <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <a href="#consult" className="inline-flex min-h-14 w-full max-w-xs items-center justify-center rounded-full bg-accent px-7 py-3 text-base font-semibold text-white shadow-md transition-colors hover:bg-accent-dark sm:w-auto sm:text-lg">
-            무료 상담 신청
-          </a>
-          <a href={`tel:${CONSULT_PHONE}`} className="inline-flex min-h-14 w-full max-w-xs items-center justify-center rounded-full border-2 border-accent bg-white px-7 py-3 text-base font-bold text-accent transition-colors hover:bg-accent/5 sm:w-auto sm:text-lg">
-            {CONSULT_PHONE}
-          </a>
+      {/* 1. Hero — 좌: 교실 학생 사진 / 우: 텍스트(모바일은 사진 위·텍스트 아래) */}
+      <section className="border-b border-line bg-surface px-5 py-10 sm:px-6 md:px-10 md:py-14">
+        <div className="mx-auto grid max-w-5xl items-center gap-8 md:grid-cols-2 md:gap-10">
+          {/* 왼쪽 — 교실 학생 사진(고정 비율, 인물 중심) */}
+          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl shadow-md">
+            <Image
+              src={HERO_IMAGE}
+              alt="교실에서 공부하는 학생"
+              fill
+              priority
+              sizes="(min-width: 768px) 512px, 100vw"
+              className="object-cover object-center"
+              unoptimized
+            />
+          </div>
+
+          {/* 오른쪽 — 텍스트(모바일 가운데 / 데스크톱 왼쪽 정렬) */}
+          <div className="text-center md:text-left">
+            <p className="text-sm font-semibold uppercase tracking-widest text-accent">
+              {sidoLabel} {sigungu.name}
+            </p>
+            <h1 className="mt-2 break-keep text-3xl font-bold leading-snug text-ink sm:text-4xl">
+              {dong.name} 1:1 과외 — 과목을 선택하세요
+            </h1>
+            <p className="mt-4 break-keep text-base leading-relaxed text-muted sm:text-lg">
+              {dong.name}에서 1:1 맞춤 개인과외 수업이 가능한 선생님을 과목별로 안내해 드립니다.
+            </p>
+            <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row md:justify-start">
+              <a href="#consult" className="inline-flex min-h-14 w-full max-w-xs items-center justify-center rounded-full bg-accent px-7 py-3 text-base font-semibold text-white shadow-md transition-colors hover:bg-accent-dark sm:w-auto sm:text-lg">
+                무료 상담 신청
+              </a>
+              <a href={`tel:${CONSULT_PHONE}`} className="inline-flex min-h-14 w-full max-w-xs items-center justify-center rounded-full border-2 border-accent bg-white px-7 py-3 text-base font-bold text-accent transition-colors hover:bg-accent/5 sm:w-auto sm:text-lg">
+                {CONSULT_PHONE}
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 
