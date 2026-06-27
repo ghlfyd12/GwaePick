@@ -68,7 +68,7 @@ export const site = {
     { label: "학교별 과외", href: "/tutoring/by-school" },
     { label: "과목별 과외", href: "/tutoring/by-subject" },
     { label: "교사진", href: "/teachers" },
-    { label: "수업후기", href: "/#reviews" },
+    { label: "수업후기", href: "/reviews" },
   ] as NavItem[],
 
   /** 연락처 (실제 값) */
