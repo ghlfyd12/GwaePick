@@ -13,15 +13,16 @@ import { site, type NavItem } from "@/data/site";
  */
 const LOGO_SRC = "/images/logo.png";
 /*
- * 기존 텍스트 로고("지식의참견")의 브레이크포인트별 실측 렌더 높이(루트 18px 기준):
- *  - 모바일 text-lg  → 31.5px (1.75rem)
- *  - md     text-3xl → 40.5px (2.25rem)
- *  - lg     text-4xl → 45px   (2.5rem)
- *  - xl     text-5xl → 54px   (3rem)
- * 이미지 높이를 동일 값으로 고정하고 가로는 비율 자동(w-auto, object-contain).
+ * 로고 표시 높이 — 브랜드 강조를 위해 확대(루트 18px 기준, 가로는 비율 2.4:1 자동).
+ *  - 모바일 h-8  → 36px   (이전 31.5px) — 우측 빠른메뉴(학교별·지역별·무료상담·햄버거)와
+ *                          겹치지 않는 최대치. 더 키우면 칩과 충돌하므로 한 단계 낮춰 균형.
+ *  - md     h-12 → 54px   (이전 40.5px, 헤더 h-20=90px)
+ *  - lg     h-14 → 63px   (이전 45px,   헤더 h-24=108px)
+ *  - xl     h-16 → 72px   (이전 54px,   헤더 h-24=108px)
+ * 가로는 w-auto + object-contain 으로 비율 유지(찌그러짐 없음). 헤더 높이는 그대로 충분.
  */
 const LOGO_HEIGHT_CLASS =
-  "h-[1.75rem] w-auto object-contain md:h-[2.25rem] lg:h-[2.5rem] xl:h-[3rem]";
+  "h-8 w-auto object-contain md:h-12 lg:h-14 xl:h-16";
 
 /*
  * 상단 고정 헤더.
