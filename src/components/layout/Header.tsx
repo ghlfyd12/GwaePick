@@ -2,27 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import CTAButton from "@/components/ui/CTAButton";
 import { site, type NavItem } from "@/data/site";
-
-/*
- * 헤더 로고 에셋 경로(단일 소스). 배경 투명 PNG, 실제 크기 1920×800(가로:세로 = 2.4:1).
- * 표시 높이는 기존 텍스트 로고의 렌더 높이에 맞춘다(아래 LOGO_HEIGHT_CLASS 참고).
- */
-const LOGO_SRC = "/images/logo.png";
-/*
- * 로고 표시 높이 — 브랜드 강조를 위해 확대(루트 18px 기준, 가로는 비율 2.4:1 자동).
- *  - 모바일 h-8  → 36px   (이전 31.5px) — 우측 빠른메뉴(학교별·지역별·무료상담·햄버거)와
- *                          겹치지 않는 최대치. 더 키우면 칩과 충돌하므로 한 단계 낮춰 균형.
- *  - md     h-12 → 54px   (이전 40.5px, 헤더 h-20=90px)
- *  - lg     h-14 → 63px   (이전 45px,   헤더 h-24=108px)
- *  - xl     h-16 → 72px   (이전 54px,   헤더 h-24=108px)
- * 가로는 w-auto + object-contain 으로 비율 유지(찌그러짐 없음). 헤더 높이는 그대로 충분.
- */
-const LOGO_HEIGHT_CLASS =
-  "h-8 w-auto object-contain md:h-12 lg:h-14 xl:h-16";
 
 /*
  * 상단 고정 헤더.
@@ -61,16 +43,13 @@ export default function Header() {
         {/* 좌측: 로고 + 태그라인(데스크톱만). min-w-0 래퍼 — xl 좁은 폭에서 태그라인이 먼저 양보해
             가로 스크롤 방지(데스크톱 기존 동작과 동일). 모바일 빠른 메뉴는 우측으로 이동. */}
         <div className="flex min-w-0 items-center gap-2">
-          <div className="flex shrink-0 items-center gap-2">
-            <Link href="/" className="flex items-center" onClick={closeAll}>
-              <Image
-                src={LOGO_SRC}
-                alt={site.name}
-                width={1920}
-                height={800}
-                priority
-                className={LOGO_HEIGHT_CLASS}
-              />
+          <div className="flex shrink-0 items-baseline gap-2">
+            <Link
+              href="/"
+              className="text-lg font-bold text-[#FF7A59] md:text-3xl lg:text-4xl xl:text-5xl"
+              onClick={closeAll}
+            >
+              {site.name}
             </Link>
             <span className="hidden min-w-0 truncate whitespace-nowrap text-sm font-medium text-muted md:inline lg:text-base">
               {site.headerTagline}

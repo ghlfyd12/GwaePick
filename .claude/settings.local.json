@@ -35,7 +35,8 @@
       "Bash(git rev-list *)",
       "Bash(grep -oE '\\\\{ name: \"[^\"]+\", slug: \"[^\"]+\"' src/data/schools.ts)",
       "Bash(\"C:/Users/user/node-portable/node-v24.16.0-win-x64/node.exe\" node_modules/next/dist/bin/next build)",
-      "Bash(\"C:/Users/user/node-portable/node-v24.16.0-win-x64/node.exe\" -e \"const fs=require\\('fs'\\);const b=fs.readFileSync\\('public/images/logo.png'\\);if\\(b.slice\\(1,4\\).toString\\(\\)==='PNG'\\){const w=b.readUInt32BE\\(16\\),h=b.readUInt32BE\\(20\\);console.log\\('PNG',w+'x'+h,'ratio',\\(w/h\\).toFixed\\(3\\)\\);}else{console.log\\('not png header'\\);}\")"
+      "Bash(\"C:/Users/user/node-portable/node-v24.16.0-win-x64/node.exe\" -e \"const fs=require\\('fs'\\);const b=fs.readFileSync\\('public/images/logo.png'\\);if\\(b.slice\\(1,4\\).toString\\(\\)==='PNG'\\){const w=b.readUInt32BE\\(16\\),h=b.readUInt32BE\\(20\\);console.log\\('PNG',w+'x'+h,'ratio',\\(w/h\\).toFixed\\(3\\)\\);}else{console.log\\('not png header'\\);}\")",
+      "Bash(git checkout *)"
     ]
   }
 }
