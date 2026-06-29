@@ -6,6 +6,7 @@ import { gyeonggi } from "@/data/gyeonggi";
 import { getSido } from "@/data/sidoRegions";
 import { subjects as detailSubjects } from "@/data/subjects";
 import { PILOT } from "@/data/dongPageCopy";
+import { powerRegionSlugs } from "@/data/powerRegions";
 
 /*
  * 동적 sitemap.xml — /sitemap.xml 로 노출.
@@ -76,5 +77,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }
   }
 
-  return [...home, ...regionPages, ...subjectDetailPages, ...pseoPages, ...pilotDetail];
+  // 파워 홈페이지 지역별 영어회화 — /power/[지역명] (경기 동 + 그 외 자치구)
+  const powerRegionPages: MetadataRoute.Sitemap = powerRegionSlugs.map((slug) => ({
+    url: `${base}/power/${enc(slug)}`,
+    lastModified,
+    changeFrequency: "weekly",
+    priority: 0.6,
+  }));
+
+  return [
+    ...home,
+    ...regionPages,
+    ...subjectDetailPages,
+    ...pseoPages,
+    ...pilotDetail,
+    ...powerRegionPages,
+  ];
 }

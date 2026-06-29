@@ -33,7 +33,8 @@
       "Bash(ls \"C:/Users/user/node-portable/node-v24.16.0-win-x64/node.exe\" 2>/dev/null && echo FOUND)",
       "Bash(C:/Users/user/node-portable/node-v24.16.0-win-x64/node.exe -e ' *)",
       "Bash(git rev-list *)",
-      "Bash(grep -oE '\\\\{ name: \"[^\"]+\", slug: \"[^\"]+\"' src/data/schools.ts)"
+      "Bash(grep -oE '\\\\{ name: \"[^\"]+\", slug: \"[^\"]+\"' src/data/schools.ts)",
+      "Bash(\"C:/Users/user/node-portable/node-v24.16.0-win-x64/node.exe\" node_modules/next/dist/bin/next build)"
     ]
   }
 }
