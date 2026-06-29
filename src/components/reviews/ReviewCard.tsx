@@ -3,7 +3,7 @@ import type { ReviewItem } from "@/data/reviewItems";
 
 /*
  * ReviewCard — 후기 카드 1개. 제목 + 별점(★ + 숫자) + 본문.
- * 날짜는 데이터에 없으므로 표시하지 않는다(없는 정보 생성 금지).
+ * 날짜(date)는 있을 때만 별점 아래에 작게 표시한다(없는 후기엔 가짜 날짜를 만들지 않음).
  */
 export default function ReviewCard({ item }: { item: ReviewItem }) {
   return (
@@ -12,9 +12,16 @@ export default function ReviewCard({ item }: { item: ReviewItem }) {
         <h3 className="break-keep text-base font-bold text-ink sm:text-lg">
           {item.title}
         </h3>
-        <span className="flex shrink-0 items-center gap-1 text-sm font-semibold text-accent">
-          <Stars value={item.rating} className="text-sm" />
-          {item.rating.toFixed(1)}
+        <span className="flex shrink-0 flex-col items-end gap-0.5">
+          <span className="flex items-center gap-1 text-sm font-semibold text-accent">
+            <Stars value={item.rating} className="text-sm" />
+            {item.rating.toFixed(1)}
+          </span>
+          {item.date && (
+            <time dateTime={item.date} className="text-xs text-muted">
+              {item.date}
+            </time>
+          )}
         </span>
       </div>
       <p className="mt-2 break-keep text-sm leading-relaxed text-muted">

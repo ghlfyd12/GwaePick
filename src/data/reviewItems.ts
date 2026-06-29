@@ -10,12 +10,25 @@ export type ReviewItem = {
   subject: string; // 국어·영어·수학·사회·과학·역사·논술·코딩
   rating: number;  // 4.8 | 4.9 | 5
   body: string;
+  date?: string;   // YYYY-MM-DD — 신규 후기에만. 기존 후기는 날짜 없음(가짜로 채우지 않음)
 };
 
-export const REVIEW_COUNT = 300;
+// 총 건수·평균은 실제 데이터 기준. 301건 합계 1484.4 → 평균 4.9316(2자리 반올림 4.93).
+export const REVIEW_COUNT = 301;
 export const REVIEW_AVG = 4.93;
 
 export const reviewItems: ReviewItem[] = [
+  {
+    // 신규 후기(오늘 날짜) — date 있는 후기를 배열 맨 앞에 두어 리스트 상단에 노출.
+    id: "rv-301",
+    title: "발곡고 고1 수학과외",
+    region: "발곡고",
+    grade: "고1",
+    subject: "수학",
+    rating: 5.0,
+    date: "2026-06-29",
+    body: "발곡고 1학년 수학 내신을 1:1로 봐주셔서 시험 범위에 딱 맞게 준비할 수 있었습니다. 아이가 어디서 막히는지 먼저 짚어 주시고, 틀린 문제를 다음 수업에서 다시 확인해 주시니 약한 단원이 확실히 정리됐어요. 차분하게 챙겨 주셔서 감사합니다.",
+  },
   {
     id: "rv-001",
     title: "둔산동 초1 사회과외",
