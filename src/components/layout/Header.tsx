@@ -2,9 +2,26 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import CTAButton from "@/components/ui/CTAButton";
 import { site, type NavItem } from "@/data/site";
+
+/*
+ * 헤더 로고 에셋 경로(단일 소스). 배경 투명 PNG, 실제 크기 1920×800(가로:세로 = 2.4:1).
+ * 표시 높이는 기존 텍스트 로고의 렌더 높이에 맞춘다(아래 LOGO_HEIGHT_CLASS 참고).
+ */
+const LOGO_SRC = "/images/logo.png";
+/*
+ * 기존 텍스트 로고("지식의참견")의 브레이크포인트별 실측 렌더 높이(루트 18px 기준):
+ *  - 모바일 text-lg  → 31.5px (1.75rem)
+ *  - md     text-3xl → 40.5px (2.25rem)
+ *  - lg     text-4xl → 45px   (2.5rem)
+ *  - xl     text-5xl → 54px   (3rem)
+ * 이미지 높이를 동일 값으로 고정하고 가로는 비율 자동(w-auto, object-contain).
+ */
+const LOGO_HEIGHT_CLASS =
+  "h-[1.75rem] w-auto object-contain md:h-[2.25rem] lg:h-[2.5rem] xl:h-[3rem]";
 
 /*
  * 상단 고정 헤더.
@@ -43,13 +60,16 @@ export default function Header() {
         {/* 좌측: 로고 + 태그라인(데스크톱만). min-w-0 래퍼 — xl 좁은 폭에서 태그라인이 먼저 양보해
             가로 스크롤 방지(데스크톱 기존 동작과 동일). 모바일 빠른 메뉴는 우측으로 이동. */}
         <div className="flex min-w-0 items-center gap-2">
-          <div className="flex shrink-0 items-baseline gap-2">
-            <Link
-              href="/"
-              className="text-lg font-bold text-accent md:text-3xl lg:text-4xl xl:text-5xl"
-              onClick={closeAll}
-            >
-              {site.name}
+          <div className="flex shrink-0 items-center gap-2">
+            <Link href="/" className="flex items-center" onClick={closeAll}>
+              <Image
+                src={LOGO_SRC}
+                alt={site.name}
+                width={1920}
+                height={800}
+                priority
+                className={LOGO_HEIGHT_CLASS}
+              />
             </Link>
             <span className="hidden min-w-0 truncate whitespace-nowrap text-sm font-medium text-muted md:inline lg:text-base">
               {site.headerTagline}
