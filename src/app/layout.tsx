@@ -18,7 +18,8 @@ const pretendard = localFont({
   variable: "--font-pretendard",
 });
 
-const TITLE = "맞춤 과외 상담 | 직접 가르쳐 본 선생님이 찾아드립니다";
+// 브랜드명을 맨 앞에 둬 '지식의참견' 단독 검색 노출을 강화한다(핵심 서비스는 뒤에 직관적으로).
+const TITLE = `${site.name} | 직접 가르친 선생님의 1:1 맞춤 과외 매칭`;
 const DESCRIPTION =
   "직접 가르쳐 온 선생님이 1:1 상담으로 우리 아이에게 가장 잘 맞는 선생님을 연결해 드립니다. 무료 상담 신청.";
 

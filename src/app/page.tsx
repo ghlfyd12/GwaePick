@@ -5,6 +5,22 @@ import TeacherIntro from "@/components/sections/TeacherIntro";
 import Teachers from "@/components/sections/Teachers";
 import ReviewVideos from "@/components/ReviewVideos";
 import ConsultForm from "@/components/ConsultForm";
+import { site } from "@/data/site";
+
+/*
+ * 메인 페이지 구조화 데이터(JSON-LD) — 구글이 '지식의참견'을 교육 서비스(Organization)로 인지하도록.
+ * 브랜드명·도메인·로고·소개는 site.ts 단일 소스에서 가져온다(중복/불일치 방지).
+ * alternateName 으로 띄어쓴 '지식의 참견' 검색도 같은 브랜드로 묶는다.
+ */
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "EducationalOrganization",
+  name: site.name,
+  alternateName: "지식의 참견",
+  url: site.url,
+  logo: `${site.url}/icon.png`,
+  description: site.description,
+};
 
 /*
  * 메인 랜딩.
@@ -16,6 +32,11 @@ import ConsultForm from "@/components/ConsultForm";
 export default function Home() {
   return (
     <>
+      {/* 구조화 데이터(Organization) — 검색 로봇용. 화면에는 보이지 않는다. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+      />
       {/* Hero — 페이지 유일의 h1 (헤드라인) */}
       <Hero />
 
