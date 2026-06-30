@@ -7,6 +7,26 @@ import CTAButton from "@/components/ui/CTAButton";
 import { site, type NavItem } from "@/data/site";
 
 /*
+ * /power(어학 랜딩) 전용 헤더 변형 — 이 경로(및 하위)에서만 로고 텍스트와
+ * 내비 3개 항목을 어학용으로 교체한다. 다른 라우트는 site.ts 기본값을 그대로 쓴다(영향 없음).
+ * 수정이 쉽도록 변형 데이터는 여기 상수로 모아 둔다(하드코딩 분산 금지).
+ */
+const POWER_PATH = "/power";
+const POWER_BRAND = "어학의참견";
+// 기존 지역별/학교별/과목별 과외 자리를 영어/일본어/중국어로 교체. /power 내 언어 섹션으로 앵커 이동.
+const POWER_NAV: NavItem[] = [
+  { label: "영어", href: "/power#english" },
+  { label: "일본어", href: "/power#japanese" },
+  { label: "중국어", href: "/power#chinese" },
+];
+// 위 3개로 대체되는 기존 항목(교사진·수업후기는 그대로 유지).
+const POWER_REPLACED_HREFS = [
+  "/tutoring/by-region",
+  "/tutoring/by-school",
+  "/tutoring/by-subject",
+];
+
+/*
  * 상단 고정 헤더.
  * - sticky 고정, 흰 배경 + 옅은 하단 보더 / 좌측 로고 · 우측 CTA(항상 노출)
  * - 네비(site.nav): 데스크톱 가로 정렬, 모바일 햄버거.
@@ -19,6 +39,14 @@ export default function Header() {
   const [open, setOpen] = useState(false);
   const [mobileSub, setMobileSub] = useState<string | null>(null);
   const pathname = usePathname();
+
+  // /power(및 하위)에서만 어학 변형 — 로고 텍스트/링크와 내비 3개 항목 교체.
+  const isPower = pathname === POWER_PATH || pathname.startsWith(`${POWER_PATH}/`);
+  const brandName = isPower ? POWER_BRAND : site.name;
+  const logoHref = isPower ? POWER_PATH : "/";
+  const navItems: NavItem[] = isPower
+    ? [...POWER_NAV, ...site.nav.filter((n) => !POWER_REPLACED_HREFS.includes(n.href))]
+    : site.nav;
 
   // 라우트형 메뉴(/teachers 등)는 현재 경로와 일치하면 active(주황 강조).
   const isActive = (href: string) =>
@@ -45,11 +73,11 @@ export default function Header() {
         <div className="flex min-w-0 items-center gap-2">
           <div className="flex shrink-0 items-baseline gap-2">
             <Link
-              href="/"
+              href={logoHref}
               className="text-lg font-bold text-[#FF7A59] md:text-3xl lg:text-4xl xl:text-5xl"
               onClick={closeAll}
             >
-              {site.name}
+              {brandName}
             </Link>
             <span className="hidden min-w-0 truncate whitespace-nowrap text-sm font-medium text-muted md:inline lg:text-base">
               {site.headerTagline}
@@ -62,7 +90,7 @@ export default function Header() {
           className="hidden items-center gap-5 md:flex lg:gap-8 xl:gap-10"
           aria-label="주요 메뉴"
         >
-          {site.nav.map((item) =>
+          {navItems.map((item) =>
             item.children ? (
               <DesktopDropdown
                 key={item.label}
@@ -152,7 +180,7 @@ export default function Header() {
           className="border-t border-line bg-white md:hidden"
         >
           <ul className="mx-auto max-w-6xl px-4 py-2 sm:px-6">
-            {site.nav.map((item) =>
+            {navItems.map((item) =>
               item.children ? (
                 <li key={item.label}>
                   {/* 아코디언 트리거 */}

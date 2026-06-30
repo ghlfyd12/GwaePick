@@ -175,7 +175,8 @@ export default function PowerPage() {
           {languagePrograms.map((lang) => (
             <article
               key={lang.id}
-              className="flex flex-col rounded-3xl border border-line bg-white p-6 shadow-sm"
+              id={lang.id}
+              className="flex scroll-mt-28 flex-col rounded-3xl border border-line bg-white p-6 shadow-sm"
             >
               <h3 className="flex items-center gap-2 break-keep text-xl font-bold text-ink">
                 <span aria-hidden className="text-2xl leading-none">
