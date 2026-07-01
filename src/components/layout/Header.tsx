@@ -13,17 +13,17 @@ import { site, type NavItem } from "@/data/site";
  */
 const POWER_PATH = "/power";
 const POWER_BRAND = "어학의참견";
-// 기존 지역별/학교별/과목별 과외 자리를 영어/일본어/중국어로 교체. /power 내 언어 섹션으로 앵커 이동.
+/*
+ * /power 전용 내비 전체 목록(메인 site.nav 와 독립).
+ *  - 지역별/학교별/과목별 과외 → 영어/일본어/중국어(언어별 상세 라우트).
+ *  - 교사진·수업후기 → /power 전용 라우트(어학의참견은 비어 있고, 메인 /teachers·/reviews 는 그대로).
+ */
 const POWER_NAV: NavItem[] = [
-  { label: "영어", href: "/power#english" },
-  { label: "일본어", href: "/power#japanese" },
-  { label: "중국어", href: "/power#chinese" },
-];
-// 위 3개로 대체되는 기존 항목(교사진·수업후기는 그대로 유지).
-const POWER_REPLACED_HREFS = [
-  "/tutoring/by-region",
-  "/tutoring/by-school",
-  "/tutoring/by-subject",
+  { label: "영어", href: "/power/english" },
+  { label: "일본어", href: "/power/japanese" },
+  { label: "중국어", href: "/power/chinese" },
+  { label: "교사진", href: "/power/teachers" },
+  { label: "수업후기", href: "/power/reviews" },
 ];
 
 /*
@@ -44,9 +44,7 @@ export default function Header() {
   const isPower = pathname === POWER_PATH || pathname.startsWith(`${POWER_PATH}/`);
   const brandName = isPower ? POWER_BRAND : site.name;
   const logoHref = isPower ? POWER_PATH : "/";
-  const navItems: NavItem[] = isPower
-    ? [...POWER_NAV, ...site.nav.filter((n) => !POWER_REPLACED_HREFS.includes(n.href))]
-    : site.nav;
+  const navItems: NavItem[] = isPower ? POWER_NAV : site.nav;
 
   // 라우트형 메뉴(/teachers 등)는 현재 경로와 일치하면 active(주황 강조).
   const isActive = (href: string) =>

@@ -7,6 +7,7 @@ import { getSido } from "@/data/sidoRegions";
 import { subjects as detailSubjects } from "@/data/subjects";
 import { PILOT } from "@/data/dongPageCopy";
 import { powerRegionSlugs } from "@/data/powerRegions";
+import { LANGUAGE_SLUGS } from "@/data/languageDetail";
 import {
   SITEMAP_URLS_PER_FILE,
   SCHOOL_PAIR_COUNT,
@@ -104,6 +105,14 @@ function coreSitemap(lastModified: Date): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
 
+  // 어학의참견 언어 상세 — /power/english·japanese·chinese
+  const powerLanguagePages: MetadataRoute.Sitemap = LANGUAGE_SLUGS.map((slug) => ({
+    url: `${base}/power/${slug}`,
+    lastModified,
+    changeFrequency: "weekly",
+    priority: 0.7,
+  }));
+
   return [
     ...home,
     ...regionPages,
@@ -111,6 +120,7 @@ function coreSitemap(lastModified: Date): MetadataRoute.Sitemap {
     ...pseoPages,
     ...pilotDetail,
     ...powerRegionPages,
+    ...powerLanguagePages,
   ];
 }
 
