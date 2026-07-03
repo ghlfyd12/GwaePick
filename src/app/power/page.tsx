@@ -1,24 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import ConsultForm from "@/components/ConsultForm";
-import ReviewCard from "@/components/reviews/ReviewCard";
-import { reviewItems } from "@/data/reviewItems";
 import { site } from "@/data/site";
 import {
   powerHero,
   powerClosing,
   languagePrograms,
   languageSharedFlow,
-  languageReviewSubjects,
 } from "@/data/languagePrograms";
 
 /*
  * /power — 어학(영어·중국어·일본어) 전문 1:1 상담 랜딩.
  *
- * 골격: Hero(h1) → 언어 안내 3카드 → 어학 후기 → 최종 CTA + 상담 폼.
+ * 골격: Hero(h1) → 언어 안내 3카드 → 최종 CTA + 상담 폼.
  * 헤더·푸터·우측 하단 플로팅 CTA 는 루트 layout 에서 자동 상속한다(여기서 만들지 않음).
  * 카피·카드 데이터는 languagePrograms.ts 단일 소스에서 가져온다(하드코딩 금지).
- * 후기는 reviewItems.ts 의 실제 데이터 중 어학 과목만 필터 — 지어내지 않는다.
  */
 
 const PAGE_TITLE =
@@ -47,11 +43,6 @@ export const metadata: Metadata = {
     images: [site.ogImage],
   },
 };
-
-// 어학(영어·중국어·일본어) 실제 후기만. 데이터에 없는 언어는 노출되지 않는다(날조 금지).
-const languageReviews = reviewItems.filter((r) =>
-  (languageReviewSubjects as readonly string[]).includes(r.subject),
-);
 
 // 페이지 내 상담 폼(#consult) 으로 모으는 인페이지 CTA.
 const CONSULT_ANCHOR = "#consult";
@@ -253,39 +244,6 @@ export default function PowerPage() {
               </div>
             </article>
           ))}
-        </div>
-      </section>
-
-      {/* ── 어학 후기 ────────────────────────────────────────────── */}
-      <section
-        aria-labelledby="power-reviews-heading"
-        className="border-t border-line bg-surface px-5 py-14 sm:px-6 sm:py-20"
-      >
-        <div className="mx-auto max-w-3xl">
-          <div className="text-center">
-            <p className="text-sm font-semibold uppercase tracking-widest text-accent">
-              어학 후기
-            </p>
-            <h2
-              id="power-reviews-heading"
-              className="mt-2 break-keep text-2xl font-bold text-ink sm:text-3xl"
-            >
-              어학 수업을 받은 학부모님 후기
-            </h2>
-          </div>
-
-          {languageReviews.length > 0 ? (
-            <ul className="mt-8 space-y-4">
-              {languageReviews.map((item) => (
-                <ReviewCard key={item.id} item={item} />
-              ))}
-            </ul>
-          ) : (
-            <p className="mt-8 break-keep text-center text-base text-muted">
-              어학 후기를 준비하고 있습니다. 먼저 상담으로 궁금한 점을 물어봐
-              주세요.
-            </p>
-          )}
         </div>
       </section>
 
