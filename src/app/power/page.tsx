@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import ConsultForm from "@/components/ConsultForm";
 import CaseGroup from "@/components/power/CaseGroup";
+import SafeImage from "@/components/SafeImage";
 import { site } from "@/data/site";
 import {
   powerHero,
@@ -49,6 +50,13 @@ export const metadata: Metadata = {
 // 페이지 내 상담 폼(#consult) 으로 모으는 인페이지 CTA.
 const CONSULT_ANCHOR = "#consult";
 
+// 최상단 이미지 배너 소스(데스크톱 16:9 / 모바일 3:4 분리). 파일 없으면 SafeImage 가
+// 빈 영역만 남겨 레이아웃이 깨지지 않는다(김아가 규격대로 저장하면 자동 연결).
+const HERO_BANNER = {
+  desktop: "/power/hero-desktop.png",
+  mobile: "/power/hero-mobile.png",
+};
+
 // 학습사례를 3개 그룹으로 묶는다(카테고리 표준값 기준). 데이터는 languageCases.ts 그대로.
 const caseGroups = CASE_GROUPS.map((g) => ({
   ...g,
@@ -58,7 +66,31 @@ const caseGroups = CASE_GROUPS.map((g) => ({
 export default function PowerPage() {
   return (
     <>
-      {/* ── Hero ─────────────────────────────────────────────────── */}
+      {/* ── 이미지 배너 (최상단, 정적 full-bleed. 오버레이 없음 — 이미지가 카피 포함) ── */}
+      <section aria-label="어학 전문 1:1 상담" className="w-full">
+        {/* 데스크톱/태블릿 (md↑) 16:9 */}
+        <div className="relative hidden aspect-[16/9] w-full bg-surface-alt md:block">
+          <SafeImage
+            src={HERO_BANNER.desktop}
+            alt="어학 전문 1:1 상담"
+            sizes="100vw"
+            priority
+            className="object-cover object-center"
+          />
+        </div>
+        {/* 모바일 (md 미만) 3:4 */}
+        <div className="relative aspect-[3/4] w-full bg-surface-alt md:hidden">
+          <SafeImage
+            src={HERO_BANNER.mobile}
+            alt="어학 전문 1:1 상담"
+            sizes="100vw"
+            priority
+            className="object-cover object-center"
+          />
+        </div>
+      </section>
+
+      {/* ── 텍스트 Hero (이미지 배너 아래로 이동, 내용·CTA 그대로) ──────── */}
       <section
         aria-labelledby="power-hero-heading"
         className="border-b border-line bg-surface px-5 py-14 sm:px-6 sm:py-20"
