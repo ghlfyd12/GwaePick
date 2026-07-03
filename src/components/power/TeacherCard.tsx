@@ -6,8 +6,9 @@ import type { LanguageTeacher } from "@/data/languageTeachers";
 
 /*
  * TeacherCard — 어학 교사 콤팩트 카드(/power/teachers 전용, 메인 사이트 미사용).
- *  - 사진(4:5, 얼굴 중심, 없으면 이니셜 플레이스홀더) → 이름 → [언어·유형] 배지 →
- *    한 줄 요약(headline 또는 원어민 좌우명, line-clamp-2) → 수업 방식 칩.
+ *  - 사진(4:5, 얼굴 중심, 없으면 이니셜 플레이스홀더) → 이름 → 대표 소개 → 수업 방식 칩.
+ *  - 대표 소개(전 언어·유형 공통 단일 규칙, 빈 값 방지): headline → 좌우명(motto) →
+ *    전문분야 상위 3개(쉼표 연결) → 이력 첫 줄. line-clamp-2(최소 높이 확보).
  *  - 상세(이력·전문분야·학력/강점/경력)는 기본 접힘, "자세히" 토글로 펼침.
  */
 export default function TeacherCard({
@@ -22,8 +23,12 @@ export default function TeacherCard({
   const modes = teacher.lessonModes ?? [];
   const credentials = teacher.credentials ?? [];
   const specialties = teacher.specialties ?? [];
-  // 요약 한 줄: 한국인은 headline, 원어민은 좌우명(motto).
-  const summary = teacher.headline ?? teacher.motto;
+  // 대표 소개(전 언어·유형 공통, 빈 값 방지): headline → 좌우명 → 전문분야 상위 3개 → 이력 첫 줄.
+  const summary =
+    teacher.headline ??
+    teacher.motto ??
+    (specialties.length > 0 ? specialties.slice(0, 3).join(", ") : undefined) ??
+    (credentials.length > 0 ? credentials[0] : undefined);
   // 원어민 상세(좌우명은 요약으로 노출하므로 제외).
   const nativeRows = [
     { label: "학력", value: teacher.education },
