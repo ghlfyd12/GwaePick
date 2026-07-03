@@ -56,7 +56,8 @@ export const TEACHER_DISPLAY_GROUPS: TeacherDisplayGroup[] = [
   { key: "english-korean", label: "영어 한국인", language: "english", types: ["korean"] },
   { key: "english-native", label: "영어 원어민", language: "english", types: ["native"] },
   { key: "japanese", label: "일본어", language: "japanese" },
-  { key: "chinese", label: "중국어", language: "chinese" },
+  { key: "chinese-korean", label: "중국어 한국인", language: "chinese", types: ["korean"] },
+  { key: "chinese-native", label: "중국어 원어민", language: "chinese", types: ["native"] },
 ];
 
 /** 교사가 해당 표시 그룹에 속하는지. */
@@ -70,6 +71,7 @@ export function teacherInGroup(
 const EN_NATIVE = "/teachers/english-native";
 const EN_KOREAN = "/teachers/english-korean";
 const JAPANESE = "/teachers/japanese";
+const CHINESE = "/teachers/chinese";
 
 export const languageTeachers: LanguageTeacher[] = [
   {
@@ -1230,6 +1232,177 @@ export const languageTeachers: LanguageTeacher[] = [
       "중국 유학 (중국어 능통)",
       "일본 유학 에이전트 근무",
       "한국어 능통",
+    ],
+  },
+
+  // ── 중국어 (4차 배치, 원문 1~11번 변환) ────────────────────────────────
+  // 원문: src/data/raw/chinese-teachers.txt. 유형: 마스킹 이름=한국인, 알파벳 실명=원어민(cn-07).
+  // 브랜드 금지어 치환·느낌표 제거 규칙 적용. 사진은 실제 업로드 파일(1~11.png) 참조.
+  {
+    id: "cn-01",
+    name: "홍*민",
+    language: "chinese",
+    type: "korean",
+    photo: `${CHINESE}/1.png`,
+    specialties: ["회화", "한자 연습", "HSK"],
+    credentials: [
+      "강원국립대학교 중어중문학과",
+      "HSK 6급·HSKK 중급 보유",
+      "중국 서안과학기술대학교 교환학생",
+      "상해외국어대학교 교환학생 선정",
+      "교환학생 통역 도우미(buddy)",
+    ],
+  },
+  {
+    id: "cn-02",
+    name: "반*유",
+    language: "chinese",
+    type: "korean",
+    photo: `${CHINESE}/2.png`,
+    specialties: ["발음 교정", "수준별 회화"],
+    credentials: [
+      "숙명여대 중어중문학부·문화관광학 졸업",
+      "동두천외고 졸업",
+      "중국 현지 유학 경력 (초등~중등, 국제·현지 학교)",
+      "중등·고등·성인 다양한 연령대 수업 진행 경력",
+      "외고 내신 및 시험 대비(HSK) 강의 경력",
+      "시험 대비: HSK·TSC·비즈니스 중국어",
+      "중·고등 중국어 내신",
+    ],
+  },
+  {
+    id: "cn-03",
+    name: "이*영",
+    language: "chinese",
+    type: "korean",
+    photo: `${CHINESE}/3.png`,
+    lessonModes: ["화상"],
+    specialties: ["기초 중국어", "실생활 회화", "비즈니스 회화", "HSK", "BCT"],
+    credentials: [
+      "University of Fraser Valley, British Columbia (캐나다)",
+      "중국 화동사범대",
+      "후지제록스 상하이 지사 근무",
+      "1:1 중국어 수업 (영어 수업 가능)",
+      "중국어 관련 게임·드라마·음식·면접·뉴스·대화 토론 등 활용",
+    ],
+  },
+  {
+    id: "cn-04",
+    name: "이*경",
+    language: "chinese",
+    type: "korean",
+    photo: `${CHINESE}/4.png`,
+    specialties: ["발음 교정", "눈높이 회화", "한자 연습", "성인 회화", "HSK"],
+    credentials: [
+      "Beijing Language and Culture University",
+      "중국 출생",
+      "신 HSK 6급 보유",
+      "동광초등학교 중국어 수업 경력",
+      "기업체 출강",
+    ],
+  },
+  {
+    id: "cn-05",
+    name: "진*영",
+    language: "chinese",
+    type: "korean",
+    photo: `${CHINESE}/5.png`,
+    specialties: ["비즈니스 회화", "실생활 회화"],
+    credentials: [
+      "중국 킬림 사범대학 졸업",
+      "중국어 1:1 강의",
+      "TOPIK 5급",
+      "중국어 교육법·한국어 언어",
+      "초·중·고·성인 1:1 맞춤 대화 중심 수업",
+    ],
+  },
+  {
+    id: "cn-06",
+    name: "장*",
+    language: "chinese",
+    type: "korean",
+    photo: `${CHINESE}/6.png`,
+    specialties: ["성조·병음", "HSK", "TSC", "어린이 중국어"],
+    credentials: [
+      "중국 천진 남개대학 졸업",
+      "다문화 이해교육 강의 경력",
+      "경기도 세계시민교육 도민 강의 경력",
+      "한·중 이중언어 선생님",
+      "어린이 중국어 지도사 자격증",
+      "어린이 한자 지도사",
+      "초급·중급·고급 중국어 수업",
+    ],
+  },
+  {
+    id: "cn-07",
+    name: "ZHUANGYU",
+    language: "chinese",
+    type: "native",
+    photo: `${CHINESE}/7.png`,
+    headline: "쉽게 가르치는 원어민 선생님과 함께하는 수업",
+    specialties: ["HSK", "TSC", "비즈니스 중국어", "관광 중국어 회화"],
+    credentials: [
+      "아주대학교 졸업",
+      "Tongji University(중국 상하이) 졸업",
+      "이주민센터 중국어 담당 상담사",
+      "TSC 10급",
+    ],
+  },
+  {
+    id: "cn-08",
+    name: "오*자",
+    language: "chinese",
+    type: "korean",
+    photo: `${CHINESE}/8.png`,
+    headline: "친절하고 다정한 선생님",
+    specialties: ["HSK", "BCT", "TSC"],
+    credentials: [
+      "베이징 거주",
+      "중국 계서시 위생학교 — 호사 전공",
+      "10년 이상 중국어 수업 경력",
+    ],
+  },
+  {
+    id: "cn-09",
+    name: "노*연",
+    language: "chinese",
+    type: "korean",
+    photo: `${CHINESE}/9.png`,
+    specialties: ["어린이 중국어", "비즈니스 회화", "HSK"],
+    credentials: [
+      "베이징 거주",
+      "중앙민족대학 국제회계학 전공",
+      "양청구청 중국어 강의",
+      "한국 기업 임직원 강의 (LS전선, 현대)",
+    ],
+  },
+  {
+    id: "cn-10",
+    name: "김*화",
+    language: "chinese",
+    type: "korean",
+    photo: `${CHINESE}/10.png`,
+    specialties: ["HSK", "비즈니스 회화"],
+    credentials: [
+      "베이징 거주",
+      "북경사범대 기업체 전문 통역",
+      "어린이 중국어 회화·한문 수업",
+      "철저한 회원 관리",
+    ],
+  },
+  {
+    id: "cn-11",
+    name: "최*계월",
+    language: "chinese",
+    type: "korean",
+    photo: `${CHINESE}/11.png`,
+    specialties: ["교사 자격증", "표준 중국어 자격증"],
+    credentials: [
+      "佳木斯大学 국제무역 전공",
+      "HSK 전문 선생님",
+      "비즈니스·프리토킹·TSC",
+      "10년 이상 중국어 수업 경력",
+      "다수 회원 유학·대학 진학 성공",
     ],
   },
 ];
