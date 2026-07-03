@@ -56,8 +56,7 @@ export const TEACHER_DISPLAY_GROUPS: TeacherDisplayGroup[] = [
   { key: "english-korean", label: "영어 한국인", language: "english", types: ["korean"] },
   { key: "english-native", label: "영어 원어민", language: "english", types: ["native"] },
   { key: "japanese", label: "일본어", language: "japanese" },
-  { key: "chinese-korean", label: "중국어 한국인", language: "chinese", types: ["korean"] },
-  { key: "chinese-native", label: "중국어 원어민", language: "chinese", types: ["native"] },
+  { key: "chinese", label: "중국어", language: "chinese" },
 ];
 
 /** 교사가 해당 표시 그룹에 속하는지. */
