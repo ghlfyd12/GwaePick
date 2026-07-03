@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import ConsultForm from "@/components/ConsultForm";
+import CaseGroup from "@/components/power/CaseGroup";
 import { site } from "@/data/site";
 import {
   powerHero,
@@ -8,6 +9,7 @@ import {
   languagePrograms,
   languageSharedFlow,
 } from "@/data/languagePrograms";
+import { languageCases, CASE_GROUPS } from "@/data/languageCases";
 
 /*
  * /power — 어학(영어·중국어·일본어) 전문 1:1 상담 랜딩.
@@ -46,6 +48,12 @@ export const metadata: Metadata = {
 
 // 페이지 내 상담 폼(#consult) 으로 모으는 인페이지 CTA.
 const CONSULT_ANCHOR = "#consult";
+
+// 학습사례를 3개 그룹으로 묶는다(카테고리 표준값 기준). 데이터는 languageCases.ts 그대로.
+const caseGroups = CASE_GROUPS.map((g) => ({
+  ...g,
+  cases: languageCases.filter((c) => g.categories.includes(c.category)),
+})).filter((g) => g.cases.length > 0);
 
 export default function PowerPage() {
   return (
@@ -244,6 +252,44 @@ export default function PowerPage() {
               </div>
             </article>
           ))}
+        </div>
+      </section>
+
+      {/* ── 어학 학습사례 (검색용, 별점·날짜·실명 없음) ──────────────── */}
+      <section
+        aria-labelledby="power-cases-heading"
+        className="border-t border-line bg-surface px-5 py-14 sm:px-6 sm:py-20"
+      >
+        <div className="mx-auto max-w-5xl">
+          <div className="text-center">
+            <p className="text-sm font-semibold uppercase tracking-widest text-accent">
+              어학 학습사례
+            </p>
+            <h2
+              id="power-cases-heading"
+              className="mt-2 break-keep text-2xl font-bold text-ink sm:text-3xl"
+            >
+              어학, 이런 목표로 함께합니다
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl break-keep text-base leading-relaxed text-muted sm:text-lg">
+              실제 상담에서 자주 나오는 학습 목표를 유형별로 정리한 예시입니다.
+            </p>
+          </div>
+
+          <div className="mt-10 space-y-10">
+            {caseGroups.map((g) => (
+              <CaseGroup key={g.key} title={g.title} cases={g.cases} />
+            ))}
+          </div>
+
+          <div className="mt-10 flex justify-center">
+            <a
+              href={CONSULT_ANCHOR}
+              className="inline-flex min-h-14 w-full max-w-xs items-center justify-center rounded-full bg-accent px-8 text-base font-semibold text-white shadow-md transition-colors hover:bg-accent-dark sm:w-auto sm:text-lg"
+            >
+              {site.cta.label} →
+            </a>
+          </div>
         </div>
       </section>
 
