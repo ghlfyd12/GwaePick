@@ -1,19 +1,14 @@
 import type { Metadata } from "next";
 import ConsultForm from "@/components/ConsultForm";
-import TeacherCard from "@/components/power/TeacherCard";
+import TeacherList from "@/components/power/TeacherList";
 import { site } from "@/data/site";
-import {
-  languageTeachers,
-  LANGUAGE_LABEL,
-  TYPE_LABEL,
-  TEACHER_GROUP_ORDER,
-} from "@/data/languageTeachers";
+import { languageTeachers } from "@/data/languageTeachers";
 
 /*
  * /power/teachers — 어학의참견 교사진.
  *
- * languageTeachers.ts 를 언어×유형으로 그룹핑해, 데이터가 있는 그룹만 섹션으로 렌더한다.
- * (현재: 영어·원어민 14명. 다른 언어/유형은 데이터 추가 시 자동으로 섹션이 생긴다.)
+ * languageTeachers.ts 데이터를 클라이언트 리스트(TeacherList)에 넘겨, 영역 필터 칩 +
+ * 콤팩트 카드 + 더보기로 렌더한다(필터·더보기 상태는 리스트 컴포넌트만 client).
  * 헤더(어학의참견)·푸터·플로팅 CTA 는 루트 layout 에서 상속. 상담 폼은 공통 ConsultForm 재사용.
  */
 
@@ -38,14 +33,6 @@ export const metadata: Metadata = {
 
 const CONSULT_ANCHOR = "#consult";
 
-// 데이터가 있는 그룹만(빈 그룹은 렌더하지 않음).
-const groups = TEACHER_GROUP_ORDER.map((g) => ({
-  ...g,
-  teachers: languageTeachers.filter(
-    (t) => t.language === g.language && t.type === g.type,
-  ),
-})).filter((g) => g.teachers.length > 0);
-
 export default function PowerTeachersPage() {
   return (
     <>
@@ -61,26 +48,9 @@ export default function PowerTeachersPage() {
         </div>
       </section>
 
-      {/* 그룹별 교사 카드 */}
-      <div className="mx-auto max-w-6xl space-y-14 px-5 py-14 sm:px-6 sm:py-16">
-        {groups.map((g) => (
-          <section
-            key={`${g.language}-${g.type}`}
-            aria-labelledby={`grp-${g.language}-${g.type}`}
-          >
-            <h2
-              id={`grp-${g.language}-${g.type}`}
-              className="break-keep text-2xl font-bold text-ink sm:text-3xl"
-            >
-              {LANGUAGE_LABEL[g.language]} · {TYPE_LABEL[g.type]} 선생님
-            </h2>
-            <ul className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {g.teachers.map((t) => (
-                <TeacherCard key={t.id} teacher={t} />
-              ))}
-            </ul>
-          </section>
-        ))}
+      {/* 교사 리스트 — 영역 필터 + 콤팩트 카드 + 더보기(클라이언트) */}
+      <div className="mx-auto max-w-6xl px-5 py-12 sm:px-6 sm:py-14">
+        <TeacherList teachers={languageTeachers} />
       </div>
 
       {/* 하단 상담 CTA */}
