@@ -20,8 +20,9 @@ import { schoolDetailHref } from "@/lib/schoolHref";
  * 콘텐츠 맥락만 '지역' → '학교'. 공통 데이터(STEP·믿는 이유·후기)는 dongPageCopy.ts 재사용.
  */
 
-// 학교 Hero 학생 사진 — 동 페이지와 별개 에셋. 한 곳에서 관리(전 학교 공용).
-const SCHOOL_HERO_IMAGE = "/images/school-students.png";
+// 학교 Hero 학생 사진 — 동 페이지와 별개 에셋. 학교급에 따라 분기.
+const SCHOOL_HERO_IMAGE = "/images/school-students.png"; // 중·고(기존, 교복 학생)
+const SCHOOL_HERO_IMAGE_ELEM = "/images/school-elementary.png"; // 초등(함께 공부하는 초등학생)
 
 export default function SchoolSubjectDetail({
   schoolSlug,
@@ -52,6 +53,9 @@ export default function SchoolSubjectDetail({
   const why = buildWhySchool(schoolName);
   const faq = buildSchoolFaq(schoolName);
   const isElem = levelLabel === "초등학교";
+  // 히어로 이미지 — 초등만 새 이미지, 중·고는 기존 그대로(학교급 데이터 기준 분기).
+  const heroImage = isElem ? SCHOOL_HERO_IMAGE_ELEM : SCHOOL_HERO_IMAGE;
+  const heroAlt = isElem ? "함께 공부하는 초등학생들" : "교복을 입은 학생들";
   const displayName = schoolFullName ?? schoolName; // 정식명, 없으면 약칭
   const strategyCards = buildStrategyCards(schoolName, schoolFullName, levelLabel, subject.label, subject.why);
   const relatedKeywords = buildRelatedKeywords(schoolName, displayName, isElem);
@@ -140,11 +144,11 @@ export default function SchoolSubjectDetail({
       {/* 1. Hero — 좌: 학생 사진 / 우: 텍스트(모바일은 사진 위·텍스트 아래) */}
       <section className="border-b border-line bg-surface px-5 py-10 sm:px-6 md:px-10 md:py-14">
         <div className="mx-auto grid max-w-5xl items-center gap-8 md:grid-cols-2 md:gap-10">
-          {/* 왼쪽 — 교복 입은 학생들 사진(고정 비율, 인물 중심) */}
+          {/* 왼쪽 — 학생 사진(학교급별: 초등/중·고, 고정 비율·인물 중심) */}
           <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl shadow-md">
             <Image
-              src={SCHOOL_HERO_IMAGE}
-              alt="교복을 입은 학생들"
+              src={heroImage}
+              alt={heroAlt}
               fill
               priority
               sizes="(min-width: 768px) 512px, 100vw"
