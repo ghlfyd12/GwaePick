@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import Script from "next/script";
 import { schoolLevels, subjects } from "@/data/categories";
+import { site } from "@/data/site";
 
 /*
  * ConsultForm(#consult) — 무료 상담 신청 섹션 + 폼.
@@ -17,8 +18,7 @@ import { schoolLevels, subjects } from "@/data/categories";
  */
 
 const CONSULT_PHONE = "010-2177-2720";
-// 실제 카카오 채널 주소가 정해지면 이 상수만 교체한다.
-const KAKAO_CHANNEL_URL = "https://pf.kakao.com/_여기에_채널주소";
+// 카카오 오픈채팅 링크는 site.ts(contact.kakaoChannelUrl) 단일 소스에서 가져온다.
 
 type FormState = {
   name: string;
@@ -172,13 +172,13 @@ export default function ConsultForm({
                 </span>
               </a>
               <a
-                href={KAKAO_CHANNEL_URL}
+                href={site.contact.kakaoChannelUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex min-w-0 items-center justify-center gap-2 rounded-xl bg-[#FEE500] px-3 py-3.5 text-base font-bold text-[#3C1E1E] transition-[filter] hover:brightness-95 sm:text-lg"
               >
                 <ChatIcon />
-                <span className="whitespace-nowrap">카카오 채널 상담</span>
+                <span className="whitespace-nowrap">카톡 상담</span>
               </a>
             </div>
 

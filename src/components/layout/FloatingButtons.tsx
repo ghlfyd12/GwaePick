@@ -68,7 +68,7 @@ export default function FloatingButtons() {
         </svg>
       </button>
 
-      {/* 카톡 문의 — 항상 표시, 새 탭으로 카카오톡 채널 열기. 카카오 브랜드색(노랑+검정). */}
+      {/* 카톡 상담 — 항상 표시, 새 탭으로 카카오톡 오픈채팅 1:1 열기. 카카오 브랜드색(노랑+검정). */}
       <a
         href={site.contact.kakaoChannelUrl}
         target="_blank"
@@ -84,7 +84,7 @@ export default function FloatingButtons() {
         >
           <path d="M12 3C6.48 3 2 6.48 2 11c0 2.5 1.36 4.73 3.5 6.19 0 .7-.35 1.9-.7 2.66-.12.26.09.53.36.46.02 0 .04-.01.06-.02 1.2-.5 2.44-1.06 3.02-1.4.86.2 1.77.31 2.7.31 5.52 0 10-3.48 10-8s-4.48-8-10-8z" />
         </svg>
-        <span>카톡 문의</span>
+        <span>카톡 상담</span>
       </a>
 
       {/* 상담전화연결 — 항상 표시, tel: 전화 걸기 */}
