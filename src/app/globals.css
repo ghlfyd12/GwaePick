@@ -48,8 +48,10 @@
  * 모든 유틸이 /power 안에서만 퍼플로 렌더되고, 메인은 코랄 그대로 유지된다.
  */
 .power-theme {
-  --color-accent: #6c4dff; /* 메인 퍼플 */
-  --color-accent-dark: #5a3ee0; /* hover/진한 강조 */
+  --color-accent: #7d0096; /* 메인 퍼플 (CTA·활성 칩·강조) */
+  --color-accent-dark: #66007b; /* hover/진한 강조 */
+  /* 연한 배경/칩은 기존 bg-accent/10 유틸이 이 퍼플의 10% 틴트(≈ #f3e6f7 라벤더)를
+     자동 생성하므로 별도 soft 토큰 없이 위 두 값만 바꾸면 전체가 #7d0096 계열로 통일된다. */
 }
 
 /*
