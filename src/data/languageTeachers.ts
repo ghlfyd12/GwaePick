@@ -50,11 +50,13 @@ export type TeacherDisplayGroup = {
   language: LanguageTeacher["language"];
   types?: LanguageTeacher["type"][];
 };
+// 표시·정렬 순서(칩·"전체" 목록·더보기가 모두 이 순서를 참조하는 단일 소스):
+// 영어 한국인 → 영어 원어민 → 일본어 → 중국어. 그룹 내부는 데이터 배열 순서 유지.
 export const TEACHER_DISPLAY_GROUPS: TeacherDisplayGroup[] = [
-  { key: "english-native", label: "영어 원어민", language: "english", types: ["native"] },
   { key: "english-korean", label: "영어 한국인", language: "english", types: ["korean"] },
-  { key: "chinese", label: "중국어", language: "chinese" },
+  { key: "english-native", label: "영어 원어민", language: "english", types: ["native"] },
   { key: "japanese", label: "일본어", language: "japanese" },
+  { key: "chinese", label: "중국어", language: "chinese" },
 ];
 
 /** 교사가 해당 표시 그룹에 속하는지. */
