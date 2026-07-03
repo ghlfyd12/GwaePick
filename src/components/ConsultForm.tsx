@@ -175,7 +175,7 @@ export default function ConsultForm({
                 href={site.contact.kakaoChannelUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex min-w-0 items-center justify-center gap-2 rounded-xl bg-[#FEE500] px-3 py-3.5 text-base font-bold text-[#3C1E1E] transition-[filter] hover:brightness-95 sm:text-lg"
+                className="cta-kakao flex min-w-0 items-center justify-center gap-2 rounded-xl bg-[#FEE500] px-3 py-3.5 text-base font-bold text-[#3C1E1E] transition-[filter] hover:brightness-95 sm:text-lg"
               >
                 <ChatIcon />
                 <span className="whitespace-nowrap">카톡 상담</span>

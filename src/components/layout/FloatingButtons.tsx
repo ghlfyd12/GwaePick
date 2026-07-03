@@ -74,7 +74,7 @@ export default function FloatingButtons() {
         target="_blank"
         rel="noopener noreferrer"
         aria-label="카카오톡으로 상담 문의"
-        className="inline-flex min-h-12 items-center gap-2 rounded-full bg-[#FEE500] px-5 font-semibold text-black shadow-lg transition-[filter] hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        className="cta-kakao inline-flex min-h-12 items-center gap-2 rounded-full bg-[#FEE500] px-5 font-semibold text-black shadow-lg transition-[filter] hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >
         <svg
           aria-hidden="true"

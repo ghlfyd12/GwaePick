@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import FloatingButtons from "@/components/layout/FloatingButtons";
+import RootShell from "@/components/layout/RootShell";
 import { site } from "@/data/site";
 
 /*
@@ -76,10 +77,12 @@ export default function RootLayout({
   return (
     <html lang="ko" className={pretendard.variable}>
       <body className="flex min-h-dvh flex-col bg-white text-ink">
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <FloatingButtons />
+        <RootShell>
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+          <FloatingButtons />
+        </RootShell>
       </body>
     </html>
   );

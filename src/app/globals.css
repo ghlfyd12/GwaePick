@@ -15,10 +15,6 @@
   --color-primary-light: #5c5c63; /* 중간 그레이 — 그라데이션 옅은 쪽/보조 */
   --color-primary-soft: #f4f4f5; /* 아주 연한 중립 회색 — 옅은 배경 */
 
-  /* 메인/브랜드 포인트(따뜻한 코랄·오렌지) — 사이트 대표색 */
-  --color-accent: #ff6b4a;
-  --color-accent-dark: #f4502b;
-
   /* 텍스트 */
   --color-ink: #1f2937; /* 진한 차콜 */
   --color-muted: #6b7280; /* 보조 회색 */
@@ -33,6 +29,36 @@
     var(--font-pretendard), "Pretendard Variable", -apple-system,
     BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, "Helvetica Neue",
     "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+}
+
+/*
+ * 브랜드 포인트(accent) — /power(어학의참견) 스코프에서 토큰만 덮어써 코랄→퍼플로
+ * 리브랜딩할 수 있도록 non-inline(@theme, var 참조)으로 둔다.
+ * 메인(지식의참견)은 아래 :root 기본값(코랄)을 그대로 쓴다.
+ */
+@theme {
+  --color-accent: #ff6b4a; /* 메인 브랜드 코랄 */
+  --color-accent-dark: #f4502b; /* hover/진한 강조 */
+}
+
+/*
+ * /power(어학의참견) 전용 퍼플 스코프.
+ * RootShell 이 /power 경로에서만 <body> 하위 래퍼에 .power-theme 를 붙이고,
+ * 여기서 accent 토큰만 퍼플로 덮어쓴다. → text-accent/bg-accent/border-accent 등
+ * 모든 유틸이 /power 안에서만 퍼플로 렌더되고, 메인은 코랄 그대로 유지된다.
+ */
+.power-theme {
+  --color-accent: #6c4dff; /* 메인 퍼플 */
+  --color-accent-dark: #5a3ee0; /* hover/진한 강조 */
+}
+
+/*
+ * 카톡 상담 버튼 — 메인은 카카오 브랜드색(노랑) 유지, /power 에서만 퍼플+화이트로 통일.
+ * (bg-[#FEE500]/text-[...] 유틸보다 특이도가 높아 스코프 안에서만 덮어쓴다.)
+ */
+.power-theme .cta-kakao {
+  background-color: var(--color-accent);
+  color: #ffffff;
 }
 
 html {

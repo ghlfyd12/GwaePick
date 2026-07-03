@@ -72,7 +72,9 @@ export default function Header() {
           <div className="flex shrink-0 items-baseline gap-2">
             <Link
               href={logoHref}
-              className="text-lg font-bold text-[#FF7A59] md:text-3xl lg:text-4xl xl:text-5xl"
+              className={`text-lg font-bold md:text-3xl lg:text-4xl xl:text-5xl ${
+                isPower ? "text-accent" : "text-[#FF7A59]"
+              }`}
               onClick={closeAll}
             >
               {brandName}
