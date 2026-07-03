@@ -1391,7 +1391,7 @@ export const languageTeachers: LanguageTeacher[] = [
   },
   {
     id: "cn-11",
-    name: "최*계월",
+    name: "최*월",
     language: "chinese",
     type: "korean",
     photo: `${CHINESE}/11.png`,
