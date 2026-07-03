@@ -77,6 +77,8 @@ export const site = {
     email: "kar9777@naver.com",
     hours: "매일 09:00 - 23:00 / 주말 상담 가능",
     kakao: "@studykim",
+    /** 카카오톡 채널 URL — 플로팅 '카톡 문의' 버튼 링크. 채널 주소 확정 시 이 값만 교체. */
+    kakaoChannelUrl: "https://여기에_채널주소_입력",
   },
 
   /** 푸터 저작권 표기 연도 */

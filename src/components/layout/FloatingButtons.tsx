@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { site } from "@/data/site";
 
 /*
  * 우측 하단 고정 플로팅 버튼.
@@ -66,6 +67,25 @@ export default function FloatingButtons() {
           <path d="M12 19V5M5 12l7-7 7 7" />
         </svg>
       </button>
+
+      {/* 카톡 문의 — 항상 표시, 새 탭으로 카카오톡 채널 열기. 카카오 브랜드색(노랑+검정). */}
+      <a
+        href={site.contact.kakaoChannelUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="카카오톡으로 상담 문의"
+        className="inline-flex min-h-12 items-center gap-2 rounded-full bg-[#FEE500] px-5 font-semibold text-black shadow-lg transition-[filter] hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+      >
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          className="h-5 w-5"
+          fill="currentColor"
+        >
+          <path d="M12 3C6.48 3 2 6.48 2 11c0 2.5 1.36 4.73 3.5 6.19 0 .7-.35 1.9-.7 2.66-.12.26.09.53.36.46.02 0 .04-.01.06-.02 1.2-.5 2.44-1.06 3.02-1.4.86.2 1.77.31 2.7.31 5.52 0 10-3.48 10-8s-4.48-8-10-8z" />
+        </svg>
+        <span>카톡 문의</span>
+      </a>
 
       {/* 상담전화연결 — 항상 표시, tel: 전화 걸기 */}
       <a
