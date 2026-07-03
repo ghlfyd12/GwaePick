@@ -39,18 +39,31 @@ export const TYPE_LABEL: Record<LanguageTeacher["type"], string> = {
   korean: "한국인",
 };
 
-/** 그룹 렌더 순서(데이터 있는 그룹만 노출). 언어/유형 추가 시 여기 순서만 관리. */
-export const TEACHER_GROUP_ORDER: {
+/**
+ * 표시 그룹(필터 칩·카드 배지 기준). 데이터 있는 그룹만 노출.
+ *  - 영어는 원어민/한국인으로 분리, 일본어·중국어는 유형 구분 없이 언어 하나로 합친다.
+ *  - types 지정 시 해당 유형만; 생략하면 그 언어 전체(원어민·한국인 포함).
+ */
+export type TeacherDisplayGroup = {
+  key: string;
+  label: string;
   language: LanguageTeacher["language"];
-  type: LanguageTeacher["type"];
-}[] = [
-  { language: "english", type: "native" },
-  { language: "english", type: "korean" },
-  { language: "chinese", type: "native" },
-  { language: "chinese", type: "korean" },
-  { language: "japanese", type: "native" },
-  { language: "japanese", type: "korean" },
+  types?: LanguageTeacher["type"][];
+};
+export const TEACHER_DISPLAY_GROUPS: TeacherDisplayGroup[] = [
+  { key: "english-native", label: "영어 원어민", language: "english", types: ["native"] },
+  { key: "english-korean", label: "영어 한국인", language: "english", types: ["korean"] },
+  { key: "chinese", label: "중국어", language: "chinese" },
+  { key: "japanese", label: "일본어", language: "japanese" },
 ];
+
+/** 교사가 해당 표시 그룹에 속하는지. */
+export function teacherInGroup(
+  t: LanguageTeacher,
+  g: TeacherDisplayGroup,
+): boolean {
+  return t.language === g.language && (!g.types || g.types.includes(t.type));
+}
 
 const EN_NATIVE = "/teachers/english-native";
 const EN_KOREAN = "/teachers/english-korean";

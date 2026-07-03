@@ -3,9 +3,8 @@
 import { useMemo, useState } from "react";
 import TeacherCard from "./TeacherCard";
 import {
-  LANGUAGE_LABEL,
-  TYPE_LABEL,
-  TEACHER_GROUP_ORDER,
+  TEACHER_DISPLAY_GROUPS,
+  teacherInGroup,
   type LanguageTeacher,
 } from "@/data/languageTeachers";
 
@@ -25,16 +24,12 @@ export default function TeacherList({
 }: {
   teachers: LanguageTeacher[];
 }) {
-  // 데이터가 있는 그룹만(순서 = TEACHER_GROUP_ORDER).
+  // 데이터가 있는 표시 그룹만(영어는 원어민/한국인 분리, 일본어·중국어는 합침).
   const groups = useMemo(
     () =>
-      TEACHER_GROUP_ORDER.map((g) => ({
-        key: `${g.language}-${g.type}`,
-        language: g.language,
-        type: g.type,
-        count: teachers.filter(
-          (t) => t.language === g.language && t.type === g.type,
-        ).length,
+      TEACHER_DISPLAY_GROUPS.map((g) => ({
+        ...g,
+        count: teachers.filter((t) => teacherInGroup(t, g)).length,
       })).filter((g) => g.count > 0),
     [teachers],
   );
@@ -42,14 +37,16 @@ export default function TeacherList({
   const [selected, setSelected] = useState<string>(ALL);
   const [visible, setVisible] = useState(INITIAL);
 
-  // 그룹 순서대로 평탄화 후, 선택 칩에 맞게 필터.
+  // 그룹 순서대로 평탄화(카드 배지 = 그룹 라벨) 후, 선택 칩에 맞게 필터.
   const filtered = useMemo(() => {
     const ordered = groups.flatMap((g) =>
-      teachers.filter((t) => t.language === g.language && t.type === g.type),
+      teachers
+        .filter((t) => teacherInGroup(t, g))
+        .map((t) => ({ teacher: t, badge: g.label, groupKey: g.key })),
     );
     return selected === ALL
       ? ordered
-      : ordered.filter((t) => `${t.language}-${t.type}` === selected);
+      : ordered.filter((x) => x.groupKey === selected);
   }, [groups, teachers, selected]);
 
   const shown = filtered.slice(0, visible);
@@ -89,7 +86,7 @@ export default function TeacherList({
               onClick={() => pick(g.key)}
               className={chipClass(selected === g.key)}
             >
-              {LANGUAGE_LABEL[g.language]} {TYPE_LABEL[g.type]}
+              {g.label}
             </button>
           </li>
         ))}
@@ -97,8 +94,8 @@ export default function TeacherList({
 
       {/* 카드 그리드 — 모바일 2열 → 태블릿 3열 → 데스크톱 4열 */}
       <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
-        {shown.map((t) => (
-          <TeacherCard key={t.id} teacher={t} />
+        {shown.map((x) => (
+          <TeacherCard key={x.teacher.id} teacher={x.teacher} badge={x.badge} />
         ))}
       </ul>
 

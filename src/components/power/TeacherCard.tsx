@@ -2,11 +2,7 @@
 
 import { useState } from "react";
 import SafeImage from "@/components/SafeImage";
-import {
-  LANGUAGE_LABEL,
-  TYPE_LABEL,
-  type LanguageTeacher,
-} from "@/data/languageTeachers";
+import type { LanguageTeacher } from "@/data/languageTeachers";
 
 /*
  * TeacherCard — 어학 교사 콤팩트 카드(/power/teachers 전용, 메인 사이트 미사용).
@@ -14,13 +10,18 @@ import {
  *    한 줄 요약(headline 또는 원어민 좌우명, line-clamp-2) → 수업 방식 칩.
  *  - 상세(이력·전문분야·학력/강점/경력)는 기본 접힘, "자세히" 토글로 펼침.
  */
-export default function TeacherCard({ teacher }: { teacher: LanguageTeacher }) {
+export default function TeacherCard({
+  teacher,
+  badge,
+}: {
+  teacher: LanguageTeacher;
+  badge: string;
+}) {
   const [open, setOpen] = useState(false);
   const initial = teacher.name.trim().charAt(0) || "·";
   const modes = teacher.lessonModes ?? [];
   const credentials = teacher.credentials ?? [];
   const specialties = teacher.specialties ?? [];
-  const badge = `${LANGUAGE_LABEL[teacher.language]} ${TYPE_LABEL[teacher.type]}`;
   // 요약 한 줄: 한국인은 headline, 원어민은 좌우명(motto).
   const summary = teacher.headline ?? teacher.motto;
   // 원어민 상세(좌우명은 요약으로 노출하므로 제외).
