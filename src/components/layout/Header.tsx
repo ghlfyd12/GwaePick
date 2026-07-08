@@ -16,14 +16,15 @@ const POWER_BRAND = "어학의참견";
 /*
  * /power 전용 내비 전체 목록(메인 site.nav 와 독립).
  *  - 지역별/학교별/과목별 과외 → 영어/일본어/중국어(언어별 상세 라우트).
- *  - 교사진·수업후기 → /power 전용 라우트(어학의참견은 비어 있고, 메인 /teachers·/reviews 는 그대로).
+ *  - 교사진 → /power 전용 라우트(메인 /teachers 는 그대로).
+ *  - 학습사례 → /power 페이지의 학습사례 섹션(#cases) 으로 스크롤 이동(별도 라우트 없음).
  */
 const POWER_NAV: NavItem[] = [
   { label: "영어", href: "/power/english" },
   { label: "일본어", href: "/power/japanese" },
   { label: "중국어", href: "/power/chinese" },
   { label: "교사진", href: "/power/teachers" },
-  { label: "수업후기", href: "/power/reviews" },
+  { label: "학습사례", href: "/power#cases" },
 ];
 
 /*

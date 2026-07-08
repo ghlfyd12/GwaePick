@@ -287,10 +287,11 @@ export default function PowerPage() {
         </div>
       </section>
 
-      {/* ── 어학 학습사례 (검색용, 별점·날짜·실명 없음) ──────────────── */}
+      {/* ── 어학 학습사례 (검색용, 별점·날짜·실명 없음) — 헤더 내비 "학습사례"(#cases) 대상 ── */}
       <section
+        id="cases"
         aria-labelledby="power-cases-heading"
-        className="border-t border-line bg-surface px-5 py-14 sm:px-6 sm:py-20"
+        className="scroll-mt-28 border-t border-line bg-surface px-5 py-14 sm:px-6 sm:py-20"
       >
         <div className="mx-auto max-w-5xl">
           <div className="text-center">

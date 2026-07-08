@@ -8,6 +8,14 @@ import type { NextConfig } from "next";
 const SITEMAP_ALIAS_COUNT = 4;
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      // 어학의참견: 빈 "수업후기"(/power/reviews) 라우트 제거 → /power 학습사례 섹션으로 통합.
+      // [region] 동적 라우트(dynamicParams)가 /power/reviews 를 지역 페이지로 오인 렌더하지 않도록
+      // 명시적으로 학습사례 앵커로 영구 리다이렉트한다(기존 유입·색인 URL 보존).
+      { source: "/power/reviews", destination: "/power#cases", permanent: true },
+    ];
+  },
   async rewrites() {
     return {
       // 파일시스템 라우팅보다 먼저 적용 — /sitemap.xml 을 사이트맵 인덱스 라우트로 서빙.
