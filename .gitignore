@@ -40,3 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .geo-tmp/
+
+# claude — 개인 로컬 설정만 무시(.claude/ 전체·CLAUDE.md·launch.json 등은 계속 추적)
+.claude/settings.local.json
