@@ -13,6 +13,25 @@ export type SchoolContext = {
   sigunguSlug: string;
 };
 
+/**
+ * 전국에서 같은 이름이 2곳 이상인 학교명 집합(모듈 1회 계산, 캐시).
+ * slug 에 지역 접미사가 붙는 이유가 바로 이 동명이교 충돌이므로,
+ * title 에 지역명을 덧붙일지 판단하는 기준으로 쓴다.
+ */
+let ambiguousNames: Set<string> | null = null;
+export function isAmbiguousSchoolName(name: string): boolean {
+  if (!ambiguousNames) {
+    const count = new Map<string, number>();
+    for (const sido of SCHOOLS)
+      for (const sg of sido.sigungu)
+        for (const s of sg.schools) count.set(s.name, (count.get(s.name) ?? 0) + 1);
+    ambiguousNames = new Set(
+      [...count].filter(([, n]) => n > 1).map(([n]) => n),
+    );
+  }
+  return ambiguousNames.has(name);
+}
+
 export function findSchoolBySlug(slug: string): SchoolContext | null {
   for (const sido of SCHOOLS) {
     for (const sg of sido.sigungu) {

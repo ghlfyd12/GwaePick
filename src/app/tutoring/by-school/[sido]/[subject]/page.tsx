@@ -1,10 +1,23 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import SchoolSubjectDetail from "@/components/SchoolSubjectDetail";
+import JsonLd from "@/components/JsonLd";
 import { subjects, subjectBySlug } from "@/data/subjects";
 import { SCHOOLS, LEVEL_LABEL } from "@/data/schools";
-import { findSchoolBySlug, sameRegionSchools } from "@/lib/findSchool";
+import {
+  findSchoolBySlug,
+  sameRegionSchools,
+  isAmbiguousSchoolName,
+} from "@/lib/findSchool";
 import { expandSchoolName } from "@/lib/schoolName";
+import { buildSchoolFaq } from "@/data/schoolDetailCopy";
+import {
+  buildSchoolMeta,
+  shortRegion,
+  serviceJsonLd,
+  breadcrumbJsonLd,
+  faqJsonLd,
+} from "@/lib/seo";
 
 /*
  * 학교×과목 상세 — /tutoring/by-school/[학교slug]/[과목]. 지역 상세와 동일 골격.
@@ -44,27 +57,15 @@ export async function generateMetadata({
   const r = resolve(sido, subject);
   if (!r) return {};
   const { ctx, subject: subj } = r;
-  const name = ctx.school.name;
-  const region = ctx.sigunguName;
-  // 약칭 → 정식명(안전 목록). 정식명이 있으면 "{시군구} {정식명}", 없으면 "{시군구}"만.
-  const fullName = expandSchoolName(name);
-  const regionPart = fullName ? `${region} ${fullName}` : region;
-  const title = `${name} ${subj.label} 과외 — ${regionPart} 1:1 맞춤 개인과외 수업 | 지식의참견`;
-  const description = `${region} ${name} ${subj.label} 1:1 맞춤 개인과외. 직접 가르쳐 온 선생님이 ${name} 학생에게 맞는 ${subj.label} 선생님을 연결해 드립니다. 내신 진도와 시험 범위에 맞춰 수업합니다.`;
-  const canonical = `/tutoring/by-school/${ctx.school.slug}/${subj.slug}`;
-  return {
-    title: { absolute: title },
-    description,
-    keywords: [
-      `${name} ${subj.label}과외`,
-      `${name} ${subj.label}`,
-      `${region} ${subj.label}`,
-      `${name} 과외`,
-    ],
-    alternates: { canonical },
-    openGraph: { title, description, url: canonical, type: "website" },
-    twitter: { card: "summary_large_image", title, description },
-  };
+  return buildSchoolMeta({
+    schoolName: ctx.school.name,
+    subjectLabel: subj.label,
+    // 동명이교(지역 접미사 slug)만 title 앞에 짧은 지역명을 붙여 검색어와 어순을 맞춘다.
+    regionShort: isAmbiguousSchoolName(ctx.school.name)
+      ? shortRegion(ctx.sigunguName)
+      : undefined,
+    canonicalPath: `/tutoring/by-school/${ctx.school.slug}/${subj.slug}`,
+  });
 }
 
 export default async function SchoolSubjectPage({
@@ -77,8 +78,29 @@ export default async function SchoolSubjectPage({
   if (!r) notFound();
   const { ctx, subject: subj } = r;
 
+  const canonical = `/tutoring/by-school/${ctx.school.slug}/${subj.slug}`;
+  const regionShort = isAmbiguousSchoolName(ctx.school.name)
+    ? shortRegion(ctx.sigunguName)
+    : "";
+  const jsonLd = [
+    serviceJsonLd({
+      subjectLabel: subj.label,
+      areaServed: ctx.sigunguName,
+      canonicalPath: canonical,
+    }),
+    breadcrumbJsonLd([
+      { name: "홈", path: "/" },
+      { name: "학교별 과외", path: "/tutoring/by-school" },
+      { name: `${regionShort ? regionShort + " " : ""}${ctx.school.name} ${subj.label}과외` },
+    ]),
+    // FAQPage — SchoolSubjectDetail 이 실제로 렌더링하는 Q&A(buildSchoolFaq)와 동일 소스.
+    faqJsonLd(buildSchoolFaq(ctx.school.name)),
+  ];
+
   return (
-    <SchoolSubjectDetail
+    <>
+      <JsonLd data={jsonLd} />
+      <SchoolSubjectDetail
       schoolSlug={ctx.school.slug}
       schoolName={ctx.school.name}
       schoolFullName={expandSchoolName(ctx.school.name)}
@@ -88,6 +110,7 @@ export default async function SchoolSubjectPage({
       sigunguName={ctx.sigunguName}
       subject={subj}
       otherSchools={sameRegionSchools(ctx, 13)}
-    />
+      />
+    </>
   );
 }

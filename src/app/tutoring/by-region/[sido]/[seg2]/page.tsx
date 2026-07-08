@@ -5,8 +5,16 @@ import LinkToggleGrid from "@/components/LinkToggleGrid";
 import SubjectChips from "@/components/SubjectChips";
 import ConsultForm from "@/components/ConsultForm";
 import RelatedKeywords from "@/components/RelatedKeywords";
+import JsonLd from "@/components/JsonLd";
 import { getSido } from "@/data/sidoRegions";
 import { buildRegionContent } from "@/lib/regionContent";
+import {
+  buildRegionMeta,
+  serviceJsonLd,
+  breadcrumbJsonLd,
+  breadcrumbJsonLdFromNav,
+  faqJsonLd,
+} from "@/lib/seo";
 import {
   subjects,
   subjectBySlug,
@@ -44,25 +52,20 @@ export async function generateMetadata({
   if (sidoKey === PSEO_SIDO) {
     const subj = subjectBySlug[slugKey(seg2)];
     if (!subj) return {};
-    const c = buildRegionContent({
-      sidoLabel: gyeonggi.sidoLabel,
-      subjectLabel: subj.label,
+    return buildRegionMeta({
+      regionName: gyeonggi.sidoLabel,
+      subjectPhrase: subj.label,
+      canonicalPath: pseoHref.sidoSubject(subj.slug),
     });
-    return {
-      title: { absolute: c.metaTitle },
-      description: c.metaDescription,
-      alternates: { canonical: pseoHref.sidoSubject(subj.slug) },
-      openGraph: { title: c.ogTitle, description: c.metaDescription },
-    };
   }
   if (sidoKey === "seoul") {
     const gu = districts.find((d) => d.slug === slugKey(seg2));
     if (!gu) return {};
-    return {
-      title: `${gu.name} 1:1 과외`,
-      description: `${gu.name} 1:1 맞춤 과외. 직접 가르쳐 본 상담 선생님이 호흡 맞는 선생님을 연결합니다.`,
-      alternates: { canonical: `/tutoring/by-region/seoul/${gu.slug}` },
-    };
+    // 서울 구 페이지는 과목 없는 지역 허브 → subjectPhrase 생략.
+    return buildRegionMeta({
+      regionName: gu.name,
+      canonicalPath: `/tutoring/by-region/seoul/${gu.slug}`,
+    });
   }
   return {};
 }
@@ -96,7 +99,19 @@ export default async function Seg2Page({
         href: pseoHref.sigunguSubject(sg.slug, subj.slug),
       }));
 
+    const jsonLd = [
+      serviceJsonLd({
+        subjectLabel: subj.label,
+        areaServed: gyeonggi.sidoLabel,
+        canonicalPath: pseoHref.sidoSubject(subj.slug),
+      }),
+      breadcrumbJsonLdFromNav(breadcrumb),
+      faqJsonLd(content.faq),
+    ];
+
     return (
+      <>
+      <JsonLd data={jsonLd} />
       <PseoLanding
         content={content}
         breadcrumb={breadcrumb}
@@ -113,6 +128,7 @@ export default async function Seg2Page({
           />
         </div>
       </PseoLanding>
+      </>
     );
   }
 
@@ -124,8 +140,20 @@ export default async function Seg2Page({
     const guDongs =
       getSido("seoul")?.sigungu.find((s) => s.name === gu.name)?.dong ?? [];
     const neighborDongs = guDongs.slice(0, 6).map((d) => d.name);
+    const jsonLd = [
+      serviceJsonLd({
+        areaServed: gu.name,
+        canonicalPath: `/tutoring/by-region/seoul/${gu.slug}`,
+      }),
+      breadcrumbJsonLd([
+        { name: "홈", path: "/" },
+        { name: "지역별 과외", path: "/tutoring/by-region" },
+        { name: `${gu.name} 과외` },
+      ]),
+    ];
     return (
       <>
+        <JsonLd data={jsonLd} />
         <section className="border-b border-line bg-surface px-4 py-14 text-center sm:px-6 sm:py-16">
           <p className="text-sm font-semibold uppercase tracking-widest text-accent">
             서울 지역별 과외

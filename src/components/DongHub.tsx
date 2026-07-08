@@ -4,7 +4,6 @@ import ConsultForm from "@/components/ConsultForm";
 import SubjectTabs from "@/components/SubjectTabs";
 import RelatedKeywords from "@/components/RelatedKeywords";
 import { subjects } from "@/data/subjects";
-import { site } from "@/data/site";
 import {
   CONSULT_PHONE,
   STEPS,
@@ -59,45 +58,10 @@ export default function DongHub({
     .slice(0, 12)
     .map((d) => ({ label: d.name, href: dongHref(sidoSlug, sigungu.slug, d.slug) }));
 
-  // JSON-LD
-  const base = site.url.replace(/\/$/, "");
-  const hubPath = `/tutoring/by-region/${sidoSlug}/${sigungu.slug}/${dong.slug}`;
-  const faqJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: faq.map((f) => ({
-      "@type": "Question",
-      name: f.q,
-      acceptedAnswer: { "@type": "Answer", text: f.a },
-    })),
-  };
-  const breadcrumbJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { name: "지역별", url: `${base}/tutoring/by-region` },
-      { name: sidoLabel, url: `${base}/tutoring/by-region/${sidoSlug}` },
-      { name: sigungu.name, url: `${base}/tutoring/by-region/${sidoSlug}` },
-      { name: dong.name, url: `${base}${hubPath}` },
-    ].map((it, i) => ({
-      "@type": "ListItem",
-      position: i + 1,
-      name: it.name,
-      item: it.url,
-    })),
-  };
+  // JSON-LD(Service·FAQPage·BreadcrumbList)는 라우트 레벨(lib/seo.ts)에서 중앙 삽입한다(중복 제거).
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-      />
-
       {/* 브레드크럼 */}
       <nav aria-label="현재 위치" className="border-b border-line bg-white px-4 py-3 sm:px-6">
         <ol className="mx-auto flex max-w-5xl flex-wrap items-center gap-1 text-sm text-muted">

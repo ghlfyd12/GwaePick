@@ -13,8 +13,16 @@ import {
 } from "@/data/pseo";
 import { gyeonggi, sigunguBySlug } from "@/data/gyeonggi";
 import { getSido } from "@/data/sidoRegions";
-import { PILOT } from "@/data/dongPageCopy";
+import { PILOT, buildFaq } from "@/data/dongPageCopy";
 import DongHub from "@/components/DongHub";
+import JsonLd from "@/components/JsonLd";
+import {
+  buildRegionMeta,
+  serviceJsonLd,
+  breadcrumbJsonLd,
+  breadcrumbJsonLdFromNav,
+  faqJsonLd,
+} from "@/lib/seo";
 
 /*
  * 3-seg — 두 갈래:
@@ -70,29 +78,19 @@ export async function generateMetadata({
   const { sido, seg2, seg3 } = await params;
   const r = resolve(sido, seg2, seg3);
   if (r) {
-    const c = buildRegionContent({
-      sidoLabel: gyeonggi.sidoLabel,
-      sigunguLabel: r.sg.name,
-      subjectLabel: r.subj.label,
+    return buildRegionMeta({
+      regionName: r.sg.name,
+      subjectPhrase: r.subj.label,
+      canonicalPath: pseoHref.sigunguSubject(r.sg.slug, r.subj.slug),
     });
-    return {
-      title: { absolute: c.metaTitle },
-      description: c.metaDescription,
-      alternates: { canonical: pseoHref.sigunguSubject(r.sg.slug, r.subj.slug) },
-      openGraph: { title: c.ogTitle, description: c.metaDescription },
-    };
   }
   const rh = resolveHub(sido, seg2, seg3);
   if (rh) {
-    const title = `${rh.dong.name} 1:1 과외 — ${rh.sg.name} 개인과외 수업 | 지식의참견`;
-    const description = `${rh.sg.name} ${rh.dong.name} 1:1 맞춤 개인과외. 과목을 선택해 ${rh.dong.name} 학생에게 맞는 선생님을 만나보세요.`;
-    return {
-      title: { absolute: title },
-      description,
-      alternates: {
-        canonical: `/tutoring/by-region/${rh.sidoSlug}/${rh.sg.slug}/${rh.dong.slug}`,
-      },
-    };
+    // 동 허브 — 과목 선택 전 단계 → subjectPhrase 생략(지역 허브 메타).
+    return buildRegionMeta({
+      regionName: rh.dong.name,
+      canonicalPath: `/tutoring/by-region/${rh.sidoSlug}/${rh.sg.slug}/${rh.dong.slug}`,
+    });
   }
   return {};
 }
@@ -112,14 +110,29 @@ export default async function Seg3Page({
       .filter((d) => d.slug !== rh.dong.slug)
       .slice(0, 6)
       .map((d) => d.name);
+    const jsonLd = [
+      serviceJsonLd({
+        areaServed: rh.dong.name,
+        canonicalPath: `/tutoring/by-region/${rh.sidoSlug}/${rh.sg.slug}/${rh.dong.slug}`,
+      }),
+      breadcrumbJsonLd([
+        { name: "홈", path: "/" },
+        { name: "지역별 과외", path: "/tutoring/by-region" },
+        { name: `${rh.dong.name} 과외` },
+      ]),
+      faqJsonLd(buildFaq(rh.dong.name)),
+    ];
     return (
-      <DongHub
-        sidoSlug={rh.sidoSlug}
-        sidoLabel={rh.sidoLabel}
-        sigungu={rh.sg}
-        dong={rh.dong}
-        neighborDongs={neighborDongs}
-      />
+      <>
+        <JsonLd data={jsonLd} />
+        <DongHub
+          sidoSlug={rh.sidoSlug}
+          sidoLabel={rh.sidoLabel}
+          sigungu={rh.sg}
+          dong={rh.dong}
+          neighborDongs={neighborDongs}
+        />
+      </>
     );
   }
 
@@ -143,7 +156,19 @@ export default async function Seg3Page({
     href: pseoHref.dongSubject(sg.slug, d.slug, subj.slug),
   }));
 
+  const jsonLd = [
+    serviceJsonLd({
+      subjectLabel: subj.label,
+      areaServed: sg.name,
+      canonicalPath: pseoHref.sigunguSubject(sg.slug, subj.slug),
+    }),
+    breadcrumbJsonLdFromNav(breadcrumb),
+    faqJsonLd(content.faq),
+  ];
+
   return (
+    <>
+    <JsonLd data={jsonLd} />
     <PseoLanding
       content={content}
       breadcrumb={breadcrumb}
@@ -163,5 +188,6 @@ export default async function Seg3Page({
         />
       </div>
     </PseoLanding>
+    </>
   );
 }

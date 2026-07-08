@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import ConsultForm from "@/components/ConsultForm";
 import type { Subject } from "@/data/subjects";
-import { site } from "@/data/site";
 import { CONSULT_PHONE, STEPS, TRUST } from "@/data/dongPageCopy";
 import { buildSubjectFaq } from "@/data/subjectDetailCopy";
 import { buildSubjectKeywords } from "@/data/subjectKeywords";
@@ -21,43 +20,10 @@ export default function SubjectDetail({ subject }: { subject: Subject }) {
   const keywords = buildSubjectKeywords(subject.slug);
   const consultMessage = `${subject.label} 과외 문의드립니다.`;
 
-  // JSON-LD (FAQ + breadcrumb)
-  const base = site.url.replace(/\/$/, "");
-  const detailPath = `/tutoring/by-subject/${subject.slug}`;
-  const faqJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: faq.map((f) => ({
-      "@type": "Question",
-      name: f.q,
-      acceptedAnswer: { "@type": "Answer", text: f.a },
-    })),
-  };
-  const breadcrumbJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { name: "과목별", url: `${base}/tutoring/by-subject` },
-      { name: `${subject.label} 과외`, url: `${base}${detailPath}` },
-    ].map((it, i) => ({
-      "@type": "ListItem",
-      position: i + 1,
-      name: it.name,
-      item: it.url,
-    })),
-  };
+  // JSON-LD(FAQPage·BreadcrumbList)는 라우트 레벨(lib/seo.ts)에서 중앙 삽입한다(중복 제거).
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-      />
-
       {/* 브레드크럼 */}
       <nav aria-label="현재 위치" className="border-b border-line bg-white px-4 py-3 sm:px-6">
         <ol className="mx-auto flex max-w-3xl flex-wrap items-center gap-1 text-sm text-muted">

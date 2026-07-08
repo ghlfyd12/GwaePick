@@ -1,7 +1,15 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import SubjectDetail from "@/components/SubjectDetail";
+import JsonLd from "@/components/JsonLd";
 import { subjects, subjectBySlug } from "@/data/subjects";
+import { buildSubjectFaq } from "@/data/subjectDetailCopy";
+import {
+  buildSubjectMeta,
+  serviceJsonLd,
+  breadcrumbJsonLd,
+  faqJsonLd,
+} from "@/lib/seo";
 
 /*
  * 과목 단독 상세 — /tutoring/by-subject/[subject](영문 slug).
@@ -23,17 +31,10 @@ export async function generateMetadata({
   const { subject } = await params;
   const subj = subjectBySlug[slugKey(subject)];
   if (!subj) return {};
-  const title = `${subj.label} 과외 — 1:1 맞춤 개인과외 | 지식의참견`;
-  const description = `${subj.label} 1:1 맞춤 개인과외. 직접 가르쳐 온 선생님이 학생 수준에 맞는 ${subj.label} 선생님을 연결해 드립니다. 진단부터 내신·서술형까지 단계별로 관리합니다.`;
-  const canonical = `/tutoring/by-subject/${subj.slug}`;
-  return {
-    title: { absolute: title },
-    description,
-    keywords: [`${subj.label}과외`, `${subj.label} 1:1 과외`, `${subj.label} 개인과외`, `${subj.label} 내신`],
-    alternates: { canonical },
-    openGraph: { title, description, url: canonical, type: "website" },
-    twitter: { card: "summary_large_image", title, description },
-  };
+  return buildSubjectMeta({
+    subjectLabel: subj.label,
+    canonicalPath: `/tutoring/by-subject/${subj.slug}`,
+  });
 }
 
 export default async function SubjectPage({
@@ -44,5 +45,23 @@ export default async function SubjectPage({
   const { subject } = await params;
   const subj = subjectBySlug[slugKey(subject)];
   if (!subj) notFound();
-  return <SubjectDetail subject={subj} />;
+
+  const canonical = `/tutoring/by-subject/${subj.slug}`;
+  const jsonLd = [
+    serviceJsonLd({ subjectLabel: subj.label, canonicalPath: canonical }),
+    breadcrumbJsonLd([
+      { name: "홈", path: "/" },
+      { name: "과목별 과외", path: "/tutoring/by-subject" },
+      { name: `${subj.label}과외` },
+    ]),
+    // FAQPage — SubjectDetail 이 렌더링하는 Q&A(buildSubjectFaq)와 동일 소스.
+    faqJsonLd(buildSubjectFaq(subj.label)),
+  ];
+
+  return (
+    <>
+      <JsonLd data={jsonLd} />
+      <SubjectDetail subject={subj} />
+    </>
+  );
 }

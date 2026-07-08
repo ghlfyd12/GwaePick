@@ -3,7 +3,6 @@ import Link from "next/link";
 import ConsultForm from "@/components/ConsultForm";
 import type { Subject } from "@/data/subjects";
 import SubjectTabs from "@/components/SubjectTabs";
-import { site } from "@/data/site";
 import { CONSULT_PHONE, STEPS, TRUST, REVIEW_PLACEHOLDERS } from "@/data/dongPageCopy";
 import {
   buildSchoolIntro,
@@ -68,66 +67,11 @@ export default function SchoolSubjectDetail({
     .slice(0, 12)
     .map((s) => ({ label: s.name, href: schoolDetailHref(s.slug, subject.slug) }));
 
-  // JSON-LD
-  const base = site.url.replace(/\/$/, "");
-  const detailPath = `/tutoring/by-school/${schoolSlug}/${subject.slug}`;
-  // 과외 서비스(Service) — 검색엔진이 "이 학교 과외 서비스" 로 이해하도록.
-  // areaServed=지역, provider=지식의참견. 평점/후기는 실제 데이터가 없어 넣지 않는다(허위 금지).
-  const serviceJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Service",
-    serviceType: `${subject.label} 1:1 맞춤 개인과외`,
-    name: `${schoolName} ${subject.label} 과외`,
-    description: `${region} ${schoolName} 학생을 위한 ${subject.label} 1:1 맞춤 개인과외. 내신 진도와 시험 범위에 맞춰 수업합니다.`,
-    url: `${base}${detailPath}`,
-    areaServed: { "@type": "Place", name: region },
-    audience: { "@type": "EducationalAudience", educationalRole: "student" },
-    provider: {
-      "@type": "EducationalOrganization",
-      name: site.name,
-      url: base,
-    },
-  };
-  const faqJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: faq.map((f) => ({
-      "@type": "Question",
-      name: f.q,
-      acceptedAnswer: { "@type": "Answer", text: f.a },
-    })),
-  };
-  const breadcrumbJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { name: "학교별", url: `${base}/tutoring/by-school` },
-      { name: region, url: `${base}/tutoring/by-school/${sidoSlug}` },
-      { name: schoolName, url: `${base}${detailPath}` },
-      { name: `${subject.label} 과외`, url: `${base}${detailPath}` },
-    ].map((it, i) => ({
-      "@type": "ListItem",
-      position: i + 1,
-      name: it.name,
-      item: it.url,
-    })),
-  };
+  // JSON-LD(Service·FAQPage·BreadcrumbList)는 라우트 레벨에서 lib/seo.ts 로 중앙 삽입한다
+  // (컴포넌트 하드코딩 제거 — 중복 스키마 방지).
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceJsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-      />
-
       {/* 브레드크럼 */}
       <nav aria-label="현재 위치" className="border-b border-line bg-white px-4 py-3 sm:px-6">
         <ol className="mx-auto flex max-w-5xl flex-wrap items-center gap-1 text-sm text-muted">

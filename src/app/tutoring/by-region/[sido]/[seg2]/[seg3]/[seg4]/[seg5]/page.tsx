@@ -3,7 +3,14 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import PseoLanding from "@/components/PseoLanding";
 import SubjectChips from "@/components/SubjectChips";
+import JsonLd from "@/components/JsonLd";
 import { buildRegionContent } from "@/lib/regionContent";
+import {
+  buildRegionMeta,
+  serviceJsonLd,
+  breadcrumbJsonLdFromNav,
+  faqJsonLd,
+} from "@/lib/seo";
 import {
   subjectBySlug,
   grades,
@@ -69,26 +76,16 @@ export async function generateMetadata({
   const { sido, seg2, seg3, seg4, seg5 } = await params;
   const r = resolve(sido, seg2, seg3, seg4, seg5);
   if (!r) return {};
-  const c = buildRegionContent({
-    sidoLabel: gyeonggi.sidoLabel,
-    sigunguLabel: r.sg.name,
-    dongLabel: r.dong.name,
-    gradeLabel: r.grade.label,
-    subjectLabel: r.subj.label,
+  return buildRegionMeta({
+    regionName: r.dong.name,
+    subjectPhrase: `${r.grade.label} ${r.subj.label}`,
+    canonicalPath: pseoHref.dongGradeSubject(
+      r.sg.slug,
+      r.dong.slug,
+      r.grade.slug,
+      r.subj.slug,
+    ),
   });
-  return {
-    title: { absolute: c.metaTitle },
-    description: c.metaDescription,
-    alternates: {
-      canonical: pseoHref.dongGradeSubject(
-        r.sg.slug,
-        r.dong.slug,
-        r.grade.slug,
-        r.subj.slug,
-      ),
-    },
-    openGraph: { title: c.ogTitle, description: c.metaDescription },
-  };
 }
 
 export default async function Seg5Page({
@@ -125,7 +122,24 @@ export default async function Seg5Page({
     { label: `${grade.label} ${subj.label}` },
   ];
 
+  const jsonLd = [
+    serviceJsonLd({
+      subjectLabel: subj.label,
+      areaServed: dong.name,
+      canonicalPath: pseoHref.dongGradeSubject(
+        sg.slug,
+        dong.slug,
+        grade.slug,
+        subj.slug,
+      ),
+    }),
+    breadcrumbJsonLdFromNav(breadcrumb),
+    faqJsonLd(content.faq),
+  ];
+
   return (
+    <>
+    <JsonLd data={jsonLd} />
     <PseoLanding
       content={content}
       breadcrumb={breadcrumb}
@@ -168,5 +182,6 @@ export default async function Seg5Page({
         />
       </div>
     </PseoLanding>
+    </>
   );
 }

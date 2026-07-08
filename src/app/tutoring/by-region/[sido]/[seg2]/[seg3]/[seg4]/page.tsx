@@ -19,8 +19,16 @@ import {
   subjects as subjectsEn,
   subjectBySlug as subjectBySlugEn,
 } from "@/data/subjects";
-import { PILOT } from "@/data/dongPageCopy";
+import { PILOT, buildFaq } from "@/data/dongPageCopy";
 import DongSubjectDetail from "@/components/DongSubjectDetail";
+import JsonLd from "@/components/JsonLd";
+import {
+  buildRegionMeta,
+  serviceJsonLd,
+  breadcrumbJsonLd,
+  breadcrumbJsonLdFromNav,
+  faqJsonLd,
+} from "@/lib/seo";
 
 /*
  * 4-seg — 두 갈래:
@@ -85,42 +93,22 @@ export async function generateMetadata({
   // 기존 경기 Korean pSEO
   const r = resolve(sido, seg2, seg3, seg4);
   if (r) {
-    const c = buildRegionContent({
-      sidoLabel: gyeonggi.sidoLabel,
-      sigunguLabel: r.sg.name,
-      dongLabel: r.dong.name,
-      subjectLabel: r.subj.label,
+    return buildRegionMeta({
+      regionName: r.dong.name,
+      subjectPhrase: r.subj.label,
+      canonicalPath: pseoHref.dongSubject(r.sg.slug, r.dong.slug, r.subj.slug),
     });
-    return {
-      title: { absolute: c.metaTitle },
-      description: c.metaDescription,
-      alternates: {
-        canonical: pseoHref.dongSubject(r.sg.slug, r.dong.slug, r.subj.slug),
-      },
-      openGraph: { title: c.ogTitle, description: c.metaDescription },
-    };
   }
 
   // 신규 동×과목 상세
   const rn = resolveNew(sido, seg2, seg3, seg4);
   if (rn) {
     const { sg, dong, subj, sidoSlug } = rn;
-    const title = `${dong.name} ${subj.label} 과외 — ${sg.name} 1:1 맞춤 개인과외 수업 | 지식의참견`;
-    const description = `${sg.name} ${dong.name} ${subj.label} 1:1 맞춤 개인과외. 직접 가르쳐 온 선생님이 ${dong.name} 학생에게 맞는 ${subj.label} 선생님을 연결해 드립니다. 첫 상담은 무료입니다.`;
-    const canonical = `/tutoring/by-region/${sidoSlug}/${sg.slug}/${dong.slug}/${subj.slug}`;
-    return {
-      title: { absolute: title },
-      description,
-      keywords: [
-        `${dong.name} ${subj.label}과외`,
-        `${dong.name} ${subj.label}`,
-        `${sg.name} ${subj.label}`,
-        `${dong.name} 과외`,
-      ],
-      alternates: { canonical },
-      openGraph: { title, description, url: canonical, type: "website" },
-      twitter: { card: "summary_large_image", title, description },
-    };
+    return buildRegionMeta({
+      regionName: dong.name,
+      subjectPhrase: subj.label,
+      canonicalPath: `/tutoring/by-region/${sidoSlug}/${sg.slug}/${dong.slug}/${subj.slug}`,
+    });
   }
   return {};
 }
@@ -135,14 +123,31 @@ export default async function Seg4Page({
   // 신규 동×과목 상세(sidoRegions, 영문 slug)
   const rn = resolveNew(sido, seg2, seg3, seg4);
   if (rn) {
+    const canonical = `/tutoring/by-region/${rn.sidoSlug}/${rn.sg.slug}/${rn.dong.slug}/${rn.subj.slug}`;
+    const jsonLd = [
+      serviceJsonLd({
+        subjectLabel: rn.subj.label,
+        areaServed: rn.dong.name,
+        canonicalPath: canonical,
+      }),
+      breadcrumbJsonLd([
+        { name: "홈", path: "/" },
+        { name: "지역별 과외", path: "/tutoring/by-region" },
+        { name: `${rn.dong.name} ${rn.subj.label}과외` },
+      ]),
+      faqJsonLd(buildFaq(rn.dong.name)),
+    ];
     return (
-      <DongSubjectDetail
-        sidoSlug={rn.sidoSlug}
-        sidoLabel={rn.sidoLabel}
-        sigungu={rn.sg}
-        dong={rn.dong}
-        subject={rn.subj}
-      />
+      <>
+        <JsonLd data={jsonLd} />
+        <DongSubjectDetail
+          sidoSlug={rn.sidoSlug}
+          sidoLabel={rn.sidoLabel}
+          sigungu={rn.sg}
+          dong={rn.dong}
+          subject={rn.subj}
+        />
+      </>
     );
   }
 
@@ -171,7 +176,19 @@ export default async function Seg4Page({
       href: pseoHref.dongSubject(sg.slug, d.slug, subj.slug),
     }));
 
+  const jsonLd = [
+    serviceJsonLd({
+      subjectLabel: subj.label,
+      areaServed: dong.name,
+      canonicalPath: pseoHref.dongSubject(sg.slug, dong.slug, subj.slug),
+    }),
+    breadcrumbJsonLdFromNav(breadcrumb),
+    faqJsonLd(content.faq),
+  ];
+
   return (
+    <>
+    <JsonLd data={jsonLd} />
     <PseoLanding
       content={content}
       breadcrumb={breadcrumb}
@@ -211,5 +228,6 @@ export default async function Seg4Page({
         </div>
       )}
     </PseoLanding>
+    </>
   );
 }
