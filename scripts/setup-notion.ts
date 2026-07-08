@@ -26,7 +26,7 @@ if (!NOTION_API_KEY || !NOTION_PARENT_PAGE_ID) {
 }
 
 const notion = new Client({ auth: NOTION_API_KEY });
-const DB_TITLE = "지식의 참견 - 실시간 과외 상담 접수 현황";
+const DB_TITLE = "지식의 참견 - 실시간 상담 접수 대장";
 
 /** .env.local 에 key 를 기록(있으면 값 교체, 없으면 끝에 추가). */
 function writeEnv(key: string, value: string) {
