@@ -13,6 +13,7 @@ import {
   neighborDongs,
   dongHref,
 } from "@/data/dongPageCopy";
+import { gradeBlock } from "@/data/gradeContent";
 
 /*
  * DongSubjectDetail — 동×과목 상세 페이지(서버 컴포넌트, 파일럿 pSEO).
@@ -48,6 +49,8 @@ export default function DongSubjectDetail({
     dong.slug,
   );
   const faq = buildFaq(dong.name);
+  // 학년 블록(변주) — 동 slug + 과목으로 3종 중 1종 선택(gradeContent). 미등록 과목이면 미노출.
+  const gradeText = gradeBlock(subject.slug, dong.slug);
   const consultMessage = `${sigungu.name} ${dong.name} ${subject.label} 과외 문의드립니다.`;
 
   // 내부 링크
@@ -151,6 +154,18 @@ export default function DongSubjectDetail({
             </div>
           )}
         </section>
+
+        {/* 4-1. 학년별 학습 목표(학년 변주 블록) — 학년+과목 검색어 부분매칭 커버 */}
+        {gradeText && (
+          <section>
+            <h2 className="break-keep text-xl font-bold text-ink sm:text-2xl">
+              {dong.name} 학년별 {subject.label} 학습 목표
+            </h2>
+            <p className="mt-3 break-keep text-base leading-relaxed text-muted sm:text-lg">
+              {gradeText}
+            </p>
+          </section>
+        )}
 
         {/* 5. 진행 순서 STEP */}
         <section>

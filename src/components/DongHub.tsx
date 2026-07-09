@@ -44,7 +44,7 @@ export default function DongHub({
   neighborDongs?: string[];
 }) {
   const intro = buildHubIntro(sigungu.name, dong.name);
-  const strategyCards = buildHubStrategy(dong.name);
+  const strategyCards = buildHubStrategy(dong.name, dong.slug);
   const faq = buildFaq(dong.name);
   const consultMessage = `${sigungu.name} ${dong.name} 과외 문의드립니다.`;
 

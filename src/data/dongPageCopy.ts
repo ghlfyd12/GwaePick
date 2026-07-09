@@ -7,6 +7,7 @@
  */
 import { getSido } from "@/data/sidoRegions";
 import type { SubjectCurriculumStep } from "@/data/subjects";
+import { hubGradeBlock, gradeFaq } from "@/data/gradeContent";
 
 export const CONSULT_PHONE = "010-2177-2720";
 
@@ -146,12 +147,18 @@ export const HUB_CURRICULUM: SubjectCurriculumStep[] = [
   { step: "STEP 4", title: "점검", desc: "틀린 문제의 이유를 함께 짚고 다음 수업의 디딤돌로 삼아 반복을 줄입니다." },
 ];
 
-/** 동 허브 학습 전략 카드 4개 — 동 맥락, 과목 공통. */
-export function buildHubStrategy(dong: string): { title: string; body: string }[] {
+/**
+ * 동 허브 학습 전략 카드 4개 — 동 맥락, 과목 공통.
+ * "학년별 학습 목표" 는 동 slug 해시로 3종 중 1종을 골라 대량 페이지 중복을 피한다(gradeContent).
+ */
+export function buildHubStrategy(
+  dong: string,
+  dongSlug: string,
+): { title: string; body: string }[] {
   return [
     {
       title: "학년별 학습 목표",
-      body: "초등은 기초 개념과 공부 습관을, 중등은 넓어지는 범위의 빈틈 관리를, 고등은 내신과 수능의 균형을 목표로 합니다. 학년에 따라 달라지는 목표를 1:1로 맞춰 갑니다.",
+      body: hubGradeBlock(dongSlug),
     },
     {
       title: "과목별 학습 포인트",
@@ -168,13 +175,18 @@ export function buildHubStrategy(dong: string): { title: string; body: string }[
   ];
 }
 
-/** FAQ(동명 슬롯). 가격 단정 금지. */
+/**
+ * FAQ(동명 슬롯). 가격 단정 금지.
+ * 학년 관련 문항 1개는 동명 해시로 3종 중 1종을 골라 페이지 간 변주한다(gradeContent).
+ * 본문 FAQ 와 FAQPage JSON-LD 는 같은 buildFaq 를 쓰므로 항상 1:1 로 일치한다.
+ */
 export function buildFaq(dong: string): { q: string; a: string }[] {
   return [
     {
       q: `${dong}도 개인과외(방문) 수업이 되나요?`,
       a: `${dong}과 인근 지역까지 방문이 가능합니다. 정확한 동선은 상담에서 확인해 연결해 드립니다.`,
     },
+    gradeFaq(dong),
     {
       q: "선생님이 아이와 안 맞으면 어떻게 하나요?",
       a: "첫 수업 후 잘 맞지 않으면, 다른 선생님과 호흡을 맞춰볼 수 있도록 조율해 드립니다.",
