@@ -128,12 +128,12 @@ export const CASE_GROUPS: CaseGroup[] = [
   },
   {
     key: "business",
-    title: "성인·직장인 영어",
+    title: "비즈니스·직장 영어",
     categories: ["비즈니스 회화", "직장인 진급시험"],
   },
   {
     key: "school",
-    title: "학생 내신·제2외국어",
+    title: "내신·제2외국어",
     categories: ["외고 제2외국어", "영어 수행평가"],
   },
 ];

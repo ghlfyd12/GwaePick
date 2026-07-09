@@ -82,8 +82,8 @@ export default async function PowerRegionPage({
       body: `알파벳·발음이 막막한 분도 입이 트일 때까지, 한 문장씩 직접 말해 보며 ${name}에서 천천히 시작합니다.`,
     },
     {
-      title: "학생 스피킹·시험",
-      body: `내신 수행평가부터 말하기 시험까지, ${name} 학생의 수준과 목표에 맞춰 선생님을 매칭합니다.`,
+      title: "내신·말하기 시험",
+      body: `내신 수행평가부터 말하기 시험까지, ${name}에서 지금 수준과 목표에 맞춰 선생님을 매칭합니다.`,
     },
   ];
 
@@ -112,7 +112,7 @@ export default async function PowerRegionPage({
           <p className="mx-auto mt-5 max-w-2xl break-keep text-base leading-relaxed text-muted sm:text-lg">
             학원을 다녀도 입이 떨어지지 않았다면, 문제는 방법이 아니라
             선생님입니다. <span className="font-semibold text-ink">{name}</span>
-            에서 직장인 비즈니스 영어, 주부 왕초보 회화, 학생 스피킹 시험까지
+            에서 직장인 비즈니스 영어, 주부 왕초보 회화, 내신·말하기 시험까지
             호흡이 딱 맞는 선생님을 직접 매칭해 드립니다.
           </p>
 

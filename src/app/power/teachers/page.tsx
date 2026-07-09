@@ -14,7 +14,7 @@ import { languageTeachers } from "@/data/languageTeachers";
 
 const PAGE_TITLE = "어학 원어민·전문 선생님 교사진 | 어학의참견";
 const PAGE_DESCRIPTION =
-  "영어·일본어·중국어 1:1 선생님을 소개합니다. 원어민·교포·한국인 선생님 중에서 학생 수준과 목표에 맞는 한 분을 상담으로 연결해 드립니다.";
+  "영어·일본어·중국어 1:1 선생님을 소개합니다. 원어민·교포·한국인 선생님 중에서 지금 수준과 목표에 맞는 한 분을 상담으로 연결해 드립니다.";
 
 export const metadata: Metadata = {
   title: { absolute: PAGE_TITLE },
@@ -43,7 +43,7 @@ export default function PowerTeachersPage() {
             어학의참견 교사진
           </h1>
           <p className="mx-auto mt-4 max-w-2xl break-keep text-base leading-relaxed text-muted sm:text-lg">
-            학생 수준과 목표에 맞춰 연결해 드리는 선생님들입니다.
+            지금 수준과 목표에 맞춰 연결해 드리는 선생님들입니다.
           </p>
         </div>
       </section>

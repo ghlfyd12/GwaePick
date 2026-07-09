@@ -57,7 +57,7 @@ export type LanguageDetailData = {
 const REASON_SCHEDULE: LanguageReason = {
   no: "04",
   title: "편한 시간에 맞춘 수업",
-  desc: "오전 9시부터 밤 12시까지, 학생 일정에 맞춰 수업 시간을 조율합니다. 사정에 따라 유동적으로 조정할 수 있습니다.",
+  desc: "오전 9시부터 밤 12시까지, 일정에 맞춰 수업 시간을 조율합니다. 사정에 따라 유동적으로 조정할 수 있습니다.",
 };
 
 export const languageDetails: Record<LanguageSlug, LanguageDetailData> = {
@@ -66,7 +66,7 @@ export const languageDetails: Record<LanguageSlug, LanguageDetailData> = {
     label: "영어",
     heroHeadline: "혼자 외우던 영어, 이제 선생님과 직접 말하며 시작하세요",
     heroSub:
-      "현지 원어민과 국내 거주 교포 선생님 중에서, 학생 수준과 목표에 가장 잘 맞는 한 분을 상담으로 직접 찾아 연결해 드립니다.",
+      "현지 원어민과 국내 거주 교포 선생님 중에서, 지금 수준과 목표에 가장 잘 맞는 한 분을 상담으로 직접 찾아 연결해 드립니다.",
     heroChips: ["수준별 1:1", "원어민·교포 선생님", "무료 테스트 수업", "회화·시험·입시"],
     reasons: [
       {
@@ -95,14 +95,14 @@ export const languageDetails: Record<LanguageSlug, LanguageDetailData> = {
       "지금 막힌 한 곳도, 맞는 선생님과 함께 말하다 보면 충분히 달라집니다. 오늘 상담으로 첫걸음을 시작하세요.",
     metaTitle: "영어 1:1 원어민·교포 회화 과외 | 어학의참견",
     metaDescription:
-      "현지 원어민과 국내 거주 교포 선생님 중 학생 수준·목표에 맞는 한 분을 상담으로 연결합니다. 회화·시험·입시까지 1:1 맞춤 영어 과외.",
+      "현지 원어민과 국내 거주 교포 선생님 중 지금 수준·목표에 맞는 한 분을 상담으로 연결합니다. 회화·시험·입시까지 1:1 맞춤 영어 과외.",
   },
   japanese: {
     slug: "japanese",
     label: "일본어",
     heroHeadline: "히라가나부터 JLPT까지, 일본어를 직접 말하며 시작하세요",
     heroSub:
-      "원어민·교포 선생님과 1:1로, 회화부터 시험·유학까지 학생 목표에 맞춰 진행합니다.",
+      "원어민·교포 선생님과 1:1로, 회화부터 시험·유학까지 목표에 맞춰 진행합니다.",
     heroChips: ["수준별 1:1", "원어민·교포 선생님", "무료 테스트 수업", "회화·JLPT·유학"],
     reasons: [
       {
@@ -130,14 +130,14 @@ export const languageDetails: Record<LanguageSlug, LanguageDetailData> = {
       "글자부터 시작해도 괜찮습니다. 맞는 선생님과 함께라면 일본어로 말하는 날이 생각보다 빨리 옵니다. 오늘 상담으로 시작하세요.",
     metaTitle: "일본어 1:1 원어민·교포 회화·JLPT 과외 | 어학의참견",
     metaDescription:
-      "히라가나부터 JLPT까지, 원어민·교포 선생님과 1:1로 진행하는 일본어 과외. 학생 목표에 맞는 선생님을 상담으로 연결합니다.",
+      "히라가나부터 JLPT까지, 원어민·교포 선생님과 1:1로 진행하는 일본어 과외. 목표에 맞는 선생님을 상담으로 연결합니다.",
   },
   chinese: {
     slug: "chinese",
     label: "중국어",
     heroHeadline: "병음과 성조부터 HSK까지, 중국어를 제대로 시작하세요",
     heroSub:
-      "원어민·교포 선생님과 1:1로, 회화부터 시험·비즈니스까지 학생 목표에 맞춰 진행합니다.",
+      "원어민·교포 선생님과 1:1로, 회화부터 시험·비즈니스까지 목표에 맞춰 진행합니다.",
     heroChips: ["수준별 1:1", "원어민·교포 선생님", "무료 테스트 수업", "회화·HSK·비즈니스"],
     reasons: [
       {
@@ -165,7 +165,7 @@ export const languageDetails: Record<LanguageSlug, LanguageDetailData> = {
       "성조가 어렵게 느껴져도, 맞는 선생님과 반복하면 자연스럽게 익습니다. 오늘 상담으로 첫걸음을 시작하세요.",
     metaTitle: "중국어 1:1 원어민·교포 회화·HSK 과외 | 어학의참견",
     metaDescription:
-      "병음·성조부터 HSK까지, 원어민·교포 선생님과 1:1로 진행하는 중국어 과외. 학생 목표에 맞는 선생님을 상담으로 연결합니다.",
+      "병음·성조부터 HSK까지, 원어민·교포 선생님과 1:1로 진행하는 중국어 과외. 목표에 맞는 선생님을 상담으로 연결합니다.",
   },
 };
 

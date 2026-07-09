@@ -249,9 +249,9 @@ export default function PowerPage() {
                 {lang.name}
               </h3>
 
-              {/* 이런 학습자에게 */}
+              {/* 이런 분에게 */}
               <p className="mt-5 break-keep text-sm font-bold text-accent">
-                이런 학습자에게
+                이런 분에게
               </p>
               <ul className="mt-2 space-y-1.5">
                 {lang.forLearners.map((line) => (
