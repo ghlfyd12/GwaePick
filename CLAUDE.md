@@ -15,6 +15,10 @@
 - **핵심 슬로건**: `선생님을 보는 눈은, 선생님이 가장 정확합니다.`
 - **톤**: 영업·과장 금지. "내가 가르쳐봤으니 안다"는 **동료 교사의 차분한 확신**.
   과장된 보장(100%, 무조건 등)·공포 마케팅 금지. 따뜻하고 신뢰감 있게.
+- **대상 지칭 표현 기준** (연령 중립):
+  - 등록·관리 맥락(수업 관리, 후기 주체 등): **"회원"**.
+  - 상담 전 방문자 공감·설명 문구: **"누구나"** 또는 **문장 주어 생략**.
+  - ❌ **"학생 / 아이" 등 특정 연령을 한정하는 지칭은 피한다.** (초등·성인·시니어 등 연령 나열 금지.)
 
 ## 2. 전환 목표
 
@@ -25,10 +29,13 @@
 
 ## 3. 디자인 토큰 (`src/app/globals.css` 의 `@theme`)
 
-- **메인/브랜드: 따뜻한 주황 `#FF6B4A` 계열 + 흰색** → `text-accent` / `bg-accent` / `hover:bg-accent-dark`
+- **포인트 컬러는 경로별로 브랜드가 갈린다. `text-accent` / `bg-accent` 유틸을 쓰되, 값은 스코프에서 결정된다.**
+  - **지식의참견(메인 — `/power` 및 그 하위가 아닌 모든 경로): 코랄 `#FF7A59` + 흰색** → `text-accent` / `bg-accent` / `hover:bg-accent-dark`. ⛔ **퍼플 금지.**
+  - **어학의참견(`/power` 및 그 하위): 퍼플 `#7D0096`(hover `#66007B`, soft `#F3E6F7`) — CTA 포함 전체 퍼플.** ⛔ **코랄 금지.**
+    `/power` 는 `.power-theme` 스코프에서 `accent` 토큰만 퍼플로 오버라이드한다 → 같은 `text-accent`/`bg-accent` 유틸이 `/power` 안에서만 퍼플로 렌더된다.
+  - **공유 컴포넌트(Header·Footer·FloatingCTA·ConsultForm 등)는 `/power` 스코프에서만 퍼플로 오버라이드**되고, 메인 경로에서는 코랄 그대로 유지한다. 공유 컴포넌트에 브랜드색을 하드코딩하지 않는다.
 - 구조적 어두운 요소(헤더 바·강한 배경 등): **차콜·그레이 계열** `#2B2B2E` → `bg-primary` / `from-primary-dark to-primary`
   (`primary` 토큰은 이제 차콜이다: primary `#2B2B2E` / primary-dark `#1F1F22` / primary-light(중간 그레이) `#5C5C63` / primary-soft(연한 회색) `#F4F4F5`)
-- ⛔ **보라색(violet/purple, `#7C3AED`·`#6D28D9` 등) 전역 금지.** 보라가 쓰이던 자리는 주황(강조) 또는 차콜(구조)로 대체한다.
 - 텍스트: 진한 차콜 `#1F2937` (`text-ink`), 보조 회색 `#6B7280` (`text-muted`)
 - 배경/구분선: `bg-surface`(#F9FAFB), `bg-surface-alt`(#F3F4F6), `border-line`(#E5E7EB)
 - 폰트: **Pretendard** (self-hosted, `next/font/local`, `--font-pretendard`), 헤드라인은 `font-bold` 이상
