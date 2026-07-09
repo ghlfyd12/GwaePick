@@ -14,20 +14,20 @@
 /** 후기 필터 기준 — reviewItems.ts 의 subject 값 중 어학에 해당하는 과목만. */
 export const languageReviewSubjects = ["영어", "중국어", "일본어"] as const;
 
-/** Hero 안의 헤드라인 강조 조각(강조 부분만 코랄로 렌더). */
+/** Hero 안의 헤드라인 강조 조각(강조 부분만 퍼플로 렌더). */
 export type HeadlineSegment = { text: string; emphasis?: boolean };
 
 export const powerHero = {
   /** 작은 머리표시 */
   eyebrow: "어학 전문 1:1 상담",
-  /** 페이지 유일의 h1 — 강조 조각만 코랄 처리 */
+  /** 페이지 유일의 h1 — 강조 조각만 퍼플 처리(연령 중립: 특정 연령 지칭 없음) */
   headline: [
-    { text: "외국어, 혼자 외우다 멈춘 아이에게 필요한 건 " },
+    { text: "외국어, 혼자 외우다 멈췄다면 필요한 건 " },
     { text: "함께 말해 줄 한 사람", emphasis: true },
     { text: "입니다." },
   ] as HeadlineSegment[],
   /** 서브 카피 */
-  sub: "회화부터 어학시험, 입시 영어까지 — 아이의 현재 수준을 먼저 보고, 가장 잘 맞는 선생님과 호흡을 맞춰 수업할 수 있도록 해드립니다.",
+  sub: "회화부터 어학시험, 입시까지 — 지금 수준을 먼저 보고, 가장 잘 맞는 선생님과 호흡을 맞춰 수업할 수 있도록 해드립니다.",
   /** 신뢰 뱃지 3종 */
   badges: ["검증 선생님", "무료 체험", "교체 무료"] as const,
 } as const;
