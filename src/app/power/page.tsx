@@ -6,8 +6,11 @@ import SafeImage from "@/components/SafeImage";
 import { site } from "@/data/site";
 import {
   powerHero,
+  powerWhyIntro,
+  powerWhyFeatures,
   powerClosing,
   languagePrograms,
+  languageSectionCopy,
   languageSharedFlow,
 } from "@/data/languagePrograms";
 import { languageCases, CASE_GROUPS } from "@/data/languageCases";
@@ -15,7 +18,8 @@ import { languageCases, CASE_GROUPS } from "@/data/languageCases";
 /*
  * /power — 어학(영어·중국어·일본어) 전문 1:1 상담 랜딩.
  *
- * 골격: Hero(h1) → 언어 안내 3카드 → 최종 CTA + 상담 폼.
+ * 골격: 이미지 배너 → 텍스트 Hero(h1) → 왜 원어민 1:1(특징 4블록) → 언어 안내(4단계 흐름+3카드)
+ *      → 어학 학습사례 → 최종 CTA + 상담 폼.
  * 헤더·푸터·우측 하단 플로팅 CTA 는 루트 layout 에서 자동 상속한다(여기서 만들지 않음).
  * 카피·카드 데이터는 languagePrograms.ts 단일 소스에서 가져온다(하드코딩 금지).
  */
@@ -142,40 +146,69 @@ export default function PowerPage() {
             ))}
           </ul>
         </div>
-
-        {/* 어떤 학습자인가 — 4개 블록 */}
-        <ul className="mx-auto mt-10 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-2">
-          {powerHero.learnerTypes.map((learner) => (
-            <li
-              key={learner.text}
-              className="flex items-start gap-3 rounded-2xl border border-line bg-white p-4"
-            >
-              <span aria-hidden className="text-2xl leading-none">
-                {learner.icon}
-              </span>
-              <span className="break-keep text-sm font-medium leading-relaxed text-ink sm:text-base">
-                {learner.text}
-              </span>
-            </li>
-          ))}
-        </ul>
       </section>
 
-      {/* ── 언어 안내 (3카드) ─────────────────────────────────────── */}
+      {/* ── 왜 원어민 1:1 어학 수업인가 (특징 4블록) ───────────────── */}
+      <section
+        aria-labelledby="power-why-heading"
+        className="px-5 py-14 sm:px-6 sm:py-20"
+      >
+        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-10 lg:grid-cols-2 lg:items-start lg:gap-14">
+          {/* 좌측 카피 */}
+          <div className="lg:sticky lg:top-28">
+            <p className="text-sm font-semibold uppercase tracking-widest text-accent">
+              {powerWhyIntro.eyebrow}
+            </p>
+            <h2
+              id="power-why-heading"
+              className="mt-3 break-keep text-2xl font-bold leading-snug text-ink sm:text-3xl sm:leading-tight"
+            >
+              {powerWhyIntro.title}
+            </h2>
+            <p className="mt-5 break-keep text-base leading-relaxed text-muted sm:text-lg">
+              {powerWhyIntro.sub}
+            </p>
+          </div>
+
+          {/* 우측 특징 4블록 (모바일은 좌측 카피 아래로 스택) */}
+          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {powerWhyFeatures.map((feature) => (
+              <li
+                key={feature.title}
+                className="rounded-2xl border border-line bg-white p-5"
+              >
+                <span
+                  aria-hidden
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-accent/10 text-2xl leading-none"
+                >
+                  {feature.icon}
+                </span>
+                <p className="mt-4 break-keep text-base font-bold text-ink">
+                  {feature.title}
+                </p>
+                <p className="mt-1.5 break-keep text-sm leading-relaxed text-muted">
+                  {feature.desc}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* ── 언어 안내 (4단계 흐름 + 3카드) ─────────────────────────── */}
       <section
         aria-labelledby="power-languages-heading"
-        className="px-5 py-14 sm:px-6 sm:py-20"
+        className="border-t border-line px-5 py-14 sm:px-6 sm:py-20"
       >
         <div className="mx-auto max-w-3xl text-center">
           <h2
             id="power-languages-heading"
             className="break-keep text-2xl font-bold text-ink sm:text-3xl"
           >
-            언어별로, 지금 필요한 만큼
+            {languageSectionCopy.title}
           </h2>
           <p className="mt-3 break-keep text-base leading-relaxed text-muted sm:text-lg">
-            영어 · 중국어 · 일본어 모두 같은 흐름으로 — 현재 수준을 먼저 보고,
-            회화 · 시험 · 입시 중 필요한 목표에 맞춰 수업합니다.
+            {languageSectionCopy.sub}
           </p>
         </div>
 
