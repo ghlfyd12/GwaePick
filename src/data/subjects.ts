@@ -9,6 +9,18 @@ export interface SubjectCurriculumStep {
   title: string;
   desc: string;
 }
+/**
+ * 과목 카피의 학교급 오버라이드 — 지정한 필드만 교체(필드 단위 병합).
+ * 학교별 상세페이지 렌더 경로에서만 lib/subjectCopy.resolveSubjectCopy 로 병합해 쓴다.
+ * curriculum 은 실제 타입(SubjectCurriculumStep[])에 맞춰 해당 필드 전체를 대체한다.
+ */
+export interface SubjectLevelOverride {
+  why?: string;
+  curriculum?: SubjectCurriculumStep[];
+  forWhom?: string[];
+  teaching?: string;
+}
+
 export interface Subject {
   slug: string;
   label: string;
@@ -18,6 +30,15 @@ export interface Subject {
   forWhom?: string[];
   /** 수업 방식 한 단락(선택) — 있으면 상세 페이지에 노출. */
   teaching?: string;
+  /**
+   * 학교급별 카피 오버라이드(선택) — 학교별 상세페이지에서만 적용.
+   * 지역×과목·by-subject 페이지는 이 필드를 읽지 않으므로 기존 출력 불변. 이번엔 elem 만 작성.
+   */
+  levelOverrides?: {
+    elem?: SubjectLevelOverride;
+    middle?: SubjectLevelOverride;
+    high?: SubjectLevelOverride;
+  };
 }
 
 const DIAGNOSE = (s: string): SubjectCurriculumStep => ({
@@ -53,6 +74,18 @@ export const subjects: Subject[] = [
       { step: "STEP 3", title: "심화", desc: "지문 독해와 내신 문법·서술형을 함께 다룹니다." },
       REVIEW("약점 단원을 주기적으로 점검하고 보완합니다."),
     ],
+    // 초등 학교 페이지 전용 — 내신·시험 프레이밍 제거, 소리 내어 읽기·단원평가·기초 문법 중심.
+    levelOverrides: {
+      elem: {
+        why: "소리 내어 읽고 문장을 끊어 읽는 기본기에서 영어 독해의 첫걸음이 트입니다.",
+        curriculum: [
+          DIAGNOSE("영어"),
+          { step: "STEP 2", title: "기초", desc: "구문 독해와 어휘를 매일 누적해 읽는 힘을 만듭니다." },
+          { step: "STEP 3", title: "심화", desc: "단원평가에 맞춰 기초 문법과 짧은 지문 읽기를 함께 다집니다." },
+          REVIEW("약점 단원을 주기적으로 점검하고 보완합니다."),
+        ],
+      },
+    },
   },
   {
     slug: "math",

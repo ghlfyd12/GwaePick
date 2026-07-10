@@ -10,6 +10,7 @@ import {
   isAmbiguousSchoolName,
 } from "@/lib/findSchool";
 import { expandSchoolName } from "@/lib/schoolName";
+import { resolveSubjectCopy } from "@/lib/subjectCopy";
 import { buildSchoolFaq } from "@/data/schoolDetailCopy";
 import {
   buildSchoolMeta,
@@ -79,6 +80,8 @@ export default async function SchoolSubjectPage({
   const r = resolve(sido, subject);
   if (!r) notFound();
   const { ctx, subject: subj } = r;
+  // 학교급 오버라이드(초등 등)를 병합한 과목 카피 — 렌더 전용. slug·label 은 불변이라 JSON-LD·메타 영향 없음.
+  const subjForRender = resolveSubjectCopy(subj, ctx.school.level);
 
   const canonical = `/tutoring/by-school/${ctx.school.slug}/${subj.slug}`;
   const regionShort = isAmbiguousSchoolName(ctx.school.name)
@@ -111,7 +114,7 @@ export default async function SchoolSubjectPage({
       sidoLabel={ctx.sidoLabel}
       sidoSlug={ctx.sidoSlug}
       sigunguName={ctx.sigunguName}
-      subject={subj}
+      subject={subjForRender}
       otherSchools={sameRegionSchools(ctx, 13)}
       />
     </>
