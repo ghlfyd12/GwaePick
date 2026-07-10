@@ -51,9 +51,9 @@ export default function SchoolSubjectDetail({
   const region = `${sidoLabel} ${sigunguName}`;
   // H1 의 지역 파트 — 정식명이 있으면 "{시군구} {정식명}", 없으면 "{시군구}"만(메타 title 과 동일 규칙).
   const h1RegionPart = schoolFullName ? `${sigunguName} ${schoolFullName}` : sigunguName;
-  const intro = buildSchoolIntro(schoolName, subject.label);
-  const why = buildWhySchool(schoolName);
-  const faq = buildSchoolFaq(schoolName);
+  const intro = buildSchoolIntro(schoolName, subject.label, levelLabel);
+  const why = buildWhySchool(schoolName, levelLabel);
+  const faq = buildSchoolFaq(schoolName, levelLabel);
   const isElem = levelLabel === "초등학교";
   // 히어로 이미지 — 초등만 새 이미지, 중·고는 기존 그대로(학교급 데이터 기준 분기).
   const heroImage = isElem ? SCHOOL_HERO_IMAGE_ELEM : SCHOOL_HERO_IMAGE;

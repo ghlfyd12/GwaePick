@@ -4,27 +4,81 @@
  * 톤: 차분한 동료 교사. 과장·느낌표·미확정 수치 금지.
  */
 
-/** 인트로 문단 — 학교 내신 맥락. */
-export function buildSchoolIntro(schoolName: string, subjectLabel: string): string {
-  return `${schoolName} 재학생을 위한 1:1 ${subjectLabel} 과외를 찾고 계신가요? 같은 학교 같은 학년이라도 학생마다 막히는 지점은 다릅니다. ${schoolName}의 내신 진도와 시험 범위에 맞춰, 지금 어디서 멈췄는지를 먼저 짚고 거기서부터 차근히 쌓아 올리는 수업을 설계합니다. 상담에서 아이의 현재 수준과 목표를 살핀 뒤, 성적뿐 아니라 호흡까지 맞는 선생님을 추천해 드립니다.`;
+/* ───────── 학교급 분기 유틸 ─────────
+ * School.level 라벨(초등학교/중학교/고등학교)을 카피 레벨 키로 변환한다.
+ *  - 초등(elem): 내신·중간·기말·모의고사·등급 표현을 쓰지 않고 단원평가·수행평가·학습 습관 프레이밍.
+ *  - 중·고(middle/high): 내신 프레이밍을 공유(중등은 등급·수능 미사용).
+ *  - 미지의 라벨은 중등으로 폴백(내신 프레이밍 = 기존 동작).
+ */
+export type CopyLevel = "elem" | "middle" | "high";
+const LEVEL_KEY: Record<string, CopyLevel> = {
+  초등학교: "elem",
+  중학교: "middle",
+  고등학교: "high",
+};
+function toLevel(levelLabel: string): CopyLevel {
+  return LEVEL_KEY[levelLabel] ?? "middle";
 }
 
-/** "왜 {학교}에서 1:1 {과목} 과외일까요?" 본문 — 학교 내신 맥락 변주. */
-export function buildWhySchool(schoolName: string): string {
+/* 중·고 공통(내신 프레이밍) 본문 — elem 과 분기해 재사용. */
+function introSecondary(schoolName: string, subjectLabel: string): string {
+  return `${schoolName} 재학생을 위한 1:1 ${subjectLabel} 과외를 찾고 계신가요? 같은 학교 같은 학년이라도 학생마다 막히는 지점은 다릅니다. ${schoolName}의 내신 진도와 시험 범위에 맞춰, 지금 어디서 멈췄는지를 먼저 짚고 거기서부터 차근히 쌓아 올리는 수업을 설계합니다. 상담에서 아이의 현재 수준과 목표를 살핀 뒤, 성적뿐 아니라 호흡까지 맞는 선생님을 추천해 드립니다.`;
+}
+function whySecondary(schoolName: string): string {
   return `학원 한 반에서는 학교마다 다른 내신 진도와 시험 범위를 일일이 맞추기 어렵습니다. 1:1 수업은 ${schoolName}의 진도와 출제 경향에 맞춰, 우리 아이가 어디서 멈췄는지를 그 자리에서 바로 메웁니다. 모르는 것을 모른다고 말할 수 있는 수업에서 내신과 실력이 함께 자랍니다.`;
 }
 
-/** FAQ — 학교 맥락 1~2문항 변형 + 공통 문항. 가격 단정 금지. */
-export function buildSchoolFaq(schoolName: string): { q: string; a: string }[] {
+/** 인트로 문단 — 학교급별 프레이밍(초등=학교 진도·단원평가·학습 습관 / 중·고=내신). */
+const INTRO_BUILDERS: Record<CopyLevel, (schoolName: string, subjectLabel: string) => string> = {
+  elem: (schoolName, subjectLabel) =>
+    `${schoolName} 재학생을 위한 1:1 ${subjectLabel} 과외를 찾고 계신가요? 같은 학교 같은 학년이라도 학생마다 막히는 지점은 다릅니다. ${schoolName}의 학교 진도와 단원평가·수행평가에 맞춰, 지금 어디서 멈췄는지를 먼저 짚고 기초부터 차근히 쌓아 올리는 수업을 설계합니다. 상담에서 아이의 현재 수준과 학습 습관을 살핀 뒤, 눈높이와 호흡까지 맞는 선생님을 추천해 드립니다.`,
+  middle: introSecondary,
+  high: introSecondary,
+};
+export function buildSchoolIntro(
+  schoolName: string,
+  subjectLabel: string,
+  levelLabel: string,
+): string {
+  return INTRO_BUILDERS[toLevel(levelLabel)](schoolName, subjectLabel);
+}
+
+/** "왜 {학교}에서 1:1 {과목} 과외일까요?" 본문 — 학교급별 변주. */
+const WHY_BUILDERS: Record<CopyLevel, (schoolName: string) => string> = {
+  elem: (schoolName) =>
+    `학원 한 반에서는 학교마다 다른 진도와 단원평가 범위를 일일이 맞추기 어렵습니다. 1:1 수업은 ${schoolName}의 학교 진도에 맞춰, 우리 아이가 어디서 멈췄는지를 그 자리에서 바로 메웁니다. 모르는 것을 모른다고 말할 수 있는 수업에서 기초와 학습 습관이 함께 자랍니다.`,
+  middle: whySecondary,
+  high: whySecondary,
+};
+export function buildWhySchool(schoolName: string, levelLabel: string): string {
+  return WHY_BUILDERS[toLevel(levelLabel)](schoolName);
+}
+
+/** 학교급별 시험 대비 FAQ 1문항 — 초등=단원평가·수행평가 / 중·고=내신. */
+function examFaq(schoolName: string, level: CopyLevel): { q: string; a: string } {
+  if (level === "elem")
+    return {
+      q: `${schoolName} 단원평가·수행평가 대비도 해주시나요?`,
+      a: `${schoolName}의 학교 진도에 맞춰 단원평가와 수행평가 범위를 중심으로 준비합니다. 학교 일정에 맞춰 기초와 학습 습관까지 1:1로 함께 잡아갑니다.`,
+    };
+  return {
+    q: `${schoolName} 내신 대비도 봐주나요?`,
+    a: `${schoolName}의 내신 진도와 기출 경향에 맞춰 시험 범위 중심으로 준비합니다. 학교 일정에 맞춰 1:1로 진행합니다.`,
+  };
+}
+
+/**
+ * FAQ — 공통 4문항 + 학교급별 시험 대비 문항 1개(2번째). 순서·개수는 학교급 무관 동일(JSON-LD 구조 불변).
+ * page.tsx 의 faqJsonLd(buildSchoolFaq(...)) 와 동일 소스이므로 반드시 같은 levelLabel 로 호출한다.
+ * 가격 단정 금지.
+ */
+export function buildSchoolFaq(schoolName: string, levelLabel: string): { q: string; a: string }[] {
   return [
     {
       q: `${schoolName} 근처도 개인과외(방문) 수업이 되나요?`,
       a: `${schoolName}과 인근 지역까지 방문이 가능합니다. 정확한 동선은 상담에서 확인해 연결해 드립니다.`,
     },
-    {
-      q: `${schoolName} 내신 대비도 봐주나요?`,
-      a: `${schoolName}의 내신 진도와 기출 경향에 맞춰 시험 범위 중심으로 준비합니다. 학교 일정에 맞춰 1:1로 진행합니다.`,
-    },
+    examFaq(schoolName, toLevel(levelLabel)),
     {
       q: "선생님이 아이와 안 맞으면 어떻게 하나요?",
       a: "첫 수업 후 잘 맞지 않으면, 다른 선생님과 호흡을 맞춰볼 수 있도록 조율해 드립니다.",
@@ -64,6 +118,13 @@ function levelGoal(
   return `${schoolName} 1학년은 ${subjectLabel}의 기초 개념을 빠짐없이 다지는 시기이고, 2학년은 범위가 넓어지는 만큼 빈틈이 생기지 않도록 관리하는 것이 중요합니다. ${formal} 3학년은 고등 과정과 이어지는 내용을 단단히 마무리하며 내신과 진학을 함께 준비합니다. 학년마다 달라지는 목표에 맞춰, 지금 단계에 꼭 필요한 부분부터 1:1로 채워 갑니다.`;
 }
 
+/** "학교 시험 대응" 카드 본문 — 초등=단원평가·수행평가·학습 습관 / 중·고=내신. */
+function examStrategyBody(schoolName: string, level: CopyLevel): string {
+  if (level === "elem")
+    return `${schoolName}의 학교 진도와 단원평가·수행평가 범위에 맞춰 준비합니다. 학교 일정에 맞춰 약한 부분을 먼저 짚고 기초와 학습 습관까지 1:1로 보완해 드립니다.`;
+  return `${schoolName}의 내신 진도와 시험 범위, 출제 경향에 맞춰 시험 대비를 준비합니다. 학교 일정에 맞춰 약한 단원을 먼저 짚고 1:1로 보완해 드립니다.`;
+}
+
 /** "학습 전략" 카드 4개 — 학교명·정식명·학교급·과목 메타만으로 구성. */
 export function buildStrategyCards(
   schoolName: string,
@@ -83,7 +144,7 @@ export function buildStrategyCards(
     },
     {
       title: "학교 시험 대응",
-      body: `${schoolName}의 내신 진도와 시험 범위, 출제 경향에 맞춰 시험 대비를 준비합니다. 학교 일정에 맞춰 약한 단원을 먼저 짚고 1:1로 보완해 드립니다.`,
+      body: examStrategyBody(schoolName, toLevel(levelLabel)),
     },
     {
       title: "1:1 과외의 강점",

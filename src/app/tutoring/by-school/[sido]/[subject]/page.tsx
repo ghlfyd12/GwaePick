@@ -64,6 +64,8 @@ export async function generateMetadata({
     regionShort: isAmbiguousSchoolName(ctx.school.name)
       ? shortRegion(ctx.sigunguName)
       : undefined,
+    // 초등은 내신 대신 단원평가·수행평가 프레이밍 description 을 쓰도록 학교급 전달.
+    level: ctx.school.level,
     canonicalPath: `/tutoring/by-school/${ctx.school.slug}/${subj.slug}`,
   });
 }
@@ -94,7 +96,8 @@ export default async function SchoolSubjectPage({
       { name: `${regionShort ? regionShort + " " : ""}${ctx.school.name} ${subj.label}과외` },
     ]),
     // FAQPage — SchoolSubjectDetail 이 실제로 렌더링하는 Q&A(buildSchoolFaq)와 동일 소스.
-    faqJsonLd(buildSchoolFaq(ctx.school.name)),
+    // 학교급별 분기가 렌더와 JSON-LD 에 동일하게 반영되도록 같은 levelLabel 을 넘긴다.
+    faqJsonLd(buildSchoolFaq(ctx.school.name, LEVEL_LABEL[ctx.school.level])),
   ];
 
   return (

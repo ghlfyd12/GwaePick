@@ -9,7 +9,7 @@
  *  - 사이트명·도메인·상담 경로는 site.ts 중앙 설정에서만 가져온다(중복 정의·하드코딩 금지).
  *  - 도메인은 site.url(=배포 기준 URL). sitemap·OG·robots 가 이미 이 값을 쓰므로 canonical 도 동일하게 맞춘다.
  *  - description 은 유형별 2~3종을 canonical 경로 해시로 회전해 대량 중복을 피한다(배포 간 안정적).
- *  - 느낌표·"컨설턴트/컨설팅/코치/코칭/멘토/강사" 미사용. 평점·후기 수 등 허위 수치 미기재.
+ *  - 느낌표·영업성 대체 호칭 미사용(선생님/상담 통일). 평점·후기 수 등 허위 수치 미기재.
  */
 import type { Metadata } from "next";
 import { site } from "@/data/site";
@@ -49,6 +49,16 @@ const SCHOOL_DESC: ReadonlyArray<(p: SchoolMetaInput) => string> = [
     `${R ? R + " " : ""}${S} ${J} 내신이 학원 단체 수업으로 잡히지 않는다면 1:1 맞춤 과외가 답입니다. 상담 선생님이 ${S} 학생을 먼저 이해하고 진도와 시험 범위에 맞춰 수업할 선생님을 찾아 연결해 드립니다. 무료 상담으로 시작하세요.`,
   ({ schoolName: S, subjectLabel: J, regionShort: R }) =>
     `${R ? R + " " : ""}${S} ${J}과외, 지식의참견이 맞는 선생님을 연결합니다. 직접 가르쳐 본 상담 선생님이 학생의 실력과 성향을 듣고 ${S}에 어울리는 ${J} 선생님을 1:1로 소개해 드립니다. 잘 맞지 않으면 다시 연결해 드리며 첫 상담은 무료입니다.`,
+];
+
+/* 초등 전용 description — 내신·중간·기말·모의고사·등급 대신 학교 진도·단원평가·수행평가·학습 습관 프레이밍. */
+const SCHOOL_DESC_ELEM: ReadonlyArray<(p: SchoolMetaInput) => string> = [
+  ({ schoolName: S, subjectLabel: J, regionShort: R }) =>
+    `${R ? R + " " : ""}${S} ${J}과외를 찾고 계신가요. 직접 가르쳐 온 상담 선생님이 아이의 학년과 성향, ${S} 학교 진도와 단원평가 유형을 먼저 살피고 호흡이 잘 맞는 ${J} 선생님을 1:1로 연결해 드립니다. 첫 상담은 무료이니 부담 없이 문의하세요.`,
+  ({ schoolName: S, subjectLabel: J, regionShort: R }) =>
+    `${R ? R + " " : ""}${S} ${J} 공부가 학원 단체 수업으로 잡히지 않는다면 1:1 맞춤 과외가 답입니다. 상담 선생님이 ${S} 학생을 먼저 이해하고 학교 진도와 단원평가·수행평가에 맞춰 수업할 선생님을 찾아 연결해 드립니다. 무료 상담으로 시작하세요.`,
+  ({ schoolName: S, subjectLabel: J, regionShort: R }) =>
+    `${R ? R + " " : ""}${S} ${J}과외, 지식의참견이 맞는 선생님을 연결합니다. 직접 가르쳐 본 상담 선생님이 학생의 현재 수준과 학습 습관을 듣고 ${S}에 어울리는 ${J} 선생님을 1:1로 소개해 드립니다. 잘 맞지 않으면 다시 연결해 드리며 첫 상담은 무료입니다.`,
 ];
 
 const REGION_DESC: ReadonlyArray<(p: { regionName: string; subjectPhrase: string }) => string> = [
@@ -102,12 +112,15 @@ export interface SchoolMetaInput {
   subjectLabel: string;
   /** 동명이교(지역 접미사) 학교만 지정 — title 앞에 짧은 지역명이 붙는다. */
   regionShort?: string;
+  /** 학교급 — 초등(elem)은 내신 대신 단원평가·수행평가 프레이밍 description 을 쓴다. 미지정 시 중·고 기준. */
+  level?: "elem" | "middle" | "high";
   canonicalPath: string;
 }
 export function buildSchoolMeta(p: SchoolMetaInput): Metadata {
   const prefix = p.regionShort ? `${p.regionShort} ` : "";
   const title = `${prefix}${p.schoolName} ${p.subjectLabel}과외 선생님 매칭 | ${SITE_NAME}`;
-  const description = pick(SCHOOL_DESC, p.canonicalPath)(p);
+  const descSet = p.level === "elem" ? SCHOOL_DESC_ELEM : SCHOOL_DESC;
+  const description = pick(descSet, p.canonicalPath)(p);
   return baseMetadata(title, description, p.canonicalPath);
 }
 
