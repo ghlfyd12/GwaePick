@@ -13,6 +13,9 @@ import {
   buildSubjectOverview,
 } from "@/data/schoolDetailCopy";
 import { schoolDetailHref } from "@/lib/schoolHref";
+import { selectSchoolContent } from "@/lib/contentVariant";
+import SchoolStruggles from "@/components/school/SchoolStruggles";
+import SchoolExamPrep from "@/components/school/SchoolExamPrep";
 
 /*
  * SchoolSubjectDetail — 학교×과목 상세(서버 컴포넌트). 지역 상세(DongSubjectDetail)와 동일 골격·디자인.
@@ -61,6 +64,9 @@ export default function SchoolSubjectDetail({
   // "과목별 1:1 과외" — 전 학교급. 초등 8과목 / 중·고등 5과목.
   const subjectOverview = buildSubjectOverview(displayName, isElem);
   const consultMessage = `${schoolName} ${subject.label} 과외 문의드립니다.`;
+
+  // 학교급×과목 고유 콘텐츠(자주 겪는 어려움 · 시험 대비 관리) — 학교 slug 해시로 결정론적 변형 선택.
+  const schoolContentVariant = selectSchoolContent(schoolSlug, levelLabel, subject.slug);
 
   // 내부 링크
   const otherSchoolLinks = otherSchools
@@ -177,6 +183,14 @@ export default function SchoolSubjectDetail({
             </div>
           )}
         </section>
+
+        {/* 4-1. 학교급×과목 고유 콘텐츠 — 자주 겪는 어려움 / 시험 대비 관리(하단 상담 CTA) */}
+        {schoolContentVariant && (
+          <>
+            <SchoolStruggles schoolName={schoolName} struggles={schoolContentVariant.struggles} />
+            <SchoolExamPrep schoolName={schoolName} examPrep={schoolContentVariant.examPrep} />
+          </>
+        )}
 
         {/* 5. 진행 순서 STEP */}
         <section>
