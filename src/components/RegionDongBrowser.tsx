@@ -21,8 +21,9 @@ import { dongHref } from "@/data/dongPageCopy";
  */
 
 // 전체보기 탭 초기 노출 개수 + 더보기 1회당 증가량(개별 시군구·검색 중엔 미적용).
-const INITIAL_COUNT = 24;
-const STEP = 24;
+// 페이지네이션 페이지 크기와 동일(48) — 1페이지 SSR = 첫 48개, 나머지는 /p/[n] 서버 페이지.
+const INITIAL_COUNT = 48;
+const STEP = 48;
 
 export default function RegionDongBrowser({ sido }: { sido: Sido }) {
   // null = 전체보기(기본), 그 외 = 시군구 slug

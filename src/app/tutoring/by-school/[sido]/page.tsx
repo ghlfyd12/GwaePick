@@ -2,8 +2,13 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import HeroSearch from "@/components/HeroSearch";
 import SchoolBrowser from "@/components/SchoolBrowser";
+import Pagination from "@/components/Pagination";
 import { SCHOOLS, getSchoolSido } from "@/data/schools";
+import { flatSchoolsOfSido } from "@/lib/schoolList";
+import { pageCount } from "@/lib/paginate";
 import { site } from "@/data/site";
+
+const PAGE_SIZE = 48;
 
 /*
  * 학교별 시/도 — /tutoring/by-school/[sido]. 지역별과 동일 구도(지도만 제외).
@@ -53,6 +58,8 @@ export default async function SchoolSidoPage({
   const schoolSido = getSchoolSido(sido);
   if (!schoolSido) notFound();
 
+  const totalPages = pageCount(flatSchoolsOfSido(schoolSido).length, PAGE_SIZE);
+
   return (
     <>
       {/* 공통 히어로(지역별과 동일 구도, 지도 없음) — 유일한 h1 */}
@@ -78,6 +85,14 @@ export default async function SchoolSidoPage({
           <div className="mt-7">
             <SchoolBrowser sido={schoolSido} />
           </div>
+
+          {/* 크롤 가능한 페이지네이션 — 전체보기 목록의 나머지 페이지로 도달(서버 <a>) */}
+          <Pagination
+            page={1}
+            totalPages={totalPages}
+            basePath={`/tutoring/by-school/${schoolSido.slug}`}
+            ariaLabel={`${schoolSido.label} 학교 목록 페이지`}
+          />
         </div>
 
         {/* 하단 CTA */}

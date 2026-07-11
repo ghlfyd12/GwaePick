@@ -10,6 +10,7 @@ import {
 import Link from "next/link";
 import type { SchoolSido, SchoolLevel } from "@/data/schools";
 import { schoolHref } from "@/lib/schoolHref";
+import { flatSchoolsOfSido } from "@/lib/schoolList";
 
 /*
  * SchoolBrowser — 시/도의 학교 탐색 UI(지역 RegionDongBrowser 와 동일 패턴, 지도 없음).
@@ -19,8 +20,10 @@ import { schoolHref } from "@/lib/schoolHref";
  * 데이터는 prop(sido)만 사용 — schools.ts(730KB)는 서버에서 추출해 이 시/도분만 전달(타입만 import).
  */
 
-const INITIAL_COUNT = 24;
-const STEP = 24;
+// 페이지네이션 페이지 크기와 동일(48). 전체보기 1페이지 = 첫 48개(SSR 크롤 가능),
+// 나머지는 /p/[n] 서버 페이지에서 도달. "더보기"는 JS 사용자 편의로 유지(크롤 경로는 페이지네이션).
+const INITIAL_COUNT = 48;
+const STEP = 48;
 
 // 필터 버튼용 라벨(LEVEL_LABEL 과 동일) + 카드 배지용 짧은 라벨. (데이터 import 없이 로컬)
 const LEVELS: { key: "all" | SchoolLevel; label: string }[] = [
@@ -76,13 +79,8 @@ export default function SchoolBrowser({ sido }: { sido: SchoolSido }) {
 
   // 현재 탭의 학교(가나다, 시군구 라벨 동반)
   const items = useMemo(() => {
-    if (active === null) {
-      return sigungu
-        .flatMap((sg) =>
-          sg.schools.map((s) => ({ ...s, sigungu: sg.name, sigunguSlug: sg.slug })),
-        )
-        .sort((a, b) => a.name.localeCompare(b.name, "ko"));
-    }
+    // 전체보기 — 페이지네이션 페이지와 동일한 순서를 공유하도록 lib/schoolList 단일 소스 사용.
+    if (active === null) return flatSchoolsOfSido(sido);
     const sg = sigungu.find((s) => s.slug === active);
     return [...(sg?.schools ?? [])]
       .sort((a, b) => a.name.localeCompare(b.name, "ko"))

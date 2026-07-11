@@ -8,7 +8,11 @@ import { gyeonggi } from "@/data/gyeonggi";
 import { DEFAULT_SUBJECT, pseoHref } from "@/data/pseo";
 import { getSido } from "@/data/sidoRegions";
 import RegionDongBrowser from "@/components/RegionDongBrowser";
+import Pagination from "@/components/Pagination";
+import { pageCount } from "@/lib/paginate";
 import { site } from "@/data/site";
+
+const PAGE_SIZE = 48;
 
 /*
  * 시/도 상세 — /tutoring/by-region/[sido]
@@ -95,6 +99,14 @@ export default async function SidoPage({
               <div className="mt-8">
                 <RegionDongBrowser sido={dongSido} />
               </div>
+
+              {/* 크롤 가능한 페이지네이션 — 전체보기 동 목록의 나머지 페이지로 도달(서버 <a>) */}
+              <Pagination
+                page={1}
+                totalPages={pageCount(totalDong, PAGE_SIZE)}
+                basePath={`/tutoring/by-region/${sido}`}
+                ariaLabel={`${regionLabel} 동 목록 페이지`}
+              />
             </>
           )}
         </div>
