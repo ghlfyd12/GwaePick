@@ -16,6 +16,7 @@ import { schoolDetailHref } from "@/lib/schoolHref";
 import { selectSchoolContent } from "@/lib/contentVariant";
 import SchoolStruggles from "@/components/school/SchoolStruggles";
 import SchoolExamPrep from "@/components/school/SchoolExamPrep";
+import SchoolRegionLinks from "@/components/SchoolRegionLinks";
 
 /*
  * SchoolSubjectDetail — 학교×과목 상세(서버 컴포넌트). 지역 상세(DongSubjectDetail)와 동일 골격·디자인.
@@ -324,6 +325,9 @@ export default function SchoolSubjectDetail({
             </div>
           )}
         </section>
+
+        {/* 9-1. 지역으로 찾기 — 학교→지역 스택 연결(시도 허브, 과목 중립: 학교 데이터가 동 미포함) */}
+        <SchoolRegionLinks sidoLabel={sidoLabel} sidoSlug={sidoSlug} />
 
         {/* 10. 최종 CTA */}
         <section className="rounded-2xl bg-surface px-6 py-8 text-center sm:py-10">

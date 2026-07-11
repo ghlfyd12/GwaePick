@@ -3,6 +3,7 @@ import Link from "next/link";
 import ConsultForm from "@/components/ConsultForm";
 import SubjectTabs from "@/components/SubjectTabs";
 import RelatedKeywords from "@/components/RelatedKeywords";
+import RegionSchoolLinks from "@/components/RegionSchoolLinks";
 import { subjects } from "@/data/subjects";
 import {
   CONSULT_PHONE,
@@ -255,6 +256,13 @@ export default function DongHub({
             )}
           </section>
         )}
+
+        {/* 13-1. 이 시군구 학교 — 지역→학교 스택 연결(과목은 학교별 해시로 분산) */}
+        <RegionSchoolLinks
+          sidoSlug={sidoSlug}
+          sigunguName={sigungu.name}
+          sigunguSlug={sigungu.slug}
+        />
 
         {/* 14. 최종 CTA */}
         <section className="rounded-2xl bg-surface px-6 py-8 text-center sm:py-10">

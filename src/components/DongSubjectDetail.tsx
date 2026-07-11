@@ -14,6 +14,7 @@ import {
   dongHref,
 } from "@/data/dongPageCopy";
 import { gradeBlock } from "@/data/gradeContent";
+import RegionSchoolLinks from "@/components/RegionSchoolLinks";
 
 /*
  * DongSubjectDetail — 동×과목 상세 페이지(서버 컴포넌트, 파일럿 pSEO).
@@ -246,6 +247,15 @@ export default function DongSubjectDetail({
             )}
           </div>
         </section>
+
+        {/* 9-1. 이 시군구 학교 — 지역→학교 스택 연결(현재 과목으로 링크) */}
+        <RegionSchoolLinks
+          sidoSlug={sidoSlug}
+          sigunguName={sigungu.name}
+          sigunguSlug={sigungu.slug}
+          subjectSlug={subject.slug}
+          subjectLabel={subject.label}
+        />
 
         {/* 10. 최종 CTA */}
         <section className="rounded-2xl bg-surface px-6 py-8 text-center sm:py-10">
