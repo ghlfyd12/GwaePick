@@ -3,6 +3,7 @@ import { subjects } from "@/data/subjects";
 import { schoolsInSigungu } from "@/lib/schoolRegionIndex";
 import { schoolDetailHref } from "@/lib/schoolHref";
 import { hashSlug } from "@/lib/contentVariant";
+import { isSharedRegionSlug } from "@/data/sigunguSlugMap";
 import { regionSchoolsTitle } from "@/data/crossLinkCopy";
 
 /*
@@ -27,8 +28,13 @@ export default function RegionSchoolLinks({
   subjectSlug?: string;
   subjectLabel?: string;
 }) {
-  const schools = schoolsInSigungu(sidoSlug, sigunguSlug).slice(0, MAX);
-  if (schools.length === 0) return null;
+  const pool = schoolsInSigungu(sidoSlug, sigunguSlug);
+  if (pool.length === 0) return null;
+  // B형(구 분할) 공유 풀만 구 slug 해시로 시작 오프셋을 분산 → 같은 시의 여러 구 페이지가 서로 다른 목록.
+  // 직접 일치·A형(1:1)은 오프셋 0으로 기존 출력을 그대로 유지(서울 등 불변). 결정론적(Math.random 금지).
+  const start = isSharedRegionSlug(sidoSlug, sigunguSlug) ? hashSlug(sigunguSlug) % pool.length : 0;
+  const ordered = start === 0 ? pool : [...pool.slice(start), ...pool.slice(0, start)];
+  const schools = ordered.slice(0, MAX);
 
   const links = schools.map((s) => {
     if (subjectSlug && subjectLabel) {

@@ -10,6 +10,7 @@
  */
 import { SCHOOLS } from "@/data/schools";
 import type { SchoolLevel } from "@/data/schools";
+import { resolveSchoolSigunguSlug } from "@/data/sigunguSlugMap";
 
 export type IndexedSchool = { name: string; slug: string; level: SchoolLevel };
 
@@ -23,10 +24,17 @@ for (const sido of SCHOOLS) {
   }
 }
 
-/** 해당 시도+시군구에 속한 학교(가나다순). 매칭 없으면 빈 배열. */
+/**
+ * 해당 시도+시군구에 속한 학교(가나다순). 매칭 없으면 빈 배열.
+ * 조회 순서: 직접 slug 일치 우선 → 미스 시 SIGUNGU_SLUG_MAP 경유(같은 시도 내 학교 시군구 slug 로 변환).
+ */
 export function schoolsInSigungu(
   sidoSlug: string,
   sigunguSlug: string,
 ): IndexedSchool[] {
-  return bySigungu.get(`${sidoSlug}/${sigunguSlug}`) ?? [];
+  const direct = bySigungu.get(`${sidoSlug}/${sigunguSlug}`);
+  if (direct) return direct;
+  const mapped = resolveSchoolSigunguSlug(sidoSlug, sigunguSlug);
+  if (mapped) return bySigungu.get(`${sidoSlug}/${mapped}`) ?? [];
+  return [];
 }
