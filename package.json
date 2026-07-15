@@ -25,6 +25,7 @@
     "eslint-config-next": "16.2.9",
     "mapshaper": "^0.7.33",
     "tailwindcss": "^4",
+    "tsx": "^4.23.1",
     "typescript": "^5"
   }
 }
