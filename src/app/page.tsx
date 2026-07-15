@@ -5,6 +5,7 @@ import TeacherIntro from "@/components/sections/TeacherIntro";
 import Teachers from "@/components/sections/Teachers";
 import ReviewVideos from "@/components/ReviewVideos";
 import ConsultForm from "@/components/ConsultForm";
+import BlogSection from "@/components/blog/BlogSection";
 import { site } from "@/data/site";
 
 /*
@@ -72,6 +73,9 @@ export default function Home() {
         {/* 영상으로 만나는 후기 (텍스트 후기 슬라이더는 다음 작업에서 구현) */}
         <ReviewVideos />
       </section>
+
+      {/* 네이버 블로그 최신글 연계 (RSS · ISR). 수집 실패/미설정 시 자동 숨김. */}
+      <BlogSection />
 
       {/* 무료 상담 신청 폼 — 모든 CTA 의 앵커 목적지(#consult) */}
       <ConsultForm />

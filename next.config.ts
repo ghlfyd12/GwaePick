@@ -8,6 +8,14 @@ import type { NextConfig } from "next";
 const SITEMAP_ALIAS_COUNT = 4;
 
 const nextConfig: NextConfig = {
+  // 네이버 블로그 RSS 썸네일 호스트 허용(next/image). 썸네일은 unoptimized 로도 렌더하지만
+  // 호스트 허용을 함께 두어 안전하게 처리한다. (blogthumb.pstatic.net, *.phinf.naver.net 등)
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "**.pstatic.net" },
+      { protocol: "https", hostname: "**.naver.net" },
+    ],
+  },
   async redirects() {
     return [
       // 어학의참견: 빈 "수업후기"(/power/reviews) 라우트 제거 → /power 학습사례 섹션으로 통합.
