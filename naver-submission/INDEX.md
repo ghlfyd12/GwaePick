@@ -24,7 +24,7 @@
 4. 다음 날 다음 번호 파일로 이어서 진행합니다. (재생성 스크립트: `npx tsx scripts/generate-naver-submission-batches.ts`)
 
 ## 제출 체크리스트
-- [ ] day-001.txt
+- [x] day-001.txt
 - [ ] day-002.txt
 - [ ] day-003.txt
 - [ ] day-004.txt
