@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { insertConsultLead, type ConsultLead } from "@/lib/notion";
+import { notifyNewLead } from "@/lib/notify";
+import { SERVICE, isServiceName } from "@/data/service";
 
 /*
  * 무료 상담 신청 수신(POST /api/consult) → 노션 DB 실시간 저장.
@@ -23,6 +25,8 @@ type ConsultPayload = {
   addressDetail?: string;
   message?: string;
   agree?: boolean;
+  /** 폼이 고정 주입("지식의참견" | "어학의참견"). 값이 없거나 이상하면 지식의참견으로. */
+  service?: string;
 };
 
 const isDev = process.env.NODE_ENV !== "production";
@@ -65,11 +69,20 @@ export async function POST(request: Request) {
     subjects: Array.isArray(data.subjects) ? data.subjects : [],
     message: (data.message ?? "").trim(),
     source: request.headers.get("referer") ?? "",
+    // 폼이 넘긴 서비스 값(검증). 없거나 이상하면 지식의참견으로 기본 처리.
+    service: isServiceName(data.service) ? data.service : SERVICE.main,
   };
 
   // 4) 노션 삽입(속성 로깅·재시도는 lib/notion.ts 내부에서 처리).
+  //    순서: 검증 → 저장(성공) → 알림 → 응답. 저장을 알림보다 먼저(리드 유실 방지).
   try {
     const page = await insertConsultLead(databaseId, lead);
+    // 저장 성공 후 알림 — 실패해도 사용자에겐 성공(저장은 이미 완료).
+    try {
+      await notifyNewLead(lead);
+    } catch (notifyErr) {
+      console.error("[consult] 알림 실패(저장은 완료):", notifyErr);
+    }
     return NextResponse.json({ ok: true, id: page.id });
   } catch (err) {
     // 노션 에러 상세를 서버 로그로 드러낸다(삼키지 않는다).

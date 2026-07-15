@@ -1,5 +1,6 @@
 import { Client } from "@notionhq/client";
 import type { CreatePageParameters } from "@notionhq/client/build/src/api-endpoints";
+import type { ServiceName } from "@/data/service";
 
 /*
  * 노션 연동 단일 소스 — 상담 리드 삽입.
@@ -8,6 +9,10 @@ import type { CreatePageParameters } from "@notionhq/client/build/src/api-endpoi
  * 실제 DB 스키마와 글자 단위로 일치해야 한다 — `npx tsx scripts/inspect-notion.ts` 로 검증.
  * 실측(2026-07-09): 이름=title / 연락처=phone_number / 지역=rich_text /
  *   학년·과목=multi_select / 문의내용·유입페이지=rich_text / 상담 상태=select / 신청일시=created_time.
+ *
+ * ⚠️ Notion DB 에 "서비스" Select 속성(옵션: 지식의참견 / 어학의참견)이 있어야 한다.
+ *    없으면 `npx tsx scripts/ensure-notion-service-property.ts` 로 1회 생성(멱등).
+ *    주소·상세주소는 폼에서 결합되어 기존 "지역"(rich_text)에 저장한다(별도 속성 추가 불필요).
  */
 
 /** 노션 실제 속성명(공백 포함) 단일 소스. */
@@ -20,6 +25,7 @@ export const NOTION_PROP = {
   message: "문의내용", // rich_text
   source: "유입페이지", // rich_text (Referer)
   status: "상담 상태", // select — 공백 포함(글자 단위 일치 필수)
+  service: "서비스", // select — 지식의참견 / 어학의참견
   // 신청일시(created_time)는 노션이 자동 기록 → 코드에서 전송하지 않는다.
 } as const;
 
@@ -57,11 +63,14 @@ function multiSelectValue(values: unknown) {
 export type ConsultLead = {
   name: string;
   phone: string;
+  /** 주소 + 상세주소 결합("지역"에 저장). 어학의참견 폼도 주소를 받으므로 채워진다. */
   region: string;
   grades: string[];
   subjects: string[];
   message: string;
   source: string;
+  /** 어느 서비스에서 온 리드인지(지식의참견 / 어학의참견). */
+  service: ServiceName;
 };
 
 /** 리드 → 노션 properties(빈 값 속성 제외, 상담 상태는 항상 "신규"). */
@@ -92,6 +101,8 @@ export function buildConsultProperties(
     [P.subject]: subject ? { multi_select: subject } : undefined,
     [P.message]: message ? { rich_text: message } : undefined,
     [P.source]: source ? { rich_text: source } : undefined,
+    // 서비스 구분(select) — 지식의참견 / 어학의참견.
+    [P.service]: { select: { name: lead.service } },
     // 상담 상태 — 서버에서 항상 "신규" 강제(select).
     [P.status]: { select: { name: CONSULT_STATUS_NEW } },
     // 신청일시(created_time)는 전송하지 않음.

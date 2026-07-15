@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import Script from "next/script";
 import { schoolLevels, subjects } from "@/data/categories";
+import { serviceFromPath } from "@/data/service";
 import { site } from "@/data/site";
 
 /*
@@ -65,6 +67,8 @@ export default function ConsultForm({
   defaultMessage?: string;
 } = {}) {
   const [form, setForm] = useState<FormState>({ ...EMPTY, message: defaultMessage });
+  // 서비스 구분 — /power(및 하위)면 어학의참견, 그 외 지식의참견. 폼 UI 는 그대로.
+  const service = serviceFromPath(usePathname());
   const [errors, setErrors] = useState<Errors>({});
   const [status, setStatus] = useState<
     "idle" | "submitting" | "success" | "error"
@@ -117,7 +121,7 @@ export default function ConsultForm({
       const res = await fetch("/api/consult", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, service }),
       });
       if (!res.ok) throw new Error("bad status");
       setStatus("success");
