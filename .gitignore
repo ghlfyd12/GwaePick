@@ -41,8 +41,9 @@ yarn-error.log*
 next-env.d.ts
 .geo-tmp/
 
-# claude — 개인 로컬 설정만 무시(.claude/ 전체·CLAUDE.md·launch.json 등은 계속 추적)
+# claude — 머신 종속 개인 로컬 설정만 무시(.claude/ 전체·CLAUDE.md 등은 계속 추적)
 .claude/settings.local.json
+.claude/launch.json
 
 # 내부 감사 보고서(로컬 참고용, Git 추적 제외)
 docs/internal-link-audit.md
