@@ -32,7 +32,8 @@ import { districts } from "@/data/districts";
  * ISR: 시드만 SSG, 나머지 요청 시 생성+캐시. 잘못된 slug 404.
  */
 export const dynamicParams = true;
-export const revalidate = 86400;
+// 재배포 전까지 영구 캐시 — 시간 기반 재생성 없음(콘텐츠는 data 파일 기준).
+export const revalidate = false;
 
 export function generateStaticParams() {
   // 시드: 경기×과목 5개 + 서울×구 일부(빠른 진입). 나머지는 ISR.

@@ -27,7 +27,8 @@ import { gyeonggi, sigunguBySlug, findDong } from "@/data/gyeonggi";
  * 교차 네비: 다른 학년/과목 전환 + 인근 동.
  */
 export const dynamicParams = true;
-export const revalidate = 86400;
+// 재배포 전까지 영구 캐시 — 시간 기반 재생성 없음(콘텐츠는 data 파일 기준).
+export const revalidate = false;
 
 export function generateStaticParams() {
   // 시드 1개. 나머지 ISR.

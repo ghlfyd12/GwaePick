@@ -28,7 +28,8 @@ import {
  * 렌더링: 파일럿 일부만 SSG + 나머지 ISR(온디맨드). 잘못된 학교/과목 조합 404.
  */
 export const dynamicParams = true;
-export const revalidate = 86400;
+// 재배포 전까지 영구 캐시 — 시간 기반 재생성 없음(콘텐츠는 data 파일 기준).
+export const revalidate = false;
 
 const slugKey = (s: string) => decodeURIComponent(s).normalize("NFC");
 

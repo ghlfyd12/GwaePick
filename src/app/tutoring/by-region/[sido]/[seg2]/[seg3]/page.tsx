@@ -31,7 +31,8 @@ import {
  * ISR. 파일럿만 정적 생성. 잘못된 조합 404.
  */
 export const dynamicParams = true;
-export const revalidate = 86400;
+// 재배포 전까지 영구 캐시 — 시간 기반 재생성 없음(콘텐츠는 data 파일 기준).
+export const revalidate = false;
 
 export function generateStaticParams() {
   const params: { sido: string; seg2: string; seg3: string }[] = [];

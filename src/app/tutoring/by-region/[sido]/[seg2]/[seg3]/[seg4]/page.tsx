@@ -38,7 +38,8 @@ import {
  * 잘못된 조합 404.
  */
 export const dynamicParams = true;
-export const revalidate = 86400;
+// 재배포 전까지 영구 캐시 — 시간 기반 재생성 없음(콘텐츠는 data 파일 기준).
+export const revalidate = false;
 
 export function generateStaticParams() {
   // 경기 시드 1 + 파일럿(서울 4구·고양 3구) 동×5과목 정적 생성. 나머지 ISR.
