@@ -193,8 +193,8 @@ export default function RegionDongBrowser({ sido }: { sido: Sido }) {
         </div>
       </div>
 
-      {/* 과목 탭 — 시군구 칩 아래, 동 목록 위. 선택 시 동 링크가 동×과목 페이지로 바뀐다. */}
-      <div className="mt-4">
+      {/* 과목 선택 섹션 — 시군구 칩 아래, 동 목록 위(독립 섹션). 선택 시 동 링크가 동×과목 페이지로 바뀐다. */}
+      <div className="my-8">
         <RegionSubjectTabs
           subjects={regionSubjectTabs}
           active={subject}

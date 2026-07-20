@@ -25,7 +25,7 @@ export default function PagedDongGrid({
 
   return (
     <div>
-      <div className="mb-4">
+      <div className="mb-8">
         <RegionSubjectTabs
           subjects={regionSubjectTabs}
           active={subject}
