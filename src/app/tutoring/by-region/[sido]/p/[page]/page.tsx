@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import DongCardGrid from "@/components/DongCardGrid";
+import PagedDongGrid from "@/components/PagedDongGrid";
 import Pagination from "@/components/Pagination";
 import { REGIONS, getSido, allDongOf } from "@/data/sidoRegions";
 import { paginate, pageCount } from "@/lib/paginate";
@@ -91,7 +91,7 @@ export default async function RegionSidoPagedPage({
         </p>
 
         <div className="mt-7">
-          <DongCardGrid sidoSlug={r.sido.slug} dongs={paged.items} />
+          <PagedDongGrid sidoSlug={r.sido.slug} dongs={paged.items} />
         </div>
 
         <Pagination

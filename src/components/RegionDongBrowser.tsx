@@ -11,6 +11,8 @@ import {
 import Link from "next/link";
 import { allDongOf, type Sido } from "@/data/sidoRegions";
 import { dongHref } from "@/data/dongPageCopy";
+import { regionSubjectTabs } from "@/data/regionSubjectTabs";
+import RegionSubjectTabs from "@/components/RegionSubjectTabs";
 
 /*
  * RegionDongBrowser — 시/도의 동(洞) 탐색 UI.
@@ -28,6 +30,8 @@ const STEP = 48;
 export default function RegionDongBrowser({ sido }: { sido: Sido }) {
   // null = 전체보기(기본), 그 외 = 시군구 slug
   const [active, setActive] = useState<string | null>(null);
+  // null = 전체 과목(기본, 동 링크 = 동 허브). 그 외 = 과목 slug(동 링크 = 동×과목).
+  const [subject, setSubject] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   // 전체보기 동 그리드 노출 개수(탭 전환·검색 변경 시 INITIAL_COUNT 로 리셋)
   const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
@@ -189,6 +193,15 @@ export default function RegionDongBrowser({ sido }: { sido: Sido }) {
         </div>
       </div>
 
+      {/* 과목 탭 — 시군구 칩 아래, 동 목록 위. 선택 시 동 링크가 동×과목 페이지로 바뀐다. */}
+      <div className="mt-4">
+        <RegionSubjectTabs
+          subjects={regionSubjectTabs}
+          active={subject}
+          onSelect={setSubject}
+        />
+      </div>
+
       {/* 동 그리드 */}
       <p className="mt-5 text-sm text-muted" aria-live="polite">
         총 {filtered.length.toLocaleString("ko-KR")}개 동
@@ -204,7 +217,11 @@ export default function RegionDongBrowser({ sido }: { sido: Sido }) {
             {visibleDongs.map((d) => (
               <li key={`${d.sigunguSlug}-${d.slug}`}>
                 <Link
-                  href={dongHref(sido.slug, d.sigunguSlug, d.slug)}
+                  href={
+                    subject && d.sigunguSlug && d.slug
+                      ? dongHref(sido.slug, d.sigunguSlug, d.slug, subject)
+                      : dongHref(sido.slug, d.sigunguSlug, d.slug)
+                  }
                   className="flex h-full flex-col items-center justify-center rounded-xl border border-line bg-white px-3 py-3 text-center transition-colors hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                 >
                   <span className="break-keep text-sm font-semibold text-ink">
