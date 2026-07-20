@@ -14,6 +14,7 @@ const REGION_SUBJECT_TAB_SLUGS = [
   "english",
   "math",
   "social",
+  "science",
   "history",
   "essay",
   "coding",
