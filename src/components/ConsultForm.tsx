@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import Script from "next/script";
-import { schoolLevels, subjects } from "@/data/categories";
+import { consultFormConfig } from "@/data/consultFormOptions";
 import { serviceFromPath } from "@/data/service";
 import { site } from "@/data/site";
 
@@ -75,8 +75,8 @@ export default function ConsultForm({
   >("idle");
   const addressDetailRef = useRef<HTMLInputElement>(null);
 
-  const gradeOptions = schoolLevels.map((s) => s.title);
-  const subjectOptions = subjects.map((s) => s.title);
+  // 서비스별 옵션·라벨(지식=과목, 어학=언어). 학년·과목/언어는 다중 선택.
+  const formConfig = consultFormConfig(service);
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((f) => ({ ...f, [key]: value }));
@@ -223,7 +223,7 @@ export default function ConsultForm({
                   <MultiSelect
                     id={id}
                     placeholder="학년을 선택해주세요"
-                    options={gradeOptions}
+                    options={formConfig.gradeOptions}
                     selected={form.grades}
                     onChange={(v) => set("grades", v)}
                     invalid={!!errors.grades}
@@ -231,13 +231,13 @@ export default function ConsultForm({
                 )}
               </Field>
 
-              {/* 과목 (다중) */}
-              <Field label="희망 과목" required hint="(중복 선택 가능)" error={errors.subjects}>
+              {/* 과목/언어 (다중) — 라벨·옵션은 서비스별(지식=희망 과목, 어학=희망 언어). */}
+              <Field label={formConfig.choiceLabel} required hint="(중복 선택 가능)" error={errors.subjects}>
                 {(id) => (
                   <MultiSelect
                     id={id}
-                    placeholder="과목을 선택해주세요"
-                    options={subjectOptions}
+                    placeholder={formConfig.choicePlaceholder}
+                    options={formConfig.choiceOptions}
                     selected={form.subjects}
                     onChange={(v) => set("subjects", v)}
                     invalid={!!errors.subjects}
@@ -390,14 +390,28 @@ function MultiSelect({
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  const close = () => {
+    setOpen(false);
+    triggerRef.current?.focus(); // 닫을 때 트리거로 포커스 복귀(키보드 접근성)
+  };
 
   useEffect(() => {
     if (!open) return;
+    // 보조 닫힘 — 바깥 클릭 + Esc(주 닫힘은 "선택 완료" 버튼).
     const onDoc = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
     document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
   }, [open]);
 
   const toggle = (opt: string) =>
@@ -411,6 +425,7 @@ function MultiSelect({
     <div ref={ref} className="relative">
       <button
         id={id}
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="listbox"
@@ -432,37 +447,49 @@ function MultiSelect({
       </button>
 
       {open && (
-        <ul
-          role="listbox"
-          aria-multiselectable
-          className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-lg border border-line bg-white p-1 shadow-lg"
-        >
-          {options.map((opt) => {
-            const on = selected.includes(opt);
-            return (
-              <li key={opt} role="option" aria-selected={on}>
-                <button
-                  type="button"
-                  onClick={() => toggle(opt)}
-                  className="flex w-full items-center gap-2.5 rounded-md px-3 py-2.5 text-left text-base hover:bg-surface-alt md:text-lg"
-                >
-                  <span
-                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border ${
-                      on ? "border-accent bg-accent" : "border-[#D1D5DB]"
-                    }`}
+        <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-lg border border-line bg-white shadow-lg">
+          <ul
+            role="listbox"
+            aria-multiselectable
+            className="max-h-60 overflow-auto p-1"
+          >
+            {options.map((opt) => {
+              const on = selected.includes(opt);
+              return (
+                <li key={opt} role="option" aria-selected={on}>
+                  <button
+                    type="button"
+                    onClick={() => toggle(opt)}
+                    className="flex w-full items-center gap-2.5 rounded-md px-3 py-2.5 text-left text-base hover:bg-surface-alt md:text-lg"
                   >
-                    {on && (
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    )}
-                  </span>
-                  <span className="text-ink">{opt}</span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+                    <span
+                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border ${
+                        on ? "border-accent bg-accent" : "border-[#D1D5DB]"
+                      }`}
+                    >
+                      {on && (
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      )}
+                    </span>
+                    <span className="text-ink">{opt}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+          {/* 주 닫힘 동작 — 다중 선택을 마친 뒤 누른다. 색은 accent 토큰(메인=코랄, /power=퍼플 자동). */}
+          <div className="border-t border-line p-2">
+            <button
+              type="button"
+              onClick={close}
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-accent px-4 text-base font-semibold text-white transition-colors hover:bg-accent-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            >
+              선택 완료
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
