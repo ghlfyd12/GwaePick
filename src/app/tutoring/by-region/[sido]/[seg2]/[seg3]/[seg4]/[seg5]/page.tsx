@@ -21,6 +21,7 @@ import {
   pseoHref,
 } from "@/data/pseo";
 import { gyeonggi, sigunguBySlug, findDong } from "@/data/gyeonggi";
+import { titleLevelByGradeLabel } from "@/data/seoTitlePhrases";
 
 /*
  * 5-seg — /경기/[시군구]/[동]/[학년]/[과목]. ISR(leaf). 잘못된 조합 404.
@@ -79,7 +80,10 @@ export async function generateMetadata({
   if (!r) return {};
   return buildRegionMeta({
     regionName: r.dong.name,
-    subjectPhrase: `${r.grade.label} ${r.subj.label}`,
+    subjectLabel: r.subj.label,
+    gradeLabel: r.grade.label,
+    // 학년 세그먼트가 있는 유일한 경로 — 학년에 맞춘 title 문구(초등에 수능 노출 방지).
+    level: titleLevelByGradeLabel[r.grade.label],
     canonicalPath: pseoHref.dongGradeSubject(
       r.sg.slug,
       r.dong.slug,

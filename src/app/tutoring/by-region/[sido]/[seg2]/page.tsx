@@ -55,7 +55,7 @@ export async function generateMetadata({
     if (!subj) return {};
     return buildRegionMeta({
       regionName: gyeonggi.sidoLabel,
-      subjectPhrase: subj.label,
+      subjectLabel: subj.label,
       canonicalPath: pseoHref.sidoSubject(subj.slug),
     });
   }

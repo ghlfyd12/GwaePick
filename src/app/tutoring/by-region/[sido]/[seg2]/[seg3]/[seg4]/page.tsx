@@ -96,7 +96,7 @@ export async function generateMetadata({
   if (r) {
     return buildRegionMeta({
       regionName: r.dong.name,
-      subjectPhrase: r.subj.label,
+      subjectLabel: r.subj.label,
       canonicalPath: pseoHref.dongSubject(r.sg.slug, r.dong.slug, r.subj.slug),
     });
   }
@@ -107,7 +107,8 @@ export async function generateMetadata({
     const { sg, dong, subj, sidoSlug } = rn;
     return buildRegionMeta({
       regionName: dong.name,
-      subjectPhrase: subj.label,
+      subjectLabel: subj.label,
+      subjectSlug: subj.slug,
       canonicalPath: `/tutoring/by-region/${sidoSlug}/${sg.slug}/${dong.slug}/${subj.slug}`,
     });
   }

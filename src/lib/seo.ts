@@ -9,10 +9,16 @@
  *  - 사이트명·도메인·상담 경로는 site.ts 중앙 설정에서만 가져온다(중복 정의·하드코딩 금지).
  *  - 도메인은 site.url(=배포 기준 URL). sitemap·OG·robots 가 이미 이 값을 쓰므로 canonical 도 동일하게 맞춘다.
  *  - description 은 유형별 2~3종을 canonical 경로 해시로 회전해 대량 중복을 피한다(배포 간 안정적).
+ *  - title 뒷부분 검색 키워드 문구는 data/seoTitlePhrases.ts 단일 소스(과목별·학교급별). 여기에 하드코딩 금지.
  *  - 느낌표·영업성 대체 호칭 미사용(선생님/상담 통일). 평점·후기 수 등 허위 수치 미기재.
  */
 import type { Metadata } from "next";
 import { site } from "@/data/site";
+import {
+  resolveTitlePhrase,
+  REGION_HUB_TITLE_PHRASE,
+  type TitleLevel,
+} from "@/data/seoTitlePhrases";
 
 const SITE_NAME = site.name; // 지식의참견
 const SITE_URL = site.url.replace(/\/$/, ""); // 배포 기준 도메인(단일 소스)
@@ -107,18 +113,51 @@ function baseMetadata(title: string, description: string, canonicalPath: string)
 }
 
 /* ── 유형별 Metadata 빌더 ────────────────────────────────────────────── */
+/**
+ * title 문구 조립 — seoTitlePhrases.ts 의 문구 타입에 따라 두 갈래.
+ *  - suffix: "{앞부분} {과목}과외 {문구}"
+ *  - full  : "{앞부분} {문구}"  (문구에 이미 "○○과외"가 포함됨)
+ * head 는 지역명 또는 (지역+)학교명, lead 는 과목 앞에 붙는 학년 등 수식어(선택).
+ */
+function composeTitle(p: {
+  head: string;
+  subjectLabel: string;
+  subjectSlug?: string;
+  lead?: string;
+  level?: TitleLevel;
+}): string {
+  const phrase = resolveTitlePhrase({
+    slug: p.subjectSlug,
+    label: p.subjectLabel,
+    level: p.level,
+  });
+  const lead = p.lead ? `${p.lead} ` : "";
+  const body =
+    phrase.type === "full"
+      ? `${lead}${phrase.text}`
+      : `${lead}${p.subjectLabel}과외 ${phrase.text}`;
+  return `${p.head} ${body} | ${SITE_NAME}`;
+}
+
 export interface SchoolMetaInput {
   schoolName: string;
   subjectLabel: string;
+  /** subjects.ts 의 과목 slug — title 문구 조회 키. */
+  subjectSlug?: string;
   /** 동명이교(지역 접미사) 학교만 지정 — title 앞에 짧은 지역명이 붙는다. */
   regionShort?: string;
-  /** 학교급 — 초등(elem)은 내신 대신 단원평가·수행평가 프레이밍 description 을 쓴다. 미지정 시 중·고 기준. */
-  level?: "elem" | "middle" | "high";
+  /** 학교급 — description 프레이밍 + title 문구(초·중 override) 선택에 쓰인다. 미지정 시 고등 기준. */
+  level?: TitleLevel;
   canonicalPath: string;
 }
 export function buildSchoolMeta(p: SchoolMetaInput): Metadata {
   const prefix = p.regionShort ? `${p.regionShort} ` : "";
-  const title = `${prefix}${p.schoolName} ${p.subjectLabel}과외 선생님 매칭 | ${SITE_NAME}`;
+  const title = composeTitle({
+    head: `${prefix}${p.schoolName}`,
+    subjectLabel: p.subjectLabel,
+    subjectSlug: p.subjectSlug,
+    level: p.level,
+  });
   const descSet = p.level === "elem" ? SCHOOL_DESC_ELEM : SCHOOL_DESC;
   const description = pick(descSet, p.canonicalPath)(p);
   return baseMetadata(title, description, p.canonicalPath);
@@ -126,20 +165,36 @@ export function buildSchoolMeta(p: SchoolMetaInput): Metadata {
 
 export interface RegionMetaInput {
   regionName: string;
-  /** 과목(+학년) 문구. 없으면 과목 없는 지역 허브(구·동 허브) 메타. */
-  subjectPhrase?: string;
+  /** 과목 라벨. 없으면 과목 없는 지역 허브(구·동 허브) 메타. */
+  subjectLabel?: string;
+  /** subjects.ts 의 과목 slug — title 문구 조회 키(경기 레거시는 생략, 라벨로 역매핑). */
+  subjectSlug?: string;
+  /** 학년 라벨(초등/중등/고등) — 학년 세그먼트가 있는 경로에서만. */
+  gradeLabel?: string;
+  /** 학교급 — 학년을 알 수 있는 경로에서만 지정(지역 페이지 기본은 고등 기준). */
+  level?: TitleLevel;
   canonicalPath: string;
 }
 export function buildRegionMeta(p: RegionMetaInput): Metadata {
-  if (p.subjectPhrase) {
-    const title = `${p.regionName} ${p.subjectPhrase}과외 선생님 매칭 | ${SITE_NAME}`;
+  if (p.subjectLabel) {
+    // description 은 기존과 동일하게 "학년 과목" 결합 문구를 쓴다.
+    const subjectPhrase = p.gradeLabel
+      ? `${p.gradeLabel} ${p.subjectLabel}`
+      : p.subjectLabel;
+    const title = composeTitle({
+      head: p.regionName,
+      subjectLabel: p.subjectLabel,
+      subjectSlug: p.subjectSlug,
+      lead: p.gradeLabel,
+      level: p.level,
+    });
     const description = pick(REGION_DESC, p.canonicalPath)({
       regionName: p.regionName,
-      subjectPhrase: p.subjectPhrase,
+      subjectPhrase,
     });
     return baseMetadata(title, description, p.canonicalPath);
   }
-  const title = `${p.regionName} 과외 선생님 매칭 | ${SITE_NAME}`;
+  const title = `${p.regionName} ${REGION_HUB_TITLE_PHRASE} | ${SITE_NAME}`;
   const description = pick(REGION_HUB_DESC, p.canonicalPath)({ regionName: p.regionName });
   return baseMetadata(title, description, p.canonicalPath);
 }

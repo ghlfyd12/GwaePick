@@ -81,7 +81,7 @@ export async function generateMetadata({
   if (r) {
     return buildRegionMeta({
       regionName: r.sg.name,
-      subjectPhrase: r.subj.label,
+      subjectLabel: r.subj.label,
       canonicalPath: pseoHref.sigunguSubject(r.sg.slug, r.subj.slug),
     });
   }
