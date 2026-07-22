@@ -1,7 +1,7 @@
 /**
  * 상담 폼(ConsultForm) 옵션·라벨 — 서비스별 단일 소스(하드코딩 산재 금지).
  *
- * 지식의참견(메인): 학년(초등·중등·고등) + 과목(categories.subjects) + 라벨 "희망 과목".
+ * 지식의참견(메인): 학년(초등·중등·고등·성인) + 과목(categories.subjects) + 라벨 "희망 과목".
  * 어학의참견(/power): 학년(초등·중등·고등·성인) + 언어(languageDetails) + 라벨 "희망 언어".
  * 옵션·라벨을 컴포넌트에 하드코딩하지 않고 이 파일에서만 서비스별로 주입한다(기존 데이터 재사용).
  */
@@ -20,18 +20,22 @@ export type ConsultFormConfig = {
   choicePlaceholder: string;
 };
 
-/** 공통 학년(초등·중등·고등) — 어학은 여기에 "성인"을 더한다. */
-const baseGrades = schoolLevels.map((s) => s.title);
+/**
+ * 학년 옵션(초등 → 중등 → 고등 → 성인) — 두 서비스 공통.
+ * 초·중·고는 schoolLevels(pSEO 학년 데이터) 단일 소스에서 파생하고,
+ * 성인은 학교급이 아니므로 이 파일에서만 마지막에 더한다.
+ */
+const gradeOptions = [...schoolLevels.map((s) => s.title), "성인"];
 
 const mainConfig: ConsultFormConfig = {
-  gradeOptions: baseGrades,
+  gradeOptions,
   choiceOptions: subjects.map((s) => s.title),
   choiceLabel: "희망 과목",
   choicePlaceholder: "과목을 선택해주세요",
 };
 
 const powerConfig: ConsultFormConfig = {
-  gradeOptions: [...baseGrades, "성인"],
+  gradeOptions,
   // 언어명(영어·일본어·중국어)은 languageDetail.ts 단일 소스에서 파생.
   choiceOptions: LANGUAGE_SLUGS.map((slug) => languageDetails[slug].label),
   choiceLabel: "희망 언어",
