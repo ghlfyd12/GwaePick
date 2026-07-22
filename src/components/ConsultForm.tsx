@@ -46,6 +46,16 @@ const EMPTY: FormState = {
 
 type Errors = Partial<Record<keyof FormState, string>>;
 
+/**
+ * 목적격 조사 을/를 — 라벨이 서비스별로 달라져("희망 과목" / "희망 언어")
+ * 안내 문구를 고정할 수 없으므로 받침 유무로 고른다.
+ */
+const objectParticle = (word: string) => {
+  const code = word.charCodeAt(word.length - 1) - 0xac00;
+  if (code < 0 || code > 11171) return "을"; // 한글이 아니면 기본값
+  return code % 28 === 0 ? "를" : "을";
+};
+
 declare global {
   interface Window {
     daum?: {
@@ -62,9 +72,15 @@ declare global {
 
 export default function ConsultForm({
   defaultMessage = "",
+  showHeader = true,
 }: {
   /** 문의사항 프리필(예: "{지역} {과목} 과외 문의드립니다."). */
   defaultMessage?: string;
+  /**
+   * 폼 상단 헤더(라벨·제목·안내) 노출 여부.
+   * 단독 상담 페이지(/power/consult)처럼 페이지가 h1 로 같은 말을 이미 하고 있으면 false.
+   */
+  showHeader?: boolean;
 } = {}) {
   const [form, setForm] = useState<FormState>({ ...EMPTY, message: defaultMessage });
   // 서비스 구분 — /power(및 하위)면 어학의참견, 그 외 지식의참견. 폼 UI 는 그대로.
@@ -85,13 +101,14 @@ export default function ConsultForm({
 
   const validate = (): Errors => {
     const e: Errors = {};
-    if (!form.name.trim()) e.name = "학생 이름을 입력해 주세요.";
+    if (!form.name.trim()) e.name = `${formConfig.nameLabel}을 입력해 주세요.`;
     const digits = form.phone.replace(/[^0-9]/g, "");
     if (!form.phone.trim()) e.phone = "연락처를 입력해 주세요.";
     else if (!/^[0-9-]+$/.test(form.phone) || digits.length < 9 || digits.length > 11)
       e.phone = "연락처 형식을 확인해 주세요. (숫자/하이픈)";
     if (form.grades.length === 0) e.grades = "학년을 1개 이상 선택해 주세요.";
-    if (form.subjects.length === 0) e.subjects = "과목을 1개 이상 선택해 주세요.";
+    if (form.subjects.length === 0)
+      e.subjects = `${formConfig.choiceLabel}${objectParticle(formConfig.choiceLabel)} 1개 이상 선택해 주세요.`;
     if (!form.address.trim()) e.address = "주소를 검색해 주세요.";
     if (!form.agree) e.agree = "개인정보 수집·이용에 동의해 주세요.";
     return e;
@@ -133,7 +150,8 @@ export default function ConsultForm({
   return (
     <section
       id="consult"
-      aria-labelledby="consult-heading"
+      aria-labelledby={showHeader ? "consult-heading" : undefined}
+      aria-label={showHeader ? undefined : site.cta.label}
       className="border-t border-line bg-accent/5 px-4 py-16 sm:px-6 sm:py-20"
     >
       {/* Daum 우편번호 스크립트 — 클라이언트 로드(키 불필요) */}
@@ -147,25 +165,30 @@ export default function ConsultForm({
           <SuccessMessage phone={CONSULT_PHONE} />
         ) : (
           <>
-            {/* 헤더 */}
-            <div className="text-center">
-              <p className="text-sm font-semibold text-accent">문의 및 신청</p>
-              <h2
-                id="consult-heading"
-                className="mt-2 text-4xl font-bold leading-tight text-ink md:text-5xl"
-              >
-                체험 수업
-                <br />
-                <span className="text-accent">신청하기</span>
-              </h2>
-              <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-muted md:text-lg">
-                데이터로 검증된 우리 학교 맞춤 전략, 지금 바로 확인 가능합니다.
-                상세한 상담을 원하신다면 아래 내용을 작성해 주세요.
-              </p>
-            </div>
+            {/* 헤더 — 카피는 서비스별(consultFormOptions). 단독 상담 페이지에서는 페이지 h1 이 대신한다. */}
+            {showHeader && (
+              <div className="text-center">
+                <p className="text-sm font-semibold text-accent">
+                  {formConfig.header.eyebrow}
+                </p>
+                <h2
+                  id="consult-heading"
+                  className="mt-2 text-4xl font-bold leading-tight text-ink md:text-5xl"
+                >
+                  {formConfig.header.titleTop}
+                  <br />
+                  <span className="text-accent">{formConfig.header.titleAccent}</span>
+                </h2>
+                <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-muted md:text-lg">
+                  {formConfig.header.intro}
+                </p>
+              </div>
+            )}
 
             {/* 전화 / 카카오 버튼 — 전화 강조. 모바일 세로 스택(전화 위) → sm+ 동일폭 2열(50:50). */}
-            <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div
+              className={`grid grid-cols-1 gap-3 sm:grid-cols-2 ${showHeader ? "mt-7" : ""}`}
+            >
               <a
                 href={`tel:${CONSULT_PHONE}`}
                 className="flex min-w-0 items-center justify-center gap-2 rounded-xl border-2 border-accent bg-white px-3 py-3.5 text-accent transition-colors hover:bg-accent/5"
@@ -190,7 +213,7 @@ export default function ConsultForm({
             <form onSubmit={onSubmit} noValidate className="mt-8 flex flex-col gap-5">
               {/* 이름 + 연락처 (데스크톱 2열) */}
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                <Field label="학생 이름" required error={errors.name}>
+                <Field label={formConfig.nameLabel} required error={errors.name}>
                   {(id) => (
                     <input
                       id={id}
@@ -320,7 +343,7 @@ export default function ConsultForm({
                 disabled={status === "submitting"}
                 className="mt-1 inline-flex min-h-14 w-full items-center justify-center rounded-xl bg-accent px-6 text-lg font-bold text-white shadow-md transition-colors hover:bg-accent-dark disabled:opacity-60 md:text-xl"
               >
-                {status === "submitting" ? "접수 중…" : "체험 수업 신청하기 →"}
+                {status === "submitting" ? "접수 중…" : formConfig.submitLabel}
               </button>
 
               {status === "error" && (

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ConsultLink from "@/components/ui/ConsultLink";
 import { site } from "@/data/site";
 import { footerGroups } from "@/data/footerLinks";
 
@@ -21,16 +22,22 @@ export default function Footer() {
             <div key={group.title}>
               <p className="break-keep text-sm font-semibold text-ink">{group.title}</p>
               <ul className="mt-3 space-y-2">
-                {group.links.map((link) => (
-                  <li key={`${group.title}-${link.href}-${link.label}`}>
-                    <Link
-                      href={link.href}
-                      className="break-keep text-[13px] leading-relaxed text-muted transition-colors hover:text-accent hover:underline"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
+                {group.links.map((link) => {
+                  const cls =
+                    "break-keep text-[13px] leading-relaxed text-muted transition-colors hover:text-accent hover:underline";
+                  return (
+                    <li key={`${group.title}-${link.href}-${link.label}`}>
+                      {/* 상담 링크만 경로별 도착지가 갈린다(/power → 어학 전용 폼). 나머지는 정적 <a>. */}
+                      {link.href === site.cta.href ? (
+                        <ConsultLink className={cls}>{link.label}</ConsultLink>
+                      ) : (
+                        <Link href={link.href} className={cls}>
+                          {link.label}
+                        </Link>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}

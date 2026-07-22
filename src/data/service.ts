@@ -17,6 +17,20 @@ export function serviceFromPath(pathname: string | null | undefined): ServiceNam
   return p === "/power" || p.startsWith("/power/") ? SERVICE.power : SERVICE.main;
 }
 
+/**
+ * 어학의참견 전용 상담 폼 경로 — /power 스코프 상담 CTA 의 도착지(단일 소스).
+ * 지식의참견 도착지는 site.cta.href 그대로다(여기서 다루지 않는다).
+ */
+export const POWER_CONSULT_HREF = "/power/consult";
+
+/**
+ * /power(및 하위) 경로인지 — 상담 CTA·플로팅 버튼이 같은 기준으로 분기하도록 여기서만 판별한다.
+ * pathname 이 null 이어도 안전하다(서비스 판별과 동일 규칙 재사용).
+ */
+export function isPowerPath(pathname: string | null | undefined): boolean {
+  return serviceFromPath(pathname) === SERVICE.power;
+}
+
 export function isServiceName(v: unknown): v is ServiceName {
   return v === SERVICE.main || v === SERVICE.power;
 }

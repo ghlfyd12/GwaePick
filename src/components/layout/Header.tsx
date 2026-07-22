@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import CTAButton from "@/components/ui/CTAButton";
 import { site, type NavItem } from "@/data/site";
+import { POWER_CONSULT_HREF, isPowerPath } from "@/data/service";
 
 /*
  * /power(어학 랜딩) 전용 헤더 변형 — 이 경로(및 하위)에서만 로고 텍스트와
@@ -42,10 +43,13 @@ export default function Header() {
   const pathname = usePathname();
 
   // /power(및 하위)에서만 어학 변형 — 로고 텍스트/링크와 내비 3개 항목 교체.
-  const isPower = pathname === POWER_PATH || pathname.startsWith(`${POWER_PATH}/`);
+  // 경로 판별은 service.ts 단일 소스(isPowerPath)로 — 헤더·플로팅이 같은 기준을 쓴다.
+  const isPower = isPowerPath(pathname);
   const brandName = isPower ? POWER_BRAND : site.name;
   const logoHref = isPower ? POWER_PATH : "/";
   const navItems: NavItem[] = isPower ? POWER_NAV : site.nav;
+  // 상담 CTA 도착지 — /power(데스크톱 버튼·모바일 칩 공통)는 어학 전용 폼, 그 외는 메인 폼(변경 없음).
+  const ctaHref = isPower ? POWER_CONSULT_HREF : site.cta.href;
 
   // 라우트형 메뉴(/teachers 등)는 현재 경로와 일치하면 active(주황 강조).
   const isActive = (href: string) =>
@@ -132,7 +136,7 @@ export default function Header() {
               </Link>
             ))}
             <Link
-              href={site.cta.href}
+              href={ctaHref}
               onClick={closeAll}
               className="whitespace-nowrap rounded-full bg-accent px-2.5 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-accent-dark"
             >
@@ -143,7 +147,7 @@ export default function Header() {
           {/* CTA — Hero 안 무료상담 버튼과 중복이라 모바일에선 숨김 */}
           <div className="hidden md:block">
             <CTAButton
-              href={site.cta.href}
+              href={ctaHref}
               size="lg"
               className="px-5 text-base lg:px-6 lg:text-xl lg:min-h-14 xl:text-2xl"
             >

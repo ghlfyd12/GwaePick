@@ -1,24 +1,36 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { site } from "@/data/site";
+import { POWER_CONSULT_HREF, isPowerPath } from "@/data/service";
 
 /*
  * 우측 하단 고정 플로팅 버튼.
  *  - 아래: '상담전화연결' (tel: 전화 걸기) — 항상 표시, 코랄(accent)로 눈에 띄게.
  *  - 위: '스크롤 탑' — scrollY 가 기준을 넘으면 fade-in, 클릭 시 맨 위로 부드럽게.
  *
- * 색: 주황(accent) + 차콜/그레이 + 흰색 (보라 없음). prefers-reduced-motion 이면 즉시 이동.
+ * 색: accent 토큰 + 차콜/그레이 + 흰색. 토큰이라 메인은 코랄, /power 는 퍼플로 자동 렌더된다.
+ * prefers-reduced-motion 이면 즉시 이동.
+ *
+ * /power(및 하위)에서만 '무료 상담 신청'(→ /power/consult) 버튼이 하나 더 붙는다.
+ * 메인(지식의참견)은 상담 폼이 페이지 안에 있어 플로팅 구성 그대로 유지한다.
  */
 
 // tel: 전화번호 — 실제 번호로 교체하려면 이 값만 수정.
 const PHONE = "01021772720";
 // 스크롤 탑 버튼이 나타나는 스크롤 기준(px) — 조절하려면 이 값만 수정.
 const SCROLL_TOP_THRESHOLD = 300;
+// 상담 도착지·경로 판별은 service.ts 단일 소스(Header 의 /power CTA 와 동일 기준).
 
 export default function FloatingButtons() {
   const [showTop, setShowTop] = useState(false);
   const [reduced, setReduced] = useState(false);
+  const pathname = usePathname();
+
+  // /power 스코프에서만 상담 신청 버튼 노출. 이미 상담 페이지면 자기 자신으로 보내지 않는다.
+  const showConsult = isPowerPath(pathname) && pathname !== POWER_CONSULT_HREF;
 
   // prefers-reduced-motion: 부드러운 스크롤 → 즉시 이동
   useEffect(() => {
@@ -87,11 +99,16 @@ export default function FloatingButtons() {
         <span>카톡 상담</span>
       </a>
 
-      {/* 상담전화연결 — 항상 표시, tel: 전화 걸기 */}
+      {/* 상담전화연결 — 항상 표시, tel: 전화 걸기.
+          상담 신청 버튼이 함께 뜨는 /power 에서는 흰 배경 + 테두리로 낮춰 위계를 구분한다. */}
       <a
         href={`tel:${PHONE}`}
         aria-label="상담전화연결"
-        className="inline-flex min-h-12 items-center gap-2 rounded-full bg-accent px-5 font-semibold text-white shadow-lg transition-colors hover:bg-accent-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        className={`inline-flex min-h-12 items-center gap-2 rounded-full px-5 font-semibold shadow-lg transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+          showConsult
+            ? "border-2 border-accent bg-white text-accent hover:bg-accent/5"
+            : "bg-accent text-white hover:bg-accent-dark"
+        }`}
       >
         <svg
           aria-hidden="true"
@@ -107,6 +124,30 @@ export default function FloatingButtons() {
         </svg>
         <span>상담전화연결</span>
       </a>
+
+      {/* 무료 상담 신청 — /power 스코프 전용. 어학 전용 폼(/power/consult)으로 이동. */}
+      {showConsult && (
+        <Link
+          href={POWER_CONSULT_HREF}
+          className="inline-flex min-h-12 items-center gap-2 rounded-full bg-accent px-5 font-semibold text-white shadow-lg transition-colors hover:bg-accent-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            className="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M9 4H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-4" />
+            <path d="M9 3h6v3H9zM8 11h6M8 15h4" />
+            <path d="m16.5 8.5 4-4 2 2-4 4h-2z" />
+          </svg>
+          <span>{site.cta.label}</span>
+        </Link>
+      )}
     </div>
   );
 }
