@@ -17,10 +17,13 @@ const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "EducationalOrganization",
   name: site.name,
-  alternateName: "지식의 참견",
+  // 띄어쓴 표기와 영문 표기를 같은 브랜드로 묶는다(붙여쓰기는 위 name 이 담당).
+  alternateName: ["지식의 참견", "gwae-pick"],
   url: site.url,
   logo: `${site.url}/icon.png`,
   description: site.description,
+  // 서비스 제공 지역 — 국내 전역.
+  areaServed: "KR",
 };
 
 /*

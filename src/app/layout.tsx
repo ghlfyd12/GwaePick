@@ -21,8 +21,13 @@ const pretendard = localFont({
 
 // 브랜드명을 맨 앞에 둬 '지식의참견' 단독 검색 노출을 강화한다(핵심 서비스는 뒤에 직관적으로).
 const TITLE = `${site.name} | 직접 가르친 선생님의 1:1 맞춤 과외 매칭`;
+/*
+ * description 본문에는 띄어쓴 표기('지식의 참견')를 쓴다.
+ * title 은 붙여쓰기(site.name), description 은 띄어쓰기로 두 검색 표기를 함께 커버하려는 의도이므로
+ * 어느 한쪽으로 통일하지 않는다.
+ */
 const DESCRIPTION =
-  "직접 가르쳐 온 선생님이 1:1 상담으로 우리 아이에게 가장 잘 맞는 선생님을 연결해 드립니다. 무료 상담 신청.";
+  `지식의 참견은 직접 가르쳐 온 선생님이 상담하고 검증된 선생님을 연결하는 1:1 맞춤 과외 매칭 서비스입니다. ${site.slogan}`;
 
 /* URL 공유 미리보기(OG/트위터) 이미지 — site.ogImage 단일 소스(절대 URL 변환). */
 const OG_IMAGE = site.ogImage;
@@ -39,6 +44,12 @@ export const metadata: Metadata = {
     template: `%s | ${site.name}`,
   },
   description: DESCRIPTION,
+  /*
+   * 루트 canonical — 자체 metadata 가 없는 유일한 페이지인 메인(/)에만 적용된다.
+   * (하위 페이지는 모두 각자 alternates.canonical 을 정의하므로 상속되지 않는다.)
+   * 값은 metadataBase(site.url) 기준 절대 URL 로 렌더된다 — 한글 도메인은 punycode 표기.
+   */
+  alternates: { canonical: "/" },
   // 구버전 favicon.ico 제거 후 icon.png 를 명시적으로 등록 + 캐시 무력화(?v=3)
   icons: {
     icon: "/icon.png?v=3",
