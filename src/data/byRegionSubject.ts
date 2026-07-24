@@ -26,11 +26,11 @@ const subjectBySlug = new Map(POWER_SUBJECTS.map((s) => [s.slug, s]));
 
 /** 지역 축 title 키워드(단일 소스 — 이 값만 바꾸면 전 페이지 반영). 느낌표·금지어 없음. */
 export const REGION_SUBJECT_KEYWORD: Record<string, string> = {
-  "english-conversation": "원어민 1:1 영어회화 발음 프리토킹 왕초보 성인",
-  "chinese-conversation": "원어민 1:1 중국어회화 성조 발음 기초 맞춤",
-  "chinese-tutoring": "1:1 중국어과외 병음 성조 HSK 기초 노베이스",
-  "japanese-conversation": "원어민 1:1 일본어회화 발음 프리토킹 기초 맞춤",
-  "japanese-tutoring": "1:1 일본어과외 히라가나 문법 JLPT 기초 맞춤",
+  "english-conversation": "1:1 영어회화 기초 토익 토플 오픽 스피킹",
+  "japanese-conversation": "1:1 일본어회화 왕초보 기초 JLPT 프리토킹",
+  "japanese-tutoring": "1:1 일본어과외 기초 히라가나 문법 JLPT JPT",
+  "chinese-conversation": "1:1 중국어회화 왕초보 성조 HSKK 프리토킹",
+  "chinese-tutoring": "1:1 중국어과외 기초 병음 HSK 비즈니스",
 };
 
 /* ── 과목별 특화 카드 3종(지역 축 — 왕초보·성인·기초 프레이밍). "수행평가" 미사용. ── */
