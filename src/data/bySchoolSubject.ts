@@ -133,7 +133,7 @@ function hashSlug(s: string): number {
 }
 
 /** 목적격 조사 을/를 — 마지막 글자의 받침 유무로 결정(한글 완성형 기준). */
-function objJosa(word: string): string {
+export function objJosa(word: string): string {
   const last = word.charCodeAt(word.length - 1);
   if (last < 0xac00 || last > 0xd7a3) return "를"; // 한글 완성형 아님 → 기본 를
   return (last - 0xac00) % 28 !== 0 ? "을" : "를";

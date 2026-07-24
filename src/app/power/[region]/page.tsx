@@ -6,6 +6,7 @@ import {
   powerRegionSlugs,
   resolvePowerRegionName,
 } from "@/data/powerRegions";
+import { regionSubjectEntryLinks } from "@/data/byRegionSubject";
 
 /*
  * /power/[region] — 파워 홈페이지 지역별 영어회화 동적 상세(pSEO).
@@ -70,6 +71,8 @@ export default async function PowerRegionPage({
 }) {
   const { region } = await params;
   const name = resolvePowerRegionName(region);
+  // 알려진 지역이면 신규 유형 A(지역×어학과목) 5과목 진입 링크를 노출한다(무효 지역은 빈 배열 → 미노출).
+  const subjectLinks = regionSubjectEntryLinks(region);
 
   // 지역명을 자연스럽게 녹인 본문 블록(데이터로 분리하기보다 변수 보간이 핵심이라 페이지에 둠).
   const learnerLines = [
@@ -186,6 +189,27 @@ export default async function PowerRegionPage({
               교체도 부담 없이 도와드립니다.
             </p>
           </div>
+
+          {/* 지역별 어학과목(유형 A) 진입 링크 — 영어회화 외 4과목까지 확장 */}
+          {subjectLinks.length > 0 && (
+            <div className="mt-10">
+              <h3 className="break-keep text-lg font-bold text-ink sm:text-xl">
+                {name}에서 다른 언어·과목도 찾으시나요
+              </h3>
+              <ul className="mt-4 flex flex-wrap gap-2.5">
+                {subjectLinks.map((s) => (
+                  <li key={s.href}>
+                    <Link
+                      href={s.href}
+                      className="inline-flex min-h-12 items-center break-keep rounded-full border border-accent/40 bg-white px-5 py-2.5 text-sm font-semibold text-accent transition-colors hover:bg-accent/5 sm:text-base"
+                    >
+                      {s.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div className="mt-10 text-center">
             <Link

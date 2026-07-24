@@ -10,6 +10,7 @@ import { powerRegionSlugs } from "@/data/powerRegions";
 import { LANGUAGE_SLUGS } from "@/data/languageDetail";
 import { allPowerPerformancePairs } from "@/data/powerSchoolDepts";
 import { allBySchoolPairs } from "@/data/bySchoolSubject";
+import { allByRegionPairs } from "@/data/byRegionSubject";
 import {
   SITEMAP_URLS_PER_FILE,
   SCHOOL_PAIR_COUNT,
@@ -135,6 +136,16 @@ function coreSitemap(lastModified: Date): MetadataRoute.Sitemap {
     }),
   );
 
+  // 어학의참견 유형 A — 지역×어학과목 /power/by-region/[region]/[subject] (≈960×5). 코어 총량 40k 한도 내.
+  const powerByRegionPages: MetadataRoute.Sitemap = allByRegionPairs().map(
+    ({ region, subject }) => ({
+      url: `${base}/power/by-region/${enc(region)}/${subject}`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.5,
+    }),
+  );
+
   return [
     ...home,
     ...regionPages,
@@ -145,6 +156,7 @@ function coreSitemap(lastModified: Date): MetadataRoute.Sitemap {
     ...powerLanguagePages,
     ...powerPerformancePages,
     ...powerBySchoolPages,
+    ...powerByRegionPages,
   ];
 }
 
