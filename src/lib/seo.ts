@@ -154,6 +154,9 @@ function baseMetadata(title: string, description: string, canonicalPath: string)
  *  - suffix: "{앞부분} {과목}과외 {문구}"  ← 문구는 titleKeywords.ts(페이지 유형×학교급) 에서 온다.
  *  - full  : "{앞부분} {문구}"  (논술·코딩처럼 문구에 이미 "○○과외"가 포함됨 → 학교급 무관)
  * head 는 지역명 또는 (지역+)학교명, lead 는 과목 앞에 붙는 학년 등 수식어(선택).
+ *
+ * lead 생략 규칙: suffix 문구가 lead 와 같은 말로 시작하면 lead 를 빼 같은 단어가 두 번 나오지 않게 한다.
+ * (예: lead="초등" + 문구="초등 단원평가 …" → "초등 수학과외 초등 단원평가 …" 가 되는 것을 방지)
  */
 function composeTitle(p: {
   pageType: TitlePageType;
@@ -168,12 +171,15 @@ function composeTitle(p: {
     label: p.subjectLabel,
     level: p.level,
   });
-  const lead = p.lead ? `${p.lead} ` : "";
-  const body =
-    phrase.type === "full"
-      ? `${lead}${phrase.text}`
-      : `${lead}${p.subjectLabel}과외 ${resolveTitleKeyword(p.pageType, p.level)}`;
-  return `${p.head} ${body} | ${SITE_NAME}`;
+  if (phrase.type === "full") {
+    const lead = p.lead ? `${p.lead} ` : "";
+    return `${p.head} ${lead}${phrase.text} | ${SITE_NAME}`;
+  }
+  const keyword = resolveTitleKeyword(p.pageType, p.level);
+  // 문구가 lead 로 시작하면(예: "초등 단원평가 …" + lead "초등") 중복이므로 lead 를 생략한다.
+  const dropLead = !!p.lead && keyword.startsWith(`${p.lead} `);
+  const lead = p.lead && !dropLead ? `${p.lead} ` : "";
+  return `${p.head} ${lead}${p.subjectLabel}과외 ${keyword} | ${SITE_NAME}`;
 }
 
 export interface SchoolMetaInput {
