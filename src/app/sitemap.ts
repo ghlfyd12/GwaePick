@@ -10,13 +10,17 @@ import { powerRegionSlugs } from "@/data/powerRegions";
 import { LANGUAGE_SLUGS } from "@/data/languageDetail";
 import { allPowerPerformancePairs } from "@/data/powerSchoolDepts";
 import { allBySchoolPairs } from "@/data/bySchoolSubject";
-import { allByRegionPairs } from "@/data/byRegionSubject";
 import {
   SITEMAP_URLS_PER_FILE,
   SCHOOL_PAIR_COUNT,
-  TOTAL_SITEMAP_COUNT,
+  SCHOOL_SITEMAP_CHUNKS,
   schoolPairAt,
 } from "@/lib/schoolSitemap";
+import {
+  POWER_REGION_PAIRS,
+  POWER_REGION_PAIR_COUNT,
+  TOTAL_SITEMAP_COUNT,
+} from "@/lib/powerRegionSitemap";
 
 /*
  * 동적 sitemap — 분할 구조(/sitemap/[id].xml). robots.txt 가 각 파일 URL 을 모두 가리킨다.
@@ -141,15 +145,7 @@ function coreSitemap(lastModified: Date): MetadataRoute.Sitemap {
     }),
   );
 
-  // 어학의참견 유형 A — 지역×어학과목 /power/by-region/[region]/[subject] (≈960×5). 코어 총량 40k 한도 내.
-  const powerByRegionPages: MetadataRoute.Sitemap = allByRegionPairs().map(
-    ({ region, subject }) => ({
-      url: `${base}/power/by-region/${enc(region)}/${subject}`,
-      lastModified,
-      changeFrequency: "weekly",
-      priority: 0.5,
-    }),
-  );
+  // 어학의참견 지역 축(by-region)은 대량이라 별도 shard(powerRegionSitemap) 로 분리한다(여기 미포함).
 
   return [
     ...home,
@@ -162,8 +158,24 @@ function coreSitemap(lastModified: Date): MetadataRoute.Sitemap {
     ...powerSchoolsIndex,
     ...powerPerformancePages,
     ...powerBySchoolPages,
-    ...powerByRegionPages,
   ];
+}
+
+/** 파워 지역 청크 — /power/by-region/{지역}/{과목} 한 청크(슬라이스). */
+function powerRegionSitemap(chunk: number, lastModified: Date): MetadataRoute.Sitemap {
+  const start = chunk * SITEMAP_URLS_PER_FILE;
+  const end = Math.min(start + SITEMAP_URLS_PER_FILE, POWER_REGION_PAIR_COUNT);
+  const out: MetadataRoute.Sitemap = [];
+  for (let p = start; p < end; p++) {
+    const { region, subject } = POWER_REGION_PAIRS[p];
+    out.push({
+      url: `${base}/power/by-region/${enc(region)}/${subject}`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.5,
+    });
+  }
+  return out;
 }
 
 /** id 1..N — 학교×과목 상세 한 청크. 평탄화된 (학교,과목) 쌍을 슬라이스로만 생성(메모리 안전). */
@@ -191,6 +203,8 @@ export default async function sitemap({
 }): Promise<MetadataRoute.Sitemap> {
   const lastModified = new Date();
   const n = Number(await id);
-  // id 0 = 코어, id 1..N = 학교 청크(0-based chunk = n - 1).
-  return n <= 0 ? coreSitemap(lastModified) : schoolSitemap(n - 1, lastModified);
+  // id 0 = 코어 / 1..S = 학교 청크 / S+1..S+P = 파워 지역 청크.
+  if (n <= 0) return coreSitemap(lastModified);
+  if (n <= SCHOOL_SITEMAP_CHUNKS) return schoolSitemap(n - 1, lastModified);
+  return powerRegionSitemap(n - 1 - SCHOOL_SITEMAP_CHUNKS, lastModified);
 }

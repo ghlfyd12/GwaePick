@@ -1,5 +1,5 @@
 import { site } from "@/data/site";
-import { TOTAL_SITEMAP_COUNT } from "@/lib/schoolSitemap";
+import { TOTAL_SITEMAP_COUNT } from "@/lib/powerRegionSitemap";
 
 /*
  * 사이트맵 인덱스(<sitemapindex>) — 분할된 /sitemap/[id].xml 청크 전부를 한 곳에 나열한다.

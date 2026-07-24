@@ -7,6 +7,12 @@ import {
   resolvePowerRegionName,
 } from "@/data/powerRegions";
 import { regionSubjectEntryLinks } from "@/data/byRegionSubject";
+import {
+  getExpansionRegion,
+  expansionHubRegions,
+  sigunguHubsOfSido,
+  dongsOfSigunguHub,
+} from "@/data/powerRegionsExpansion";
 
 /*
  * /power/[region] — 파워 홈페이지 지역별 영어회화 동적 상세(pSEO).
@@ -24,7 +30,11 @@ export const dynamicParams = true;
 type Params = { region: string };
 
 export function generateStaticParams(): Params[] {
-  return powerRegionSlugs.map((region) => ({ region }));
+  // 기존 963 + 확장 허브(시도·시군구)만 정적 생성. 동은 허브 없음(과목 페이지만).
+  return [
+    ...powerRegionSlugs.map((region) => ({ region })),
+    ...expansionHubRegions().map((h) => ({ region: h.slug })),
+  ];
 }
 
 export async function generateMetadata({
@@ -73,6 +83,13 @@ export default async function PowerRegionPage({
   const name = resolvePowerRegionName(region);
   // 알려진 지역이면 신규 유형 A(지역×어학과목) 5과목 진입 링크를 노출한다(무효 지역은 빈 배열 → 미노출).
   const subjectLinks = regionSubjectEntryLinks(region);
+
+  // 확장 허브 계층 링크 — 시도 허브 → 시군구 허브, 시군구 허브 → 하위 동 과목(영어회화).
+  const exp = getExpansionRegion(region);
+  const childSigungu =
+    exp?.level === "sido" ? sigunguHubsOfSido(region) : [];
+  const childDongs =
+    exp?.level === "sigungu" ? dongsOfSigunguHub(region) : [];
 
   // 지역명을 자연스럽게 녹인 본문 블록(데이터로 분리하기보다 변수 보간이 핵심이라 페이지에 둠).
   const learnerLines = [
@@ -204,6 +221,48 @@ export default async function PowerRegionPage({
                       className="inline-flex min-h-12 items-center break-keep rounded-full border border-accent/40 bg-white px-5 py-2.5 text-sm font-semibold text-accent transition-colors hover:bg-accent/5 sm:text-base"
                     >
                       {s.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* 시도 허브 → 하위 시군구 허브 계층 링크 */}
+          {childSigungu.length > 0 && (
+            <div className="mt-10">
+              <h3 className="break-keep text-lg font-bold text-ink sm:text-xl">
+                {name} 시·군·구별 안내
+              </h3>
+              <ul className="mt-4 flex flex-wrap gap-2.5">
+                {childSigungu.map((sg) => (
+                  <li key={sg.slug}>
+                    <Link
+                      href={`/power/${encodeURIComponent(sg.slug)}`}
+                      className="inline-flex min-h-11 items-center break-keep rounded-full border border-accent/40 bg-white px-4 py-2 text-sm font-semibold text-accent transition-colors hover:bg-accent/5"
+                    >
+                      {sg.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* 시군구 허브 → 하위 동 영어회화 과목 페이지 계층 링크 */}
+          {childDongs.length > 0 && (
+            <div className="mt-10">
+              <h3 className="break-keep text-lg font-bold text-ink sm:text-xl">
+                {name} 동네별 영어회화
+              </h3>
+              <ul className="mt-4 flex flex-wrap gap-2.5">
+                {childDongs.map((d) => (
+                  <li key={d.slug}>
+                    <Link
+                      href={`/power/by-region/${encodeURIComponent(d.slug)}/english-conversation`}
+                      className="inline-flex min-h-11 items-center break-keep rounded-full border border-accent/40 bg-white px-4 py-2 text-sm font-semibold text-accent transition-colors hover:bg-accent/5"
+                    >
+                      {d.name}
                     </Link>
                   </li>
                 ))}

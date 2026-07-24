@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { site } from "@/data/site";
-import { TOTAL_SITEMAP_COUNT } from "@/lib/schoolSitemap";
+import { TOTAL_SITEMAP_COUNT } from "@/lib/powerRegionSitemap";
 
 /*
  * 동적 robots.txt — /robots.txt 로 노출.

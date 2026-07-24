@@ -16,6 +16,11 @@ import type { Metadata } from "next";
 import { site } from "@/data/site";
 import { powerRegionSlugs, resolvePowerRegionName } from "@/data/powerRegions";
 import { POWER_SUBJECTS, objJosa, type PowerSubject } from "@/data/bySchoolSubject";
+import {
+  getExpansionRegion,
+  isExpansionRegionSlug,
+  allExpansionRegionSlugs,
+} from "@/data/powerRegionsExpansion";
 
 const subjectBySlug = new Map(POWER_SUBJECTS.map((s) => [s.slug, s]));
 
@@ -83,9 +88,12 @@ export function isKnownPowerRegion(regionParam: string): boolean {
   return regionSet.has(slugKey(regionParam));
 }
 
-/** (지역, 과목) 조합이 페이지 생성 대상인지 — 유효 지역 + 유효 과목. */
+/** (지역, 과목) 조합이 페이지 생성 대상인지 — 기존 963 또는 확장 지역 + 유효 과목. */
 export function isByRegionAllowed(regionParam: string, subjectSlug: string): boolean {
-  return isKnownPowerRegion(regionParam) && subjectBySlug.has(subjectSlug);
+  return (
+    (isKnownPowerRegion(regionParam) || isExpansionRegionSlug(regionParam)) &&
+    subjectBySlug.has(subjectSlug)
+  );
 }
 
 function hashSlug(s: string): number {
@@ -164,10 +172,19 @@ export function buildByRegionData(
 ): ByRegionPageData | null {
   const subject = subjectBySlug.get(subjectSlug);
   if (!subject) return null;
-  if (!isKnownPowerRegion(regionParam)) return null;
 
-  const regionName = resolvePowerRegionName(regionParam);
-  const regionSlug = regionName; // 유효 지역은 표시명이 곧 canonical slug
+  // 기존 963 은 표시명=slug(무변경 경로). 확장 지역은 expansion 의 표시명/slug 사용.
+  let regionName: string;
+  let regionSlug: string;
+  if (isKnownPowerRegion(regionParam)) {
+    regionName = resolvePowerRegionName(regionParam);
+    regionSlug = regionName;
+  } else {
+    const exp = getExpansionRegion(regionParam);
+    if (!exp) return null;
+    regionName = exp.name;
+    regionSlug = exp.slug;
+  }
   const enc = encodeURIComponent(regionSlug);
   const terms = REGION_TERMS[subjectSlug];
   const keyword = REGION_SUBJECT_KEYWORD[subjectSlug];
@@ -204,12 +221,18 @@ export function buildByRegionData(
   };
 }
 
-/** 기존 /power/[region] 템플릿의 신규 5과목 진입 링크(같은 지역). */
+/** 기존 /power/[region] 템플릿의 신규 5과목 진입 링크(같은 지역). 963·확장 모두 지원. */
 export function regionSubjectEntryLinks(
   regionParam: string,
 ): { href: string; label: string }[] {
-  if (!isKnownPowerRegion(regionParam)) return [];
-  const regionName = resolvePowerRegionName(regionParam);
+  let regionName: string;
+  if (isKnownPowerRegion(regionParam)) {
+    regionName = resolvePowerRegionName(regionParam);
+  } else {
+    const exp = getExpansionRegion(regionParam);
+    if (!exp) return [];
+    regionName = exp.name;
+  }
   const enc = encodeURIComponent(regionName);
   return POWER_SUBJECTS.map((s) => ({
     href: `/power/by-region/${enc}/${s.slug}`,
@@ -217,20 +240,27 @@ export function regionSubjectEntryLinks(
   }));
 }
 
-/** 정적 생성 파일럿 — 앞쪽 지역 일부만 SSG(나머지 ISR). 빌드 시간 최소화. */
+/** 정적 생성 파일럿 — 963·확장 앞쪽 일부만 SSG(나머지 ISR). 빌드 시간 최소화. */
 export const PILOT_REGION_COUNT = 20;
 export function pilotByRegionPairs(): { region: string; subject: string }[] {
   const out: { region: string; subject: string }[] = [];
-  for (const region of powerRegionSlugs.slice(0, PILOT_REGION_COUNT)) {
+  const pilot = [
+    ...powerRegionSlugs.slice(0, PILOT_REGION_COUNT),
+    ...allExpansionRegionSlugs().slice(0, PILOT_REGION_COUNT),
+  ];
+  for (const region of pilot) {
     for (const s of POWER_SUBJECTS) out.push({ region, subject: s.slug });
   }
   return out;
 }
 
-/** sitemap 용 전체 (지역×과목) 조합 — 960×5. */
+/** sitemap 용 전체 (지역×과목) 조합 — 963 + 확장. 지역 축 전량. */
 export function allByRegionPairs(): { region: string; subject: string }[] {
   const out: { region: string; subject: string }[] = [];
   for (const region of powerRegionSlugs) {
+    for (const s of POWER_SUBJECTS) out.push({ region, subject: s.slug });
+  }
+  for (const region of allExpansionRegionSlugs()) {
     for (const s of POWER_SUBJECTS) out.push({ region, subject: s.slug });
   }
   return out;
