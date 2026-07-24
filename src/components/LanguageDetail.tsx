@@ -1,5 +1,6 @@
 import Image from "next/image";
 import ConsultForm from "@/components/ConsultForm";
+import EnglishCourseSections from "@/components/EnglishCourseSections";
 import { site } from "@/data/site";
 import {
   languageDetails,
@@ -75,6 +76,9 @@ export default function LanguageDetail({ slug }: { slug: LanguageSlug }) {
           </div>
         </div>
       </section>
+
+      {/* 영어 전용 확장 섹션(수업 과정·관리 시스템·영작 교정) — 일본어·중국어 무영향. */}
+      {slug === "english" && <EnglishCourseSections />}
 
       <div className="mx-auto max-w-5xl space-y-14 px-5 py-14 sm:px-6 sm:py-20">
         {/* ── 2. 선택 이유 4카드 ──────────────────────────────────── */}
