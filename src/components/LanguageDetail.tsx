@@ -4,7 +4,6 @@ import { site } from "@/data/site";
 import {
   languageDetails,
   lessonMethods,
-  LANGUAGE_HERO_IMAGE,
   type LanguageSlug,
 } from "@/data/languageDetail";
 
@@ -65,8 +64,8 @@ export default function LanguageDetail({ slug }: { slug: LanguageSlug }) {
           {/* 우: 이미지(오버레이 없음, 고정 비율로 클리핑 방지) */}
           <div className="relative order-1 aspect-[4/3] w-full overflow-hidden rounded-2xl shadow-md ring-1 ring-line md:order-2">
             <Image
-              src={LANGUAGE_HERO_IMAGE}
-              alt={`${data.label} 1:1 수업을 준비하는 학생`}
+              src={data.heroImage}
+              alt={data.heroAlt}
               fill
               priority
               sizes="(min-width: 768px) 512px, 100vw"

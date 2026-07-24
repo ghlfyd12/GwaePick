@@ -14,9 +14,6 @@ import { site } from "@/data/site";
 export const LANGUAGE_SLUGS = ["english", "japanese", "chinese"] as const;
 export type LanguageSlug = (typeof LANGUAGE_SLUGS)[number];
 
-/** Hero 우측 이미지 — 저작권 안전한 기존 스톡 에셋(플레이스홀더, 3개 언어 공용). */
-export const LANGUAGE_HERO_IMAGE = "/images/subject-students.png";
-
 /** 선택 이유 카드 1개. */
 export type LanguageReason = { no: string; title: string; desc: string };
 
@@ -43,6 +40,10 @@ export type LanguageDetailData = {
   slug: LanguageSlug;
   /** 화면·폼에 쓰는 언어명(영어/일본어/중국어). */
   label: string;
+  /** Hero 이미지 — 언어별 전용 에셋(next/image + unoptimized 로 원본 경로 노출). */
+  heroImage: string;
+  /** Hero 이미지 대체 텍스트 — 실제 이미지 내용과 일치(언어별). */
+  heroAlt: string;
   heroHeadline: string;
   heroSub: string;
   heroChips: string[];
@@ -64,6 +65,8 @@ export const languageDetails: Record<LanguageSlug, LanguageDetailData> = {
   english: {
     slug: "english",
     label: "영어",
+    heroImage: "/images/power-hero-english.png",
+    heroAlt: "노트북을 두고 둘러앉아 함께 공부하는 사람들",
     heroHeadline: "혼자 외우던 영어, 이제 선생님과 직접 말하며 시작하세요",
     heroSub:
       "현지 원어민과 국내 거주 교포 선생님 중에서, 지금 수준과 목표에 가장 잘 맞는 한 분을 상담으로 직접 찾아 연결해 드립니다.",
@@ -100,6 +103,8 @@ export const languageDetails: Record<LanguageSlug, LanguageDetailData> = {
   japanese: {
     slug: "japanese",
     label: "일본어",
+    heroImage: "/images/power-hero-japanese.png",
+    heroAlt: "선생님과 나란히 앉아 학습지를 보며 공부하는 학생",
     heroHeadline: "히라가나부터 JLPT까지, 일본어를 직접 말하며 시작하세요",
     heroSub:
       "원어민·교포 선생님과 1:1로, 회화부터 시험·유학까지 목표에 맞춰 진행합니다.",
@@ -135,6 +140,8 @@ export const languageDetails: Record<LanguageSlug, LanguageDetailData> = {
   chinese: {
     slug: "chinese",
     label: "중국어",
+    heroImage: "/images/power-hero-chinese.png",
+    heroAlt: "칠판 앞 선생님과 함께 중국어를 공부하는 학생들",
     heroHeadline: "병음과 성조부터 HSK까지, 중국어를 제대로 시작하세요",
     heroSub:
       "원어민·교포 선생님과 1:1로, 회화부터 시험·비즈니스까지 목표에 맞춰 진행합니다.",
