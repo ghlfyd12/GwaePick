@@ -219,3 +219,36 @@ export const englishWriting = {
   title: "기본 문장 연습부터 에세이까지, 단계적으로 진행되는 영작 교정",
   body: "매회 지금 실력에 맞는 영작 숙제가 제공되고, 작성한 문장을 교정받으며 영어식 사고로 에세이를 쓰는 힘을 기릅니다. 영작 교정은 수업에 포함되어 추가 비용이 없습니다.",
 } as const;
+
+/* ── 섹션 0 — 원어민 수업 소개 (섹션 1 앞) ── */
+
+/** 0-A 헤더. */
+export const englishNativeIntro = {
+  title: "현지 원어민 선생님에게 배우는 살아있는 영어",
+  sub: "혹시 이렇게 말하고 있지 않나요. 원어민 선생님이 실제로 쓰는 표현으로 바로잡아 드립니다.",
+} as const;
+
+/** 0-A 콩글리시 비교(뜻 / 어색한 표현 → 자연스러운 표현). 확정 카피. */
+export const konglishPairs = [
+  { ko: "지금 가는 중이야", wrong: "I'm going.", right: "I'm on my way." },
+  { ko: "컨디션이 안 좋아요", wrong: "My condition is bad.", right: "I don't feel good." },
+  { ko: "약속이 있어요", wrong: "I have a promise.", right: "I have plans." },
+] as const;
+
+/** 0-B 1:1 수업 4대 포인트. */
+export const englishOneOnOne = {
+  title: "진짜 실력을 키우는 원어민 1:1 맞춤 수업",
+  points: [
+    "개인별 학습 목표에 맞춘 커리큘럼",
+    "말하기·듣기·읽기·쓰기 4대 역량을 함께 강화",
+    "원어민의 자연스러운 표현과 발음 습득",
+    "현지 문화까지 함께 배우는 수업",
+  ],
+} as const;
+
+/** 0-C 선생님 안내 + 링크. */
+export const englishTeacherNote = {
+  body: "검증된 현지 원어민·국내 거주 교포 선생님과 전화·화상으로 어디서든 수업할 수 있습니다. 상담 선생님이 수준과 목표, 호흡까지 보고 맞는 선생님을 연결해 드립니다.",
+  linkLabel: "선생님 소개 보기 →",
+  linkHref: "/power/teachers",
+} as const;
