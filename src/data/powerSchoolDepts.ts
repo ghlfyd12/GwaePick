@@ -23,6 +23,13 @@ export type PowerLang = "english" | "chinese" | "japanese";
 /** 페이지 생성 언어 순서(내부 링크·정적 생성 순회에 쓰는 정렬 기준). */
 export const POWER_LANGS: readonly PowerLang[] = ["english", "chinese", "japanese"];
 
+/** 언어 slug → 화면 표기 언어명(유형 A·B 공용 단일 소스 — 순환 import 방지 위해 base 모듈에 둔다). */
+export const POWER_LANG_LABEL: Record<PowerLang, string> = {
+  english: "영어",
+  chinese: "중국어",
+  japanese: "일본어",
+};
+
 /** 학교 유형 — 외고 / 국제고 / 국제중. 국제고·중은 영어 단일 운영. */
 export type PowerSchoolKind = "foreign" | "intl-high" | "intl-middle";
 

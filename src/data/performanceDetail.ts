@@ -14,16 +14,13 @@ import { findSchoolBySlug } from "@/lib/findSchool";
 import {
   getPowerSchoolEntry,
   offeredLangs,
+  POWER_LANG_LABEL,
   type PowerLang,
   type PowerSchoolKind,
 } from "@/data/powerSchoolDepts";
+import { subjectsForLang } from "@/data/bySchoolSubject";
 
-/** 언어 slug → 화면 표기 언어명. */
-export const POWER_LANG_LABEL: Record<PowerLang, string> = {
-  english: "영어",
-  chinese: "중국어",
-  japanese: "일본어",
-};
+export { POWER_LANG_LABEL };
 
 /**
  * title 뒤에 붙는 검색 키워드(단일 소스 — 사용자가 이 두 상수만 바꾸면 전 페이지 반영).
@@ -89,8 +86,10 @@ export type PerformancePageData = {
   evalTypes: PerfEvalType[];
   intro: string;
   faq: { q: string; a: string }[];
-  /** 같은 학교의 다른 생성 언어(상호 링크). */
+  /** 같은 학교의 다른 생성 언어 수행평가(상호 링크). */
   siblingLangs: { lang: PowerLang; label: string }[];
+  /** 같은 학교·같은 언어의 어학과목(유형 A) 페이지 역링크. */
+  subjectLinks: { href: string; label: string }[];
 };
 
 /** description 회전(경로 해시 기반, 배포 간 안정) — 전 변형에 수행평가·내신 + 언어 특화어 포함. */
@@ -157,6 +156,12 @@ export function buildPerformanceData(
     .filter((l) => l !== lang)
     .map((l) => ({ lang: l, label: POWER_LANG_LABEL[l] }));
 
+  // 같은 학교·같은 언어의 어학과목(유형 A) 역링크. 같은 offered&&verified 게이트라 모두 생성됨.
+  const subjectLinks = subjectsForLang(lang).map((s) => ({
+    href: `/power/by-school/${schoolSlug}/${s.slug}`,
+    label: `${schoolName} ${s.label}`,
+  }));
+
   return {
     schoolSlug,
     lang,
@@ -173,6 +178,7 @@ export function buildPerformanceData(
     intro,
     faq,
     siblingLangs,
+    subjectLinks,
   };
 }
 

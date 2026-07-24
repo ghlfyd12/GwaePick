@@ -9,6 +9,7 @@ import { PILOT } from "@/data/dongPageCopy";
 import { powerRegionSlugs } from "@/data/powerRegions";
 import { LANGUAGE_SLUGS } from "@/data/languageDetail";
 import { allPowerPerformancePairs } from "@/data/powerSchoolDepts";
+import { allBySchoolPairs } from "@/data/bySchoolSubject";
 import {
   SITEMAP_URLS_PER_FILE,
   SCHOOL_PAIR_COUNT,
@@ -124,6 +125,16 @@ function coreSitemap(lastModified: Date): MetadataRoute.Sitemap {
     }),
   );
 
+  // 어학의참견 유형 A — 학교×어학과목 /power/by-school/[school]/[subject] (149개, 40k 한도 내라 코어에 포함)
+  const powerBySchoolPages: MetadataRoute.Sitemap = allBySchoolPairs().map(
+    ({ school, subject }) => ({
+      url: `${base}/power/by-school/${school}/${subject}`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.6,
+    }),
+  );
+
   return [
     ...home,
     ...regionPages,
@@ -133,6 +144,7 @@ function coreSitemap(lastModified: Date): MetadataRoute.Sitemap {
     ...powerRegionPages,
     ...powerLanguagePages,
     ...powerPerformancePages,
+    ...powerBySchoolPages,
   ];
 }
 
