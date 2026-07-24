@@ -8,6 +8,7 @@ import { subjects as detailSubjects } from "@/data/subjects";
 import { PILOT } from "@/data/dongPageCopy";
 import { powerRegionSlugs } from "@/data/powerRegions";
 import { LANGUAGE_SLUGS } from "@/data/languageDetail";
+import { allPowerPerformancePairs } from "@/data/powerSchoolDepts";
 import {
   SITEMAP_URLS_PER_FILE,
   SCHOOL_PAIR_COUNT,
@@ -113,6 +114,16 @@ function coreSitemap(lastModified: Date): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
+  // 어학의참견 유형 B — 학교×언어 수행평가 /power/performance/[school]/[lang] (95개, 40k 한도 내라 코어에 포함)
+  const powerPerformancePages: MetadataRoute.Sitemap = allPowerPerformancePairs().map(
+    ({ school, lang }) => ({
+      url: `${base}/power/performance/${school}/${lang}`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.6,
+    }),
+  );
+
   return [
     ...home,
     ...regionPages,
@@ -121,6 +132,7 @@ function coreSitemap(lastModified: Date): MetadataRoute.Sitemap {
     ...pilotDetail,
     ...powerRegionPages,
     ...powerLanguagePages,
+    ...powerPerformancePages,
   ];
 }
 
