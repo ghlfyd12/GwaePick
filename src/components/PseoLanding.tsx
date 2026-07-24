@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import ConsultForm from "@/components/ConsultForm";
 import type { RegionContent } from "@/lib/regionContent";
@@ -49,6 +50,18 @@ export default function PseoLanding({
 
       {/* 히어로 — 유일한 h1 + 뱃지 줄 */}
       <section className="border-b border-line bg-surface px-4 py-12 text-center sm:px-6 sm:py-16">
+        {/* 대표 이미지 — 학교 템플릿과 동일 방식(next/image + unoptimized). 검색 썸네일 노출용. */}
+        <div className="relative mx-auto mb-6 aspect-[4/3] w-full max-w-sm overflow-hidden rounded-2xl shadow-md sm:max-w-md">
+          <Image
+            src="/images/region-hero.jpg"
+            alt="교복을 입은 학생들"
+            fill
+            priority
+            sizes="(min-width: 640px) 448px, 100vw"
+            className="object-cover object-center"
+            unoptimized
+          />
+        </div>
         <h1 className="mx-auto max-w-3xl break-keep text-3xl font-bold leading-snug text-ink sm:text-4xl">
           {content.h1}
         </h1>
