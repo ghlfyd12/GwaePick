@@ -116,6 +116,11 @@ function coreSitemap(lastModified: Date): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
+  // 어학의참견 학교별 안내 인덱스 — /power/schools (내부 링크 허브 1개)
+  const powerSchoolsIndex: MetadataRoute.Sitemap = [
+    { url: `${base}/power/schools`, lastModified, changeFrequency: "weekly", priority: 0.6 },
+  ];
+
   // 어학의참견 유형 B — 학교×언어 수행평가 /power/performance/[school]/[lang] (95개, 40k 한도 내라 코어에 포함)
   const powerPerformancePages: MetadataRoute.Sitemap = allPowerPerformancePairs().map(
     ({ school, lang }) => ({
@@ -154,6 +159,7 @@ function coreSitemap(lastModified: Date): MetadataRoute.Sitemap {
     ...pilotDetail,
     ...powerRegionPages,
     ...powerLanguagePages,
+    ...powerSchoolsIndex,
     ...powerPerformancePages,
     ...powerBySchoolPages,
     ...powerByRegionPages,

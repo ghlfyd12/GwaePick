@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+import FooterSwitch from "@/components/layout/FooterSwitch";
 import FloatingButtons from "@/components/layout/FloatingButtons";
 import RootShell from "@/components/layout/RootShell";
 import { site } from "@/data/site";
@@ -91,7 +91,7 @@ export default function RootLayout({
         <RootShell>
           <Header />
           <main className="flex-1">{children}</main>
-          <Footer />
+          <FooterSwitch />
           <FloatingButtons />
         </RootShell>
       </body>
