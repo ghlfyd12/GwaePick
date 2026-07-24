@@ -114,11 +114,11 @@ const SUBJECT_CARDS: Record<string, SubjectCard[]> = {
 
 /** description 에 자연스럽게 넣을 과목별 핵심어 2개(문장으로 풀어 씀). */
 const SUBJECT_TERMS: Record<string, string> = {
-  "english-conversation": "발음과 프리토킹",
-  "chinese-conversation": "성조와 발음",
-  "chinese-tutoring": "병음과 성조",
-  "japanese-conversation": "발음과 프리토킹",
-  "japanese-tutoring": "히라가나와 문법",
+  "english-conversation": "내신 토플·스피킹과 서술형",
+  "chinese-conversation": "내신 성조와 HSKK 말하기",
+  "chinese-tutoring": "내신 전공어 어법과 HSK",
+  "japanese-conversation": "내신 기초와 JLPT 말하기",
+  "japanese-tutoring": "내신 전공어 문법과 JLPT",
 };
 
 /** 학과명을 본문에 넣을 수 있는 실제 학과인지(…과 로 끝나는 명칭만). */

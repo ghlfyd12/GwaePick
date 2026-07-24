@@ -66,11 +66,11 @@ const REGION_CARDS: Record<string, SubjectCard[]> = {
 
 /** description·특화 문장에 넣을 과목별 핵심어 2개. */
 const REGION_TERMS: Record<string, string> = {
-  "english-conversation": "발음과 프리토킹",
-  "chinese-conversation": "성조와 발음",
-  "chinese-tutoring": "병음과 성조",
-  "japanese-conversation": "발음과 프리토킹",
-  "japanese-tutoring": "히라가나와 문법",
+  "english-conversation": "기초와 토익·토플 스피킹",
+  "japanese-conversation": "왕초보 기초와 프리토킹",
+  "japanese-tutoring": "기초 히라가나와 문법·JLPT",
+  "chinese-conversation": "왕초보 성조와 HSKK 프리토킹",
+  "chinese-tutoring": "기초 병음과 HSK 비즈니스",
 };
 
 /* ── 유효 지역 판정 — powerRegionSlugs 정확 일치만 허용. ── */
