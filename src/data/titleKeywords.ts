@@ -25,7 +25,7 @@ export const titleKeywords: Record<
     elementary: "단원평가 고학년 사고력 노베이스 일대일 맞춤과외",
   },
   region: {
-    high: "내신대비 모의고사 수능 정시 개별진도",
+    high: "내신대비 모의고사 정시 기초 하위권 노베이스",
     middle: "내신대비 선행 예비고1 노베이스 맞춤 1:1과외",
     elementary: "초등 단원평가 기초 개념이해 사고력 일대일 맞춤과외",
   },
