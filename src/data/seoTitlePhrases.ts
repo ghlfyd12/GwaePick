@@ -6,7 +6,10 @@
  *
  * 문구 타입 2종:
  *  - suffix : "{지역/학교} {과목}과외 " 뒤에 붙는다.
+ *             ⚠ suffix 의 실제 문구는 이제 data/titleKeywords.ts(페이지 유형×학교급 6종)가 제공한다.
+ *             이 파일의 suffix 항목은 "full 이 아님"을 표시하는 역할만 하며 text 는 쓰이지 않는다.
  *  - full   : "{과목}과외" 부분까지 통째로 대체한다(문구에 이미 "○○과외"가 들어 있는 경우).
+ *             논술·코딩이 여기 해당하며 학교급과 무관하게 이 문구 그대로 나간다.
  *
  * 규칙: 느낌표·"매칭"·"선생님" 미사용(title 한정. 본문·h1 은 기존 유지).
  */
@@ -19,11 +22,17 @@ export type TitlePhrase =
   | { type: "suffix"; text: string }
   | { type: "full"; text: string };
 
-/** 조회 실패 시 최소 문구 — title 이 비거나 undefined 로 새지 않도록. */
-export const FALLBACK_TITLE_PHRASE: TitlePhrase = { type: "suffix", text: "맞춤수업" };
+/**
+ * suffix 표식 — text 는 titleKeywords.ts 가 대신 채우므로 비워 둔다.
+ * (여기서 문구를 바꿔도 title 에 반영되지 않는다. 문구 수정은 titleKeywords.ts 에서.)
+ */
+const SUFFIX: TitlePhrase = { type: "suffix", text: "" };
 
-/* ── 과목별 기본 문구(고등 기준). 학교급 override 가 있으면 그쪽이 우선. ── */
-const HIGH_SUFFIX: TitlePhrase = { type: "suffix", text: "내신대비 수능 정시준비 맞춤수업" };
+/** 조회 실패 시 기본 처리 — suffix 로 떨어뜨려 titleKeywords 의 학교급 문구를 쓰게 한다. */
+export const FALLBACK_TITLE_PHRASE: TitlePhrase = SUFFIX;
+
+/* ── 과목별 기본 타입. 학교급 override 가 있으면 그쪽이 우선. ── */
+const HIGH_SUFFIX: TitlePhrase = SUFFIX;
 
 export const seoTitlePhrases: Record<string, TitlePhrase> = {
   korean: HIGH_SUFFIX,
@@ -41,8 +50,8 @@ export const seoTitlePhrases: Record<string, TitlePhrase> = {
 };
 
 /* ── 학교급 override — 학교급(또는 학년)을 알 수 있는 페이지에서만 적용. ── */
-const ELEM_SUFFIX: TitlePhrase = { type: "suffix", text: "기초 학습습관 맞춤수업" };
-const MIDDLE_SUFFIX: TitlePhrase = { type: "suffix", text: "내신대비 고입준비 맞춤수업" };
+const ELEM_SUFFIX: TitlePhrase = SUFFIX;
+const MIDDLE_SUFFIX: TitlePhrase = SUFFIX;
 
 export const seoTitlePhrasesByLevel: Record<TitleLevel, Record<string, TitlePhrase>> = {
   elem: {

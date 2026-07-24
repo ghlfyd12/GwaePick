@@ -9,7 +9,8 @@
  *  - 사이트명·도메인·상담 경로는 site.ts 중앙 설정에서만 가져온다(중복 정의·하드코딩 금지).
  *  - 도메인은 site.url(=배포 기준 URL). sitemap·OG·robots 가 이미 이 값을 쓰므로 canonical 도 동일하게 맞춘다.
  *  - description 은 유형별 2~3종을 canonical 경로 해시로 회전해 대량 중복을 피한다(배포 간 안정적).
- *  - title 뒷부분 검색 키워드 문구는 data/seoTitlePhrases.ts 단일 소스(과목별·학교급별). 여기에 하드코딩 금지.
+ *  - title 뒷부분 검색 키워드 문구는 data/titleKeywords.ts(페이지 유형×학교급) + data/seoTitlePhrases.ts
+ *    (논술·코딩처럼 "○○과외"가 문구에 포함된 full 타입) 단일 소스. 여기에 하드코딩 금지.
  *  - 느낌표·영업성 대체 호칭 미사용(선생님/상담 통일). 평점·후기 수 등 허위 수치 미기재.
  */
 import type { Metadata } from "next";
@@ -19,6 +20,7 @@ import {
   REGION_HUB_TITLE_PHRASE,
   type TitleLevel,
 } from "@/data/seoTitlePhrases";
+import { resolveTitleKeyword, type TitlePageType } from "@/data/titleKeywords";
 
 const SITE_NAME = site.name; // 지식의참견
 const SITE_URL = site.url.replace(/\/$/, ""); // 배포 기준 도메인(단일 소스)
@@ -48,32 +50,66 @@ function hashSlug(s: string): number {
 const pick = <T>(arr: readonly T[], key: string): T => arr[hashSlug(key) % arr.length];
 
 /* ── description 템플릿(120~155자, 핵심 키워드 앞 40자, 느낌표·금지어 없음) ── */
+/* 고등 기본 description — title 의 "기출·교과서·출제경향" 키워드를 문장으로 받는다. */
 const SCHOOL_DESC: ReadonlyArray<(p: SchoolMetaInput) => string> = [
   ({ schoolName: S, subjectLabel: J, regionShort: R }) =>
-    `${R ? R + " " : ""}${S} ${J}과외를 찾고 계신가요. 직접 가르쳐 온 상담 선생님이 아이의 학년과 성향, ${S} 내신 시험 유형을 먼저 파악하고 호흡이 잘 맞는 ${J} 선생님을 1:1로 연결해 드립니다. 첫 상담은 무료이니 부담 없이 문의하세요.`,
+    `${R ? R + " " : ""}${S} ${J}과외를 찾고 계신가요. 직접 가르쳐 온 상담 선생님이 아이의 학년과 성향, ${S} 기출과 내신 출제경향을 먼저 파악하고 호흡이 잘 맞는 ${J} 선생님을 1:1로 연결해 드립니다. 첫 상담은 무료이니 부담 없이 문의하세요.`,
   ({ schoolName: S, subjectLabel: J, regionShort: R }) =>
-    `${R ? R + " " : ""}${S} ${J} 내신이 학원 단체 수업으로 잡히지 않는다면 1:1 맞춤 과외가 답입니다. 상담 선생님이 ${S} 학생을 먼저 이해하고 진도와 시험 범위에 맞춰 수업할 선생님을 찾아 연결해 드립니다. 무료 상담으로 시작하세요.`,
+    `${R ? R + " " : ""}${S} ${J} 내신이 학원 단체 수업으로 잡히지 않는다면 1:1 맞춤 과외가 답입니다. 상담 선생님이 ${S} 기출과 교과서 진도를 함께 살펴 시험 범위와 출제경향에 맞춰 수업할 선생님을 찾아 연결해 드립니다. 무료 상담으로 시작하세요.`,
   ({ schoolName: S, subjectLabel: J, regionShort: R }) =>
-    `${R ? R + " " : ""}${S} ${J}과외, 지식의참견이 맞는 선생님을 연결합니다. 직접 가르쳐 본 상담 선생님이 학생의 실력과 성향을 듣고 ${S}에 어울리는 ${J} 선생님을 1:1로 소개해 드립니다. 잘 맞지 않으면 다시 연결해 드리며 첫 상담은 무료입니다.`,
+    `${R ? R + " " : ""}${S} ${J}과외, 지식의참견이 맞는 선생님을 연결합니다. 직접 가르쳐 본 상담 선생님이 학생의 실력과 ${S} 기출 출제경향을 함께 살펴 어울리는 ${J} 선생님을 1:1로 소개해 드립니다. 잘 맞지 않으면 다시 연결해 드리며 첫 상담은 무료입니다.`,
 ];
 
-/* 초등 전용 description — 내신·중간·기말·모의고사·등급 대신 학교 진도·단원평가·수행평가·학습 습관 프레이밍. */
+/* 중등 전용 description — 수능·정시 대신 교과서 진도·출제경향·선행 프레이밍. */
+const SCHOOL_DESC_MIDDLE: ReadonlyArray<(p: SchoolMetaInput) => string> = [
+  ({ schoolName: S, subjectLabel: J, regionShort: R }) =>
+    `${R ? R + " " : ""}${S} ${J}과외를 찾고 계신가요. 직접 가르쳐 온 상담 선생님이 아이의 학년과 성향, ${S} 교과서 진도와 내신 출제경향을 먼저 파악하고 선행이 필요한 부분까지 짚어 ${J} 선생님을 1:1로 연결해 드립니다. 첫 상담은 무료입니다.`,
+  ({ schoolName: S, subjectLabel: J, regionShort: R }) =>
+    `${R ? R + " " : ""}${S} ${J} 내신이 학원 단체 수업으로 잡히지 않는다면 1:1 맞춤 과외가 답입니다. 상담 선생님이 ${S} 교과서 범위와 출제경향을 확인하고 현행 보완과 선행 속도를 함께 잡아 줄 선생님을 연결해 드립니다. 무료 상담으로 시작하세요.`,
+  ({ schoolName: S, subjectLabel: J, regionShort: R }) =>
+    `${R ? R + " " : ""}${S} ${J}과외, 지식의참견이 맞는 선생님을 연결합니다. 직접 가르쳐 본 상담 선생님이 학생의 실력과 ${S} 교과서 출제경향을 듣고 선행과 내신을 함께 준비할 ${J} 선생님을 1:1로 소개해 드립니다. 잘 맞지 않으면 다시 연결해 드립니다.`,
+];
+
+/* 초등 전용 description — 내신·중간·기말·모의고사·등급 대신 학교 진도·단원평가·사고력·학습 습관 프레이밍. */
 const SCHOOL_DESC_ELEM: ReadonlyArray<(p: SchoolMetaInput) => string> = [
   ({ schoolName: S, subjectLabel: J, regionShort: R }) =>
-    `${R ? R + " " : ""}${S} ${J}과외를 찾고 계신가요. 직접 가르쳐 온 상담 선생님이 아이의 학년과 성향, ${S} 학교 진도와 단원평가 유형을 먼저 살피고 호흡이 잘 맞는 ${J} 선생님을 1:1로 연결해 드립니다. 첫 상담은 무료이니 부담 없이 문의하세요.`,
+    `${R ? R + " " : ""}${S} ${J}과외를 찾고 계신가요. 직접 가르쳐 온 상담 선생님이 아이의 학년과 성향, ${S} 학교 진도와 단원평가 유형을 먼저 살피고 사고력을 키워 줄 ${J} 선생님을 1:1로 연결해 드립니다. 첫 상담은 무료이니 부담 없이 문의하세요.`,
   ({ schoolName: S, subjectLabel: J, regionShort: R }) =>
-    `${R ? R + " " : ""}${S} ${J} 공부가 학원 단체 수업으로 잡히지 않는다면 1:1 맞춤 과외가 답입니다. 상담 선생님이 ${S} 학생을 먼저 이해하고 학교 진도와 단원평가·수행평가에 맞춰 수업할 선생님을 찾아 연결해 드립니다. 무료 상담으로 시작하세요.`,
+    `${R ? R + " " : ""}${S} ${J} 공부가 학원 단체 수업으로 잡히지 않는다면 1:1 맞춤 과외가 답입니다. 상담 선생님이 ${S} 학생을 먼저 이해하고 학교 진도와 단원평가에 맞춰 기초부터 사고력까지 잡아 줄 선생님을 연결해 드립니다. 무료 상담으로 시작하세요.`,
   ({ schoolName: S, subjectLabel: J, regionShort: R }) =>
-    `${R ? R + " " : ""}${S} ${J}과외, 지식의참견이 맞는 선생님을 연결합니다. 직접 가르쳐 본 상담 선생님이 학생의 현재 수준과 학습 습관을 듣고 ${S}에 어울리는 ${J} 선생님을 1:1로 소개해 드립니다. 잘 맞지 않으면 다시 연결해 드리며 첫 상담은 무료입니다.`,
+    `${R ? R + " " : ""}${S} ${J}과외, 지식의참견이 맞는 선생님을 연결합니다. 직접 가르쳐 본 상담 선생님이 학생의 현재 수준과 학습 습관, ${S} 단원평가 결과를 듣고 사고력까지 함께 다질 ${J} 선생님을 1:1로 소개해 드립니다. 첫 상담은 무료입니다.`,
 ];
 
-const REGION_DESC: ReadonlyArray<(p: { regionName: string; subjectPhrase: string }) => string> = [
+type RegionDescInput = { regionName: string; subjectPhrase: string };
+
+/* 지역 기본(고등 기준) description — title 의 "모의고사·수능·정시·개별진도" 를 문장으로 받는다. */
+const REGION_DESC: ReadonlyArray<(p: RegionDescInput) => string> = [
   ({ regionName: G, subjectPhrase: P }) =>
-    `${G} ${P}과외를 찾고 계신가요. 직접 가르쳐 온 상담 선생님이 학생의 학년과 실력, 성향을 듣고 ${G}에서 호흡이 잘 맞는 ${P} 선생님을 1:1로 연결해 드립니다. 학원 단체 수업과 달리 아이 한 명에게 맞춰 시작하며 첫 상담은 무료입니다.`,
+    `${G} ${P}과외를 찾고 계신가요. 직접 가르쳐 온 상담 선생님이 학생의 학년과 실력, 성향을 듣고 ${G}에서 내신과 모의고사를 함께 챙겨 줄 ${P} 선생님을 1:1로 연결해 드립니다. 학원 단체 수업과 달리 한 명에게 맞춘 개별 진도로 시작하며 첫 상담은 무료입니다.`,
   ({ regionName: G, subjectPhrase: P }) =>
-    `${G} ${P}과외, 지식의참견이 맞는 선생님을 연결합니다. 상담 선생님이 아이의 상황을 먼저 이해하고 ${G} 학생에게 맞는 ${P} 선생님을 1:1로 소개해 드립니다. 함께 시작한 뒤 잘 맞지 않으면 추가 비용 없이 다시 연결해 드립니다.`,
+    `${G} ${P}과외, 지식의참견이 맞는 선생님을 연결합니다. 상담 선생님이 아이의 상황을 먼저 이해하고 ${G} 학생에게 맞는 ${P} 선생님을 1:1로 소개해 드립니다. 내신과 모의고사 진도를 개별 속도에 맞춰 잡아 가며 잘 맞지 않으면 추가 비용 없이 다시 연결해 드립니다.`,
   ({ regionName: G, subjectPhrase: P }) =>
-    `${G}에서 ${P}과외 선생님을 찾고 있다면 직접 가르쳐 본 상담 선생님이 도와드립니다. 학생의 수준과 성향에 맞춰 ${G} ${P} 1:1 수업이 가능한 선생님을 연결하고 첫 수업을 체험한 뒤 결정하실 수 있습니다. 무료 상담으로 시작하세요.`,
+    `${G}에서 ${P}과외 선생님을 찾고 있다면 직접 가르쳐 본 상담 선생님이 도와드립니다. 학생의 수준과 성향, 내신과 모의고사 일정에 맞춰 ${G} ${P} 1:1 수업이 가능한 선생님을 연결하고 첫 수업을 체험한 뒤 결정하실 수 있습니다. 무료 상담으로 시작하세요.`,
+];
+
+/* 지역 중등 — 수능·정시 대신 선행·예비고1 프레이밍(학년 세그먼트가 있는 경로에서만 사용). */
+const REGION_DESC_MIDDLE: ReadonlyArray<(p: RegionDescInput) => string> = [
+  ({ regionName: G, subjectPhrase: P }) =>
+    `${G} ${P}과외를 찾고 계신가요. 직접 가르쳐 온 상담 선생님이 학생의 학년과 실력, 성향을 듣고 ${G}에서 내신과 선행을 함께 챙겨 줄 ${P} 선생님을 1:1로 연결해 드립니다. 학원 단체 수업과 달리 한 명에게 맞춘 진도로 시작하며 첫 상담은 무료입니다.`,
+  ({ regionName: G, subjectPhrase: P }) =>
+    `${G} ${P}과외, 지식의참견이 맞는 선생님을 연결합니다. 상담 선생님이 아이의 상황을 먼저 이해하고 ${G} 학생에게 맞는 ${P} 선생님을 1:1로 소개해 드립니다. 기초가 비어 있다면 처음부터, 예비고1 준비가 필요하다면 선행까지 속도를 맞춰 갑니다.`,
+  ({ regionName: G, subjectPhrase: P }) =>
+    `${G}에서 ${P}과외 선생님을 찾고 있다면 직접 가르쳐 본 상담 선생님이 도와드립니다. 내신 일정과 선행 속도, 예비고1 준비까지 고려해 ${G} ${P} 1:1 수업이 가능한 선생님을 연결하고 첫 수업을 체험한 뒤 결정하실 수 있습니다. 무료 상담으로 시작하세요.`,
+];
+
+/* 지역 초등 — 내신·수능 대신 단원평가·개념이해·사고력 프레이밍. */
+const REGION_DESC_ELEM: ReadonlyArray<(p: RegionDescInput) => string> = [
+  ({ regionName: G, subjectPhrase: P }) =>
+    `${G} ${P}과외를 찾고 계신가요. 직접 가르쳐 온 상담 선생님이 아이의 학년과 성향을 듣고 ${G}에서 학교 진도와 단원평가를 함께 챙겨 줄 ${P} 선생님을 1:1로 연결해 드립니다. 개념 이해부터 차근히 시작하며 첫 상담은 무료입니다.`,
+  ({ regionName: G, subjectPhrase: P }) =>
+    `${G} ${P}과외, 지식의참견이 맞는 선생님을 연결합니다. 상담 선생님이 아이의 상황을 먼저 이해하고 ${G}에서 기초 개념과 단원평가, 사고력까지 함께 다질 ${P} 선생님을 1:1로 소개해 드립니다. 잘 맞지 않으면 추가 비용 없이 다시 연결해 드립니다.`,
+  ({ regionName: G, subjectPhrase: P }) =>
+    `${G}에서 ${P}과외 선생님을 찾고 있다면 직접 가르쳐 본 상담 선생님이 도와드립니다. 단원평가 결과와 학습 습관을 살펴 개념 이해와 사고력을 함께 키울 ${G} ${P} 1:1 수업 선생님을 연결하고 첫 수업을 체험한 뒤 결정하실 수 있습니다. 무료 상담으로 시작하세요.`,
 ];
 
 const REGION_HUB_DESC: ReadonlyArray<(p: { regionName: string }) => string> = [
@@ -114,12 +150,13 @@ function baseMetadata(title: string, description: string, canonicalPath: string)
 
 /* ── 유형별 Metadata 빌더 ────────────────────────────────────────────── */
 /**
- * title 문구 조립 — seoTitlePhrases.ts 의 문구 타입에 따라 두 갈래.
- *  - suffix: "{앞부분} {과목}과외 {문구}"
- *  - full  : "{앞부분} {문구}"  (문구에 이미 "○○과외"가 포함됨)
+ * title 문구 조립 — 문구 타입에 따라 두 갈래.
+ *  - suffix: "{앞부분} {과목}과외 {문구}"  ← 문구는 titleKeywords.ts(페이지 유형×학교급) 에서 온다.
+ *  - full  : "{앞부분} {문구}"  (논술·코딩처럼 문구에 이미 "○○과외"가 포함됨 → 학교급 무관)
  * head 는 지역명 또는 (지역+)학교명, lead 는 과목 앞에 붙는 학년 등 수식어(선택).
  */
 function composeTitle(p: {
+  pageType: TitlePageType;
   head: string;
   subjectLabel: string;
   subjectSlug?: string;
@@ -135,7 +172,7 @@ function composeTitle(p: {
   const body =
     phrase.type === "full"
       ? `${lead}${phrase.text}`
-      : `${lead}${p.subjectLabel}과외 ${phrase.text}`;
+      : `${lead}${p.subjectLabel}과외 ${resolveTitleKeyword(p.pageType, p.level)}`;
   return `${p.head} ${body} | ${SITE_NAME}`;
 }
 
@@ -153,12 +190,19 @@ export interface SchoolMetaInput {
 export function buildSchoolMeta(p: SchoolMetaInput): Metadata {
   const prefix = p.regionShort ? `${p.regionShort} ` : "";
   const title = composeTitle({
+    pageType: "school",
     head: `${prefix}${p.schoolName}`,
     subjectLabel: p.subjectLabel,
     subjectSlug: p.subjectSlug,
     level: p.level,
   });
-  const descSet = p.level === "elem" ? SCHOOL_DESC_ELEM : SCHOOL_DESC;
+  // 학교급별 description — 미지정(판별 불가)은 고등 기준 기본 세트.
+  const descSet =
+    p.level === "elem"
+      ? SCHOOL_DESC_ELEM
+      : p.level === "middle"
+        ? SCHOOL_DESC_MIDDLE
+        : SCHOOL_DESC;
   const description = pick(descSet, p.canonicalPath)(p);
   return baseMetadata(title, description, p.canonicalPath);
 }
@@ -182,13 +226,21 @@ export function buildRegionMeta(p: RegionMetaInput): Metadata {
       ? `${p.gradeLabel} ${p.subjectLabel}`
       : p.subjectLabel;
     const title = composeTitle({
+      pageType: "region",
       head: p.regionName,
       subjectLabel: p.subjectLabel,
       subjectSlug: p.subjectSlug,
       lead: p.gradeLabel,
       level: p.level,
     });
-    const description = pick(REGION_DESC, p.canonicalPath)({
+    // 학년 세그먼트가 있는 경로만 초·중 세트, 나머지(학년 차원 없음)는 고등 기준 기본 세트.
+    const regionDescSet =
+      p.level === "elem"
+        ? REGION_DESC_ELEM
+        : p.level === "middle"
+          ? REGION_DESC_MIDDLE
+          : REGION_DESC;
+    const description = pick(regionDescSet, p.canonicalPath)({
       regionName: p.regionName,
       subjectPhrase,
     });
