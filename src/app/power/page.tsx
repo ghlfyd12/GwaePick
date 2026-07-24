@@ -53,6 +53,9 @@ export const metadata: Metadata = {
 // 페이지 내 상담 폼(#consult) 으로 모으는 인페이지 CTA.
 const CONSULT_ANCHOR = "#consult";
 
+// 최상단 배너 대체 텍스트 — 문구가 이미지에 포함되어 있어 alt 로 동일 정보를 제공한다.
+const BANNER_ALT = "영어, 원어민영어, 일본어, 중국어 1:1 전문 과외 어학의참견";
+
 // 학습사례를 3개 그룹으로 묶는다(카테고리 표준값 기준). 데이터는 languageCases.ts 그대로.
 const caseGroups = CASE_GROUPS.map((g) => ({
   ...g,
@@ -62,6 +65,31 @@ const caseGroups = CASE_GROUPS.map((g) => ({
 export default function PowerPage() {
   return (
     <>
+      {/* ── 0. 최상단 풀와이드 배너 (문구는 이미지에 포함 — 오버레이 없음) ──
+           <picture> 로 데스크톱 16:9(≥768px) / 모바일 3:4 에셋을 분기한다.
+           브라우저가 조건에 맞는 한 장만 내려받고(중복 다운로드 없음), 최상단이라 eager 로 즉시 로드한다.
+           w-full·h-auto 라 원본 비율 그대로 — 크롭·문구 잘림 없음. */}
+      <section aria-label={BANNER_ALT} className="w-full">
+        <picture>
+          <source
+            media="(min-width: 768px)"
+            srcSet="/power/hero-desktop.png"
+            width={1920}
+            height={1080}
+          />
+          <Image
+            src="/power/hero-mobile.png"
+            alt={BANNER_ALT}
+            width={750}
+            height={1000}
+            sizes="100vw"
+            loading="eager"
+            unoptimized
+            className="h-auto w-full"
+          />
+        </picture>
+      </section>
+
       {/* ── 1. 히어로 (카피 그대로 + 우측/하단 이미지 분할) ────────────── */}
       <section
         aria-labelledby="power-hero-heading"
