@@ -1,7 +1,46 @@
 import Link from "next/link";
 import { site } from "@/data/site";
 import { SERVICE } from "@/data/service";
-import { powerFooterGroups } from "@/data/powerFooterLinks";
+import {
+  powerFooterGroups,
+  powerFooterSido,
+  powerFooterGu,
+  POWER_REGION_FOOTER_SUBJECTS,
+  type RegionRow,
+} from "@/data/powerFooterLinks";
+
+const enc = (s: string) => encodeURIComponent(s);
+
+/** 지역 1행 — 굵은 허브 링크 + 회화 3종(· 구분). 앵커 텍스트에 지역명 포함. */
+function RegionLine({ row }: { row: RegionRow }) {
+  return (
+    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+      <Link
+        href={`/power/${enc(row.slug)}`}
+        className="break-keep text-[13px] font-semibold text-ink transition-colors hover:text-accent"
+      >
+        {row.label}
+      </Link>
+      <span className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
+        {POWER_REGION_FOOTER_SUBJECTS.map((subj, i) => (
+          <span key={subj.slug} className="inline-flex items-baseline gap-x-1.5">
+            {i > 0 && (
+              <span aria-hidden className="text-line">
+                ·
+              </span>
+            )}
+            <Link
+              href={`/power/by-region/${enc(row.slug)}/${subj.slug}`}
+              className="break-keep text-[13px] leading-relaxed text-muted transition-colors hover:text-accent hover:underline"
+            >
+              {row.label} {subj.label}
+            </Link>
+          </span>
+        ))}
+      </span>
+    </div>
+  );
+}
 
 /*
  * 어학의참견(/power) 전용 푸터 — 메인 지식의참견 푸터(Footer.tsx)와 분리된 4열.
@@ -17,10 +56,33 @@ export default function PowerFooter() {
   return (
     <footer className="border-t border-line bg-surface-alt">
       <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
+        {/* ── 지역별 어학과외(전폭) — 시도 17 + 주요 구 12 × 회화 3종 ── */}
+        <section aria-label="지역별 어학과외">
+          <p className="break-keep text-sm font-semibold text-ink">지역별 어학과외</p>
+          <ul className="mt-3 grid grid-cols-1 gap-x-8 gap-y-1.5 md:grid-cols-2">
+            {powerFooterSido.map((row) => (
+              <li key={row.slug}>
+                <RegionLine row={row} />
+              </li>
+            ))}
+          </ul>
+
+          <p className="mt-6 break-keep text-sm font-semibold text-ink">주요 지역 어학과외</p>
+          <ul className="mt-3 grid grid-cols-1 gap-x-8 gap-y-1.5 md:grid-cols-2">
+            {powerFooterGu.map((row) => (
+              <li key={row.slug}>
+                <RegionLine row={row} />
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <hr className="my-10 border-line" />
+
         {/* 사이트와이드 내부 링크 — 전 /power 페이지 렌더 크롤 경로 */}
         <nav
           aria-label="어학의참견 사이트 링크"
-          className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-3 md:grid-cols-4"
+          className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-3"
         >
           {powerFooterGroups.map((group) => (
             <div key={group.title}>
