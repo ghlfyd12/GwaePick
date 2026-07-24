@@ -1,6 +1,7 @@
 import Image from "next/image";
 import ConsultForm from "@/components/ConsultForm";
 import EnglishCourseSections from "@/components/EnglishCourseSections";
+import JapaneseCourseSections from "@/components/JapaneseCourseSections";
 import { site } from "@/data/site";
 import {
   languageDetails,
@@ -79,6 +80,9 @@ export default function LanguageDetail({ slug }: { slug: LanguageSlug }) {
 
       {/* 영어 전용 확장 섹션(수업 과정·관리 시스템·영작 교정) — 일본어·중국어 무영향. */}
       {slug === "english" && <EnglishCourseSections />}
+
+      {/* 일본어 전용 확장 섹션(공감 도입·1:1 포인트·로드맵·과정 8종) — 영어·중국어 무영향. */}
+      {slug === "japanese" && <JapaneseCourseSections />}
 
       <div className="mx-auto max-w-5xl space-y-14 px-5 py-14 sm:px-6 sm:py-20">
         {/* ── 2. 선택 이유 4카드 ──────────────────────────────────── */}
