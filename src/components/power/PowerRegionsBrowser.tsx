@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import type { PowerRegionSearchIndex } from "@/data/powerRegionSearch";
 
@@ -47,6 +47,24 @@ export default function PowerRegionsBrowser({
   const [sidoFilter, setSidoFilter] = useState<string | null>(null); // null=전체, else 정식명
   const [query, setQuery] = useState("");
   const [index, setIndex] = useState<PowerRegionSearchIndex | null>(null);
+  // 아코디언 열림 상태 — 기본 전부 접힘({}). key: 시군구=시도 정식명 / 신도시=권역명.
+  const [openMap, setOpenMap] = useState<Record<string, boolean>>({});
+
+  // 시도 필터 선택 시 해당 그룹 자동 펼침(전체로 돌아오면 전부 접힘).
+  useEffect(() => {
+    if (sidoFilter === null) {
+      setOpenMap({});
+      return;
+    }
+    const next: Record<string, boolean> = {};
+    for (const g of sigunguGroups) if (g.sidoLabel === sidoFilter) next[g.sidoLabel] = true;
+    for (const g of districtGroups)
+      if (g.districts.some((d) => d.sido === sidoFilter)) next[g.region] = true;
+    setOpenMap(next);
+  }, [sidoFilter, sigunguGroups, districtGroups]);
+
+  const toggleOpen = (key: string, open: boolean) =>
+    setOpenMap((m) => (m[key] === open ? m : { ...m, [key]: open }));
 
   const href = useCallback(
     (slug: string) => `/power/by-region/${encodeURIComponent(slug)}/${subject}`,
@@ -187,30 +205,43 @@ export default function PowerRegionsBrowser({
         </ul>
       </div>
 
-      {/* 4. 시군구 그룹(시도별) — 시도 필터로 표시 제어(링크는 DOM 유지, SEO) */}
-      <ul className="mt-12 space-y-10">
+      {/* 4. 시군구 그룹(시도별) — 기본 접힘 아코디언(details/summary). 링크는 접혀도 DOM 유지(SEO).
+             시도 필터로 표시 제어 + 선택 시 자동 펼침. */}
+      <ul className="mt-12 space-y-3">
         {sigunguGroups.map((group) => (
           <li key={group.sidoLabel} hidden={!visibleSido(group.sidoLabel)}>
-            <h2 className="break-keep border-b border-line pb-2 text-xl font-bold sm:text-2xl">
-              <Link
-                href={`/power/${encodeURIComponent(group.sidoSlug)}`}
-                className="text-accent transition-colors hover:underline"
-              >
-                {group.sidoLabel}
-              </Link>
-            </h2>
-            <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
-              {group.sigungu.map((sg) => (
-                <li key={sg.slug}>
-                  <Link
-                    href={href(sg.slug)}
-                    className="break-keep text-[13px] font-medium text-ink transition-colors hover:text-accent hover:underline sm:text-sm"
-                  >
-                    {sg.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <details
+              className="group border-b border-line"
+              open={!!openMap[group.sidoLabel]}
+              onToggle={(e) => toggleOpen(group.sidoLabel, e.currentTarget.open)}
+            >
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-2 py-3 [&::-webkit-details-marker]:hidden">
+                <span className="break-keep text-xl font-bold text-accent sm:text-2xl">
+                  {group.sidoLabel}
+                </span>
+                <ChevronIcon />
+              </summary>
+              <div className="pb-4">
+                <Link
+                  href={`/power/${encodeURIComponent(group.sidoSlug)}`}
+                  className="break-keep text-[13px] font-semibold text-accent transition-colors hover:underline sm:text-sm"
+                >
+                  {group.sidoLabel} 전체 안내 →
+                </Link>
+                <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
+                  {group.sigungu.map((sg) => (
+                    <li key={sg.slug}>
+                      <Link
+                        href={href(sg.slug)}
+                        className="break-keep text-[13px] font-medium text-ink transition-colors hover:text-accent hover:underline sm:text-sm"
+                      >
+                        {sg.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </details>
           </li>
         ))}
       </ul>
@@ -227,32 +258,60 @@ export default function PowerRegionsBrowser({
           행정구역으로 찾기 어려운 {totalDistricts}개 신도시·택지지구·생활권도 방문·온라인
           1:1 수업을 준비했습니다.
         </p>
-        <ul className="mt-8 space-y-8">
+        <ul className="mt-8 space-y-3">
           {districtGroups.map((group) => {
             const anyVisible = group.districts.some((d) => visibleSido(d.sido));
             return (
               <li key={group.region} hidden={!anyVisible}>
-                <h3 className="break-keep border-b border-line pb-2 text-lg font-bold text-ink sm:text-xl">
-                  {group.region}
-                </h3>
-                <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
-                  {group.districts.map((d) => (
-                    <li key={d.slug} hidden={!visibleSido(d.sido)}>
-                      <Link
-                        href={href(d.slug)}
-                        className="break-keep text-[13px] font-medium text-ink transition-colors hover:text-accent hover:underline sm:text-sm"
-                      >
-                        {d.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+                <details
+                  className="group border-b border-line"
+                  open={!!openMap[group.region]}
+                  onToggle={(e) => toggleOpen(group.region, e.currentTarget.open)}
+                >
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-2 py-3 [&::-webkit-details-marker]:hidden">
+                    <span className="break-keep text-lg font-bold text-ink sm:text-xl">
+                      {group.region}
+                    </span>
+                    <ChevronIcon />
+                  </summary>
+                  <ul className="flex flex-wrap gap-x-4 gap-y-2 pb-4">
+                    {group.districts.map((d) => (
+                      <li key={d.slug} hidden={!visibleSido(d.sido)}>
+                        <Link
+                          href={href(d.slug)}
+                          className="break-keep text-[13px] font-medium text-ink transition-colors hover:text-accent hover:underline sm:text-sm"
+                        >
+                          {d.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
               </li>
             );
           })}
         </ul>
       </section>
     </div>
+  );
+}
+
+function ChevronIcon() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+      className="shrink-0 text-accent transition-transform group-open:rotate-180"
+    >
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
   );
 }
 
