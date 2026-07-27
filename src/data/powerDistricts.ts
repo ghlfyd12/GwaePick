@@ -17,8 +17,43 @@
  * 워딩: 느낌표·금지어 없음. 색은 컴포넌트 accent(퍼플).
  */
 import { isAnyPowerRegionSlug } from "@/data/powerRegionsExpansion";
+import { REGIONS } from "@/data/sidoRegions";
 
 const nfc = (s: string) => s.normalize("NFC");
+
+/* ── 소속 시군구 → 시도(정식명) 해석(시도 필터 칩용) ─────────────────── */
+const SIDO_BY_METRO: Record<string, string> = {
+  서울: "서울특별시",
+  부산: "부산광역시",
+  대구: "대구광역시",
+  인천: "인천광역시",
+  광주: "광주광역시",
+  대전: "대전광역시",
+  울산: "울산광역시",
+  세종: "세종특별자치시",
+};
+/** 권역 → 시도(정식명). 단일 시도 권역만(모호 권역은 시군구/접두로 해석). */
+const SIDO_BY_GWANYEOK: Record<string, string> = {
+  서울: "서울특별시",
+  경기남부: "경기도",
+  경기동부: "경기도",
+  경기서부: "경기도",
+  경기북부: "경기도",
+  인천: "인천광역시",
+};
+/** 시군구명 → 시도(REGIONS 기반, 최초 등장 우선). */
+const sidoBySigungu = new Map<string, string>();
+for (const sido of REGIONS) {
+  for (const sg of sido.sigungu) {
+    if (!sidoBySigungu.has(nfc(sg.name))) sidoBySigungu.set(nfc(sg.name), sido.label);
+  }
+}
+/** REGIONS 부재 시군구 폴백. */
+const SIDO_FALLBACK: Record<string, string> = {
+  군포시: "경기도",
+  진주시: "경상남도",
+  전주시: "전라북도",
+};
 
 /** 광역시·특별시 짧은 접두(소속 시군구 표기 앞) — 접두 분리 판정용. */
 const METRO_PREFIX = new Set([
@@ -203,6 +238,14 @@ const RAW: { region: string; items: [string, string][] }[] = [
  *  - 둘 다 없으면(구로 분할된 시·데이터 부재 시명) 시명 자체를 slug 로 — /power/{시} 는
  *    [region] 라우트 dynamicParams 로 200 렌더된다(ISR). prebuilt=false 로 표시.
  */
+/** 소속 시군구 표기 + 권역 → 시도 정식명(시도 칩 필터용). */
+function resolveSido(paren: string, gwanyeok: string): string {
+  if (SIDO_BY_GWANYEOK[gwanyeok]) return SIDO_BY_GWANYEOK[gwanyeok];
+  const parts = paren.split(" ");
+  if (parts.length >= 2 && SIDO_BY_METRO[parts[0]]) return SIDO_BY_METRO[parts[0]];
+  return sidoBySigungu.get(nfc(paren)) ?? SIDO_FALLBACK[paren] ?? "";
+}
+
 function resolveHubSlug(paren: string): { slug: string; prebuilt: boolean } {
   const cands = [paren];
   const parts = paren.split(" ");
@@ -224,6 +267,8 @@ export interface PowerDistrict {
   region: string;
   /** 소속 시군구 표기(본문·라벨·상향 링크 라벨용). */
   sigunguText: string;
+  /** 소속 시도(정식명) — 지역 인덱스 시도 칩 필터용. */
+  sidoLabel: string;
   /** 소속 시군구 허브 slug(상향 링크 도착) — /power/{slug} 200 렌더 보장. */
   sigunguHubSlug: string;
   /** 허브가 963∪확장 사전 빌드 slug 인지(false=시명 dynamicParams 렌더). */
@@ -262,6 +307,7 @@ for (const grp of RAW) {
       rawName,
       region: grp.region,
       sigunguText: paren,
+      sidoLabel: resolveSido(paren, grp.region),
       sigunguHubSlug: hub.slug,
       hubPrebuilt: hub.prebuilt,
     });
@@ -311,18 +357,18 @@ export function districtsOfHub(hubSlugParam: string): PowerDistrict[] {
   return byHub.get(slugKey(hubSlugParam)) ?? [];
 }
 
-/** 권역별 지명 그룹(/power/regions 신도시 섹션용, 순서 보존). */
+/** 권역별 지명 그룹(/power/regions 신도시 섹션용, 순서 보존). 시도는 칩 필터용. */
 export interface DistrictRegionGroup {
   region: string;
-  districts: { name: string; slug: string }[];
+  districts: { name: string; slug: string; sido: string }[];
 }
 export function powerDistrictGroups(): DistrictRegionGroup[] {
-  const bySlugValue = new Map(built.map((d) => [`${d.region}|${d.rawName}`, d]));
+  const byKey = new Map(built.map((d) => [`${d.region}|${d.rawName}`, d]));
   return RAW.map((g) => ({
     region: g.region,
     districts: g.items.map(([rawName]) => {
-      const d = bySlugValue.get(`${g.region}|${rawName}`)!;
-      return { name: d.name, slug: d.slug };
+      const d = byKey.get(`${g.region}|${rawName}`)!;
+      return { name: d.name, slug: d.slug, sido: d.sidoLabel };
     }),
   }));
 }

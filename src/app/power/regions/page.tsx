@@ -1,8 +1,18 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { powerRegionIndexGroups } from "@/data/powerRegionsExpansion";
 import { powerDistrictGroups } from "@/data/powerDistricts";
+import { powerFooterSido } from "@/data/powerFooterLinks";
+import PowerRegionsBrowser from "@/components/power/PowerRegionsBrowser";
 import { site } from "@/data/site";
+
+/** 어학 5과목(칩 순서) — 기본 영어회화. */
+const POWER_REGION_SUBJECTS = [
+  { slug: "english-conversation", label: "영어회화" },
+  { slug: "japanese-conversation", label: "일본어회화" },
+  { slug: "japanese-tutoring", label: "일본어과외" },
+  { slug: "chinese-conversation", label: "중국어회화" },
+  { slug: "chinese-tutoring", label: "중국어과외" },
+];
 
 /*
  * /power/regions — 어학의참견 지역별 안내 인덱스(내부 링크 허브).
@@ -46,6 +56,7 @@ export default function PowerRegionsIndexPage() {
   const totalSigungu = groups.reduce((n, g) => n + g.sigungu.length, 0);
   const districtGroups = powerDistrictGroups();
   const totalDistricts = districtGroups.reduce((n, g) => n + g.districts.length, 0);
+  const sidoChips = powerFooterSido.map((s) => ({ label: s.label, full: s.slug }));
 
   return (
     <>
@@ -60,74 +71,20 @@ export default function PowerRegionsIndexPage() {
           </h1>
           <p className="mx-auto mt-4 max-w-2xl break-keep text-base leading-relaxed text-muted sm:text-lg">
             전국 17개 시·도와 {totalSigungu}개 시·군·구의 영어·일본어·중국어 1:1 수업 안내를
-            모았습니다. 우리 동네를 찾아 방문·온라인으로 바로 시작하세요.
+            모았습니다. 지역을 검색하거나 시도·과목을 골라 바로 시작하세요.
           </p>
         </div>
       </section>
 
-      {/* 시도별 시군구 목록 */}
+      {/* 지역 탐색(검색 + 시도 필터 + 과목 선택) — 초기 렌더에 전 지역 링크 포함 */}
       <div className="mx-auto max-w-3xl px-5 py-12 sm:px-6 sm:py-16">
-        <ul className="space-y-10">
-          {groups.map((group) => (
-            <li key={group.sidoLabel}>
-              <h2 className="break-keep border-b border-line pb-2 text-xl font-bold sm:text-2xl">
-                <Link
-                  href={`/power/${encodeURIComponent(group.sidoSlug)}`}
-                  className="text-accent transition-colors hover:underline"
-                >
-                  {group.sidoLabel}
-                </Link>
-              </h2>
-              <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
-                {group.sigungu.map((sg) => (
-                  <li key={sg.slug}>
-                    <Link
-                      href={`/power/${encodeURIComponent(sg.slug)}`}
-                      className="break-keep text-[13px] font-medium text-ink transition-colors hover:text-accent hover:underline sm:text-sm"
-                    >
-                      {sg.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </li>
-          ))}
-        </ul>
-
-        {/* 신도시·주요 생활권 — 권역별 지명 → 지명별 영어회화 페이지 */}
-        <section aria-labelledby="districts-heading" className="mt-16">
-          <h2
-            id="districts-heading"
-            className="break-keep text-2xl font-bold text-ink sm:text-3xl"
-          >
-            신도시·주요 생활권
-          </h2>
-          <p className="mt-3 break-keep text-base leading-relaxed text-muted sm:text-lg">
-            행정구역으로 찾기 어려운 {totalDistricts}개 신도시·택지지구·생활권도 방문·온라인
-            1:1 수업을 준비했습니다.
-          </p>
-          <ul className="mt-8 space-y-8">
-            {districtGroups.map((group) => (
-              <li key={group.region}>
-                <h3 className="break-keep border-b border-line pb-2 text-lg font-bold text-ink sm:text-xl">
-                  {group.region}
-                </h3>
-                <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
-                  {group.districts.map((d) => (
-                    <li key={d.slug}>
-                      <Link
-                        href={`/power/by-region/${encodeURIComponent(d.slug)}/english-conversation`}
-                        className="break-keep text-[13px] font-medium text-ink transition-colors hover:text-accent hover:underline sm:text-sm"
-                      >
-                        {d.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </li>
-            ))}
-          </ul>
-        </section>
+        <PowerRegionsBrowser
+          sidoChips={sidoChips}
+          sigunguGroups={groups}
+          districtGroups={districtGroups}
+          subjects={POWER_REGION_SUBJECTS}
+          totalDistricts={totalDistricts}
+        />
       </div>
     </>
   );
