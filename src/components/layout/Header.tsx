@@ -24,6 +24,7 @@ const POWER_NAV: NavItem[] = [
   { label: "영어", href: "/power/english" },
   { label: "일본어", href: "/power/japanese" },
   { label: "중국어", href: "/power/chinese" },
+  { label: "지역별", href: "/power/regions" },
   { label: "교사진", href: "/power/teachers" },
   { label: "학습사례", href: "/power#cases" },
 ];

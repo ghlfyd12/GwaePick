@@ -4,7 +4,7 @@ import Link from "next/link";
 import ConsultForm from "@/components/ConsultForm";
 import CaseGroup from "@/components/power/CaseGroup";
 import { site } from "@/data/site";
-import { sidoList } from "@/data/sido";
+import { powerHomeRegionChips } from "@/data/powerHomeRegionChips";
 import { powerHero, powerClosing } from "@/data/languagePrograms";
 import { languageCases, CASE_GROUPS } from "@/data/languageCases";
 import {
@@ -283,17 +283,25 @@ export default function PowerPage() {
             우리 동네에서 방문·온라인으로 시작할 수 있습니다.
           </p>
           <ul className="mt-8 flex flex-wrap justify-center gap-2.5">
-            {sidoList.map((s) => (
-              <li key={s.slug}>
+            {powerHomeRegionChips.map((chip) => (
+              <li key={chip.label}>
                 <Link
-                  href={`/power/${encodeURIComponent(s.label)}`}
+                  href={chip.href}
                   className="inline-flex min-h-11 items-center break-keep rounded-full border border-accent/40 bg-white px-4 py-2 text-sm font-semibold text-accent transition-colors hover:bg-accent/5"
                 >
-                  {s.label} 어학과외
+                  {chip.label}
                 </Link>
               </li>
             ))}
           </ul>
+          <div className="mt-6">
+            <Link
+              href="/power/regions"
+              className="inline-flex items-center break-keep text-sm font-semibold text-accent transition-colors hover:underline sm:text-base"
+            >
+              지역 전체 보기 →
+            </Link>
+          </div>
         </div>
       </section>
 

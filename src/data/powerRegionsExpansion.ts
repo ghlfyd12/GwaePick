@@ -227,3 +227,32 @@ export function dongsOfSigunguHub(sigunguSlugParam: string): PowerExpansionRegio
   if (!hub || hub.level !== "sigungu") return [];
   return regionsOut.filter((r) => r.level === "dong" && r.parentSlug === hub.slug);
 }
+
+/* ── 지역 인덱스(/power/regions)용 ─────────────────────────────────── */
+export interface PowerRegionIndexGroup {
+  /** 시도 정식명(그룹 표기). */
+  sidoLabel: string;
+  /** 시도 허브 [region] slug — /power/{slug}(정식명, 확장 허브). */
+  sidoSlug: string;
+  /** 하위 시군구 전량(covered 963 평면 + 확장). name=slug(정식 지역명, 앵커=도착지). */
+  sigungu: { name: string; slug: string }[];
+}
+
+/**
+ * 시도 17그룹 × 하위 시군구 전량(253). 각 시군구는 실존 허브 slug 로 매핑한다
+ * (covered=963 평면명, 그 외=확장 표기명). 표기와 도착 slug 가 동일하다.
+ */
+export function powerRegionIndexGroups(): PowerRegionIndexGroup[] {
+  const sidoHubSlug = new Map<string, string>();
+  for (const r of regionsOut) {
+    if (r.level === "sido") sidoHubSlug.set(r.sidoLabel, r.slug);
+  }
+  return REGIONS.map((sido) => ({
+    sidoLabel: sido.label,
+    sidoSlug: sidoHubSlug.get(sido.label) ?? nfc(sido.label),
+    sigungu: sido.sigungu.map((sg) => {
+      const slug = sigunguSlugByKey.get(`${sido.label}|${sg.name}`) ?? sg.name;
+      return { name: slug, slug };
+    }),
+  }));
+}
