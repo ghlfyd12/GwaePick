@@ -17,7 +17,7 @@ function RegionLine({ row }: { row: RegionRow }) {
     <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
       <Link
         href={`/power/${enc(row.slug)}`}
-        className="break-keep text-[13px] font-semibold text-ink transition-colors hover:text-accent"
+        className="break-keep text-[12px] font-semibold text-ink transition-colors hover:text-accent"
       >
         {row.label}
       </Link>
@@ -31,7 +31,7 @@ function RegionLine({ row }: { row: RegionRow }) {
             )}
             <Link
               href={`/power/by-region/${enc(row.slug)}/${subj.slug}`}
-              className="break-keep text-[13px] leading-relaxed text-muted transition-colors hover:text-accent hover:underline"
+              className="break-keep text-[12px] leading-relaxed text-muted transition-colors hover:text-accent hover:underline"
             >
               {row.label} {subj.label}
             </Link>
@@ -39,6 +39,26 @@ function RegionLine({ row }: { row: RegionRow }) {
         ))}
       </span>
     </div>
+  );
+}
+
+/** 접기 표시용 셰브론(과한 아이콘 없이 단일 화살표). 펼침 시 회전. */
+function ChevronIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+      className="shrink-0 text-muted transition-transform group-open:rotate-180"
+    >
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
   );
 }
 
@@ -56,25 +76,49 @@ export default function PowerFooter() {
   return (
     <footer className="border-t border-line bg-surface-alt">
       <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
-        {/* ── 지역별 어학과외(전폭) — 시도 17 + 주요 구 12 × 회화 3종 ── */}
+        {/* ── 지역별 어학과외(전폭) — 기본 접힘 details. 116링크는 접혀도 SSR HTML 에 유지(display:none 미사용).
+               전체 허브는 /power/regions(항상 노출), 푸터는 보조. ── */}
         <section aria-label="지역별 어학과외">
-          <p className="break-keep text-sm font-semibold text-ink">지역별 어학과외</p>
-          <ul className="mt-3 grid grid-cols-1 gap-x-8 gap-y-1.5 md:grid-cols-2">
-            {powerFooterSido.map((row) => (
-              <li key={row.slug}>
-                <RegionLine row={row} />
-              </li>
-            ))}
-          </ul>
+          <div className="flex items-start justify-between gap-3">
+            <details className="group min-w-0 flex-1">
+              <summary className="flex cursor-pointer list-none items-center gap-2 [&::-webkit-details-marker]:hidden">
+                <span className="break-keep text-sm font-semibold text-ink">
+                  지역별 어학과외
+                </span>
+                <span className="break-keep text-xs font-medium text-muted">
+                  <span className="group-open:hidden">펼치기</span>
+                  <span className="hidden group-open:inline">접기</span>
+                </span>
+                <ChevronIcon />
+              </summary>
 
-          <p className="mt-6 break-keep text-sm font-semibold text-ink">주요 지역 어학과외</p>
-          <ul className="mt-3 grid grid-cols-1 gap-x-8 gap-y-1.5 md:grid-cols-2">
-            {powerFooterGu.map((row) => (
-              <li key={row.slug}>
-                <RegionLine row={row} />
-              </li>
-            ))}
-          </ul>
+              <ul className="mt-3 grid grid-cols-1 gap-x-8 gap-y-1 md:grid-cols-2">
+                {powerFooterSido.map((row) => (
+                  <li key={row.slug}>
+                    <RegionLine row={row} />
+                  </li>
+                ))}
+              </ul>
+
+              <p className="mt-5 break-keep text-sm font-semibold text-ink">
+                주요 지역 어학과외
+              </p>
+              <ul className="mt-3 grid grid-cols-1 gap-x-8 gap-y-1 md:grid-cols-2">
+                {powerFooterGu.map((row) => (
+                  <li key={row.slug}>
+                    <RegionLine row={row} />
+                  </li>
+                ))}
+              </ul>
+            </details>
+
+            <Link
+              href="/power/regions"
+              className="shrink-0 break-keep pt-0.5 text-[13px] font-semibold text-accent transition-colors hover:underline"
+            >
+              지역 전체 보기 →
+            </Link>
+          </div>
         </section>
 
         <hr className="my-10 border-line" />
