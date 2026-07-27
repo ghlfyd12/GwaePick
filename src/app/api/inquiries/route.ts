@@ -3,11 +3,18 @@ import { supabaseServer, isSupabaseConfigured } from "@/lib/supabase/server";
 import {
   NAME_MAX,
   MEMO_MAX,
+  LESSON_TYPES,
   isGrade,
   isLessonType,
   isSchoolFallback,
   normalizePhone,
 } from "@/data/applyFormOptions";
+import { recordInquiryToNotion } from "@/lib/notionInquiry";
+
+/** 수업 형태 코드 → 라벨(Notion 본문 표기용). */
+const LESSON_LABEL: Record<string, string> = Object.fromEntries(
+  LESSON_TYPES.map((t) => [t.value, t.label]),
+);
 
 /*
  * 신청폼 제출 — POST /api/inquiries
@@ -139,39 +146,49 @@ export async function POST(request: Request) {
   const supabase = supabaseServer();
 
   // 지역 코드 — 별도 지역 테이블이 없으므로 schools 캐시에 실재하는 조합인지 확인한다.
+  // (존재 확인과 동시에 Notion 기록용 지역 표시명도 확보한다.)
   const region = await supabase
     .from("schools")
-    .select("school_code", { head: true, count: "exact" })
+    .select("sido_name, sigungu_name")
     .eq("sido_code", sidoCode)
-    .eq("sigungu_code", sigunguCode);
+    .eq("sigungu_code", sigunguCode)
+    .limit(1)
+    .maybeSingle();
   if (region.error) {
     console.error("[inquiries] 지역 검증 실패:", region.error.message);
     return NextResponse.json({ ok: false, error: "LOOKUP_FAILED" }, { status: 502 });
   }
-  if (!region.count) return bad(["sidoCode", "sigunguCode"]);
+  if (!region.data) return bad(["sidoCode", "sigunguCode"]);
+  const regionName = `${region.data.sido_name} ${region.data.sigungu_name}`.trim();
 
-  // 과목 — 전부 subjects 테이블에 있어야 한다.
+  // 과목 — 전부 subjects 테이블에 있어야 한다(이름도 함께 확보 → Notion 본문).
   const subjects = await supabase
     .from("subjects")
-    .select("subject_id")
+    .select("subject_id, subject_name")
     .in("subject_id", subjectIds);
   if (subjects.error) {
     console.error("[inquiries] 과목 검증 실패:", subjects.error.message);
     return NextResponse.json({ ok: false, error: "LOOKUP_FAILED" }, { status: 502 });
   }
   if ((subjects.data?.length ?? 0) !== subjectIds.length) return bad(["subjectIds"]);
+  // 사용자가 고른 순서대로 이름을 나열한다.
+  const nameById = new Map(subjects.data!.map((s) => [s.subject_id, s.subject_name]));
+  const subjectNames = subjectIds.map((id) => nameById.get(id)!).filter(Boolean);
 
-  // 학교 — 고른 경우에만 실재 확인(FK 위반을 400 으로 먼저 걸러낸다).
+  // 학교 — 고른 경우에만 실재 확인(FK 위반을 400 으로 먼저 걸러낸다). 이름도 확보.
+  let schoolName: string | null = null;
   if (schoolCode) {
     const school = await supabase
       .from("schools")
-      .select("school_code", { head: true, count: "exact" })
-      .eq("school_code", schoolCode);
+      .select("school_name")
+      .eq("school_code", schoolCode)
+      .maybeSingle();
     if (school.error) {
       console.error("[inquiries] 학교 검증 실패:", school.error.message);
       return NextResponse.json({ ok: false, error: "LOOKUP_FAILED" }, { status: 502 });
     }
-    if (!school.count) return bad(["schoolCode"]);
+    if (!school.data) return bad(["schoolCode"]);
+    schoolName = school.data.school_name;
   }
 
   /* ── 3) memo 조립 — 본문 + [학교:...] + [utm:...] ─────────────────── */
@@ -226,6 +243,40 @@ export async function POST(request: Request) {
   // 저장에 성공한 건만 남용 방지 카운터에 반영한다.
   recordSubmission(ip);
 
-  // 내부 식별자는 응답에 담지 않는다.
+  /* ── 5) Notion 듀얼 라이트 — Supabase 저장 성공 후 운영자 확인 창구에 기록 ──
+   * 정식 저장소는 Supabase 이므로, Notion 실패는 사용자 응답에 영향을 주지 않는다({ ok: true } 유지).
+   * 대신 inquiries.memo 끝에 [notion_sync_failed] 를 남겨 운영자가 나중에 수동 확인하게 한다.
+   */
+  const notion = await recordInquiryToNotion({
+    name,
+    phone: phone!, // 위 검증에서 형식이 확인됨(null 이면 이미 400 반환).
+    regionName,
+    schoolLabel: schoolName ?? (schoolFallback || "(미입력)"),
+    grade: data.grade!,
+    subjectNames,
+    lessonLabel: LESSON_LABEL[data.lessonType!] ?? data.lessonType!,
+    memo: memoBody,
+  });
+
+  if (!notion.ok) {
+    // 개인정보 없이 inquiry_id 와 에러 유형만 로깅한다.
+    console.error("[inquiries] Notion 동기화 실패", {
+      inquiry_id: inquiryId,
+      error: notion.error,
+    });
+    const marked = [memo, "[notion_sync_failed]"].filter(Boolean).join(" ");
+    const mark = await supabase
+      .from("inquiries")
+      .update({ memo: marked })
+      .eq("inquiry_id", inquiryId);
+    if (mark.error) {
+      console.error("[inquiries] memo 실패표기 갱신 실패", {
+        inquiry_id: inquiryId,
+        error: mark.error.message,
+      });
+    }
+  }
+
+  // 내부 식별자는 응답에 담지 않는다. (Notion 성공/실패와 무관하게 리드는 확보됨)
   return NextResponse.json({ ok: true });
 }

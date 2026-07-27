@@ -552,8 +552,17 @@ export default function ApplyForm({
           />
           <span className="text-base text-ink">
             상담 연락을 위한 개인정보 수집·이용에 동의합니다.
-            {/* TODO(운영자): 개인정보처리방침 페이지가 확정되면 이 자리에 링크를 넣는다. */}
-            <span className="ml-2 text-sm text-muted">자세히 보기 (준비 중)</span>
+            {/* 새 탭으로 연다 — 같은 탭 이동 시 폼 입력값이 사라진다.
+                라벨 안이라 링크 클릭이 체크박스를 토글하지 않도록 전파를 막는다. */}
+            <a
+              href="/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="ml-2 text-sm text-accent underline underline-offset-2"
+            >
+              자세히 보기
+            </a>
           </span>
         </label>
         <ErrorText text={err("agree")} />
