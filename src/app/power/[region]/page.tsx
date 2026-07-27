@@ -13,6 +13,7 @@ import {
   sigunguHubsOfSido,
   dongsOfSigunguHub,
 } from "@/data/powerRegionsExpansion";
+import { districtsOfHub } from "@/data/powerDistricts";
 
 /*
  * /power/[region] — 파워 홈페이지 지역별 영어회화 동적 상세(pSEO).
@@ -90,6 +91,8 @@ export default async function PowerRegionPage({
     exp?.level === "sido" ? sigunguHubsOfSido(region) : [];
   const childDongs =
     exp?.level === "sigungu" ? dongsOfSigunguHub(region) : [];
+  // 이 시군구 허브가 관할하는 신도시·생활권 지명(하향 링크). 963 평면 허브도 매칭된다.
+  const childDistricts = districtsOfHub(region);
 
   // 지역명을 자연스럽게 녹인 본문 블록(데이터로 분리하기보다 변수 보간이 핵심이라 페이지에 둠).
   const learnerLines = [
@@ -257,6 +260,27 @@ export default async function PowerRegionPage({
               </h3>
               <ul className="mt-4 flex flex-wrap gap-2.5">
                 {childDongs.map((d) => (
+                  <li key={d.slug}>
+                    <Link
+                      href={`/power/by-region/${encodeURIComponent(d.slug)}/english-conversation`}
+                      className="inline-flex min-h-11 items-center break-keep rounded-full border border-accent/40 bg-white px-4 py-2 text-sm font-semibold text-accent transition-colors hover:bg-accent/5"
+                    >
+                      {d.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* 관할 신도시·생활권 지명 → 지명별 영어회화 페이지(하향 링크) */}
+          {childDistricts.length > 0 && (
+            <div className="mt-10">
+              <h3 className="break-keep text-lg font-bold text-ink sm:text-xl">
+                {name} 신도시·생활권
+              </h3>
+              <ul className="mt-4 flex flex-wrap gap-2.5">
+                {childDistricts.map((d) => (
                   <li key={d.slug}>
                     <Link
                       href={`/power/by-region/${encodeURIComponent(d.slug)}/english-conversation`}

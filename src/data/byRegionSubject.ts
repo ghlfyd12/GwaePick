@@ -21,6 +21,12 @@ import {
   isExpansionRegionSlug,
   allExpansionRegionSlugs,
 } from "@/data/powerRegionsExpansion";
+import {
+  getPowerDistrict,
+  isPowerDistrictSlug,
+  allDistrictSlugs,
+  type PowerDistrict,
+} from "@/data/powerDistricts";
 
 const subjectBySlug = new Map(POWER_SUBJECTS.map((s) => [s.slug, s]));
 
@@ -88,10 +94,12 @@ export function isKnownPowerRegion(regionParam: string): boolean {
   return regionSet.has(slugKey(regionParam));
 }
 
-/** (지역, 과목) 조합이 페이지 생성 대상인지 — 기존 963 또는 확장 지역 + 유효 과목. */
+/** (지역, 과목) 조합이 페이지 생성 대상인지 — 기존 963 · 확장 지역 · 신도시 지명 + 유효 과목. */
 export function isByRegionAllowed(regionParam: string, subjectSlug: string): boolean {
   return (
-    (isKnownPowerRegion(regionParam) || isExpansionRegionSlug(regionParam)) &&
+    (isKnownPowerRegion(regionParam) ||
+      isExpansionRegionSlug(regionParam) ||
+      isPowerDistrictSlug(regionParam)) &&
     subjectBySlug.has(subjectSlug)
   );
 }
@@ -147,6 +155,38 @@ function buildDescriptions(p: {
   ];
 }
 
+/* 신도시·생활권 지명 도입 3종 — 소속 시군구를 1회 언급(예: "하남시 미사에서…"). */
+function buildDistrictIntro(p: {
+  regionName: string;
+  sigungu: string;
+  label: string;
+  terms: string;
+}): string {
+  const { regionName: G, sigungu: S, label: L, terms: T } = p;
+  const variants = [
+    `${S} ${G}에서 ${L}를 시작하려는 분들이 많습니다. 왕초보도, 다시 시작하는 성인도 지금 수준이 다 다릅니다. 직접 가르쳐 온 상담 선생님이 ${T}부터 목표까지 듣고 호흡이 맞는 원어민·교포 선생님을 1:1로 연결해 드립니다.`,
+    `${S} ${G} 직장인과 학생 모두 ${L} 수업을 찾습니다. 바쁜 일정 속에서도 방문·온라인으로 맞출 수 있도록, 상담 선생님이 ${T}를 포함해 지금 상황에 맞는 원어민·교포 선생님을 1:1로 연결해 드립니다.`,
+    `${S} ${G}에서 ${L}가 학원 단체 수업으로는 늘 부족했다면 1:1이 답입니다. 상담 선생님이 왕초보인지 실력을 다지는 단계인지 먼저 듣고, ${T}까지 함께 잡아 줄 선생님을 연결해 드립니다.`,
+  ];
+  return variants[hashSlug(`${G}/${L}`) % variants.length];
+}
+
+function buildDistrictDescriptions(p: {
+  regionName: string;
+  sigungu: string;
+  label: string;
+  terms: string;
+  type: PowerSubject["type"];
+}): string[] {
+  const { regionName: G, sigungu: S, label: L, terms: T, type } = p;
+  const teacher = type === "conversation" ? "원어민·교포 선생님" : "선생님";
+  return [
+    `${S} ${G} ${L}를 찾고 계신가요. 직접 가르쳐 온 상담 선생님이 지금 수준과 목표를 먼저 듣고, ${T}까지 호흡이 맞는 ${teacher}을 1:1로 연결해 드립니다. 왕초보도 첫 상담은 무료입니다.`,
+    `${S} ${G}에서 ${L}를 1:1로 시작하세요. 상담 선생님이 방문·온라인 여건과 목표를 확인하고 ${T}${objJosa(T)} 포함해 수업할 ${teacher}을 연결해 드립니다. 무료 상담으로 시작하세요.`,
+    `${S} ${G} ${L}가 학원 단체 수업으로 부족하다면 1:1 맞춤이 답입니다. 상담 선생님이 ${T}까지 함께 잡아 줄 ${teacher}을 찾아 연결하며, 잘 맞지 않으면 다시 연결해 드립니다.`,
+  ];
+}
+
 function buildFaq(p: { regionName: string; label: string }): { q: string; a: string }[] {
   const { regionName: G, label: L } = p;
   return [
@@ -173,12 +213,17 @@ export function buildByRegionData(
   const subject = subjectBySlug.get(subjectSlug);
   if (!subject) return null;
 
-  // 기존 963 은 표시명=slug(무변경 경로). 확장 지역은 expansion 의 표시명/slug 사용.
+  // 기존 963 은 표시명=slug(무변경 경로). 확장 지역은 expansion, 신도시 지명은 district 의 표시명/slug 사용.
   let regionName: string;
   let regionSlug: string;
+  // 신도시·생활권 지명이면 도입부·description 에 소속 시군구를 1회 녹이고, 상향 링크를 시군구 허브로 건다.
+  const district: PowerDistrict | null = getPowerDistrict(regionParam);
   if (isKnownPowerRegion(regionParam)) {
     regionName = resolvePowerRegionName(regionParam);
     regionSlug = regionName;
+  } else if (district) {
+    regionName = district.name;
+    regionSlug = district.slug;
   } else {
     const exp = getExpansionRegion(regionParam);
     if (!exp) return null;
@@ -191,17 +236,34 @@ export function buildByRegionData(
   const head = `${regionName} ${subject.label}`;
   // title = "{지역} {키워드}" — 키워드에 과목명이 이미 포함되어 지역명만 앞에 둔다(중복 없음).
   const metaTitle = `${regionName} ${keyword} | 어학의참견`;
-  const metaDescription = buildDescriptions({
-    regionName,
-    label: subject.label,
-    terms,
-    type: subject.type,
-  })[hashSlug(`${regionSlug}/${subjectSlug}`) % 3];
+  const metaDescription = district
+    ? buildDistrictDescriptions({
+        regionName,
+        sigungu: district.sigunguText,
+        label: subject.label,
+        terms,
+        type: subject.type,
+      })[hashSlug(`${regionSlug}/${subjectSlug}`) % 3]
+    : buildDescriptions({
+        regionName,
+        label: subject.label,
+        terms,
+        type: subject.type,
+      })[hashSlug(`${regionSlug}/${subjectSlug}`) % 3];
 
   const otherSubjects = POWER_SUBJECTS.filter((s) => s.slug !== subjectSlug).map((s) => ({
     href: `/power/by-region/${enc}/${s.slug}`,
     label: `${regionName} ${s.label}`,
   }));
+
+  // 상향 링크: 지명은 소속 시군구 허브로(허브 미해석 시 지명 자체 허브로 폴백), 그 외는 지역 허브.
+  const regionHubLink =
+    district && district.sigunguHubSlug
+      ? {
+          href: `/power/${encodeURIComponent(district.sigunguHubSlug)}`,
+          label: `${district.sigunguText} 영어 회화 안내`,
+        }
+      : { href: `/power/${enc}`, label: `${regionName} 영어 회화 안내` };
 
   return {
     regionSlug,
@@ -213,11 +275,18 @@ export function buildByRegionData(
     keyword,
     metaTitle,
     metaDescription,
-    intro: buildIntro({ regionName, label: subject.label, terms }),
+    intro: district
+      ? buildDistrictIntro({
+          regionName,
+          sigungu: district.sigunguText,
+          label: subject.label,
+          terms,
+        })
+      : buildIntro({ regionName, label: subject.label, terms }),
     cards: REGION_CARDS[subjectSlug],
     faq: buildFaq({ regionName, label: subject.label }),
     otherSubjects,
-    regionHubLink: { href: `/power/${enc}`, label: `${regionName} 영어 회화 안내` },
+    regionHubLink,
   };
 }
 
@@ -240,13 +309,15 @@ export function regionSubjectEntryLinks(
   }));
 }
 
-/** 정적 생성 파일럿 — 963·확장 앞쪽 일부만 SSG(나머지 ISR). 빌드 시간 최소화. */
+/** 정적 생성 파일럿 — 963·확장·지명 앞쪽 일부만 SSG(나머지 ISR). 빌드 시간 최소화. */
 export const PILOT_REGION_COUNT = 20;
+export const PILOT_DISTRICT_COUNT = 20;
 export function pilotByRegionPairs(): { region: string; subject: string }[] {
   const out: { region: string; subject: string }[] = [];
   const pilot = [
     ...powerRegionSlugs.slice(0, PILOT_REGION_COUNT),
     ...allExpansionRegionSlugs().slice(0, PILOT_REGION_COUNT),
+    ...allDistrictSlugs().slice(0, PILOT_DISTRICT_COUNT),
   ];
   for (const region of pilot) {
     for (const s of POWER_SUBJECTS) out.push({ region, subject: s.slug });
@@ -254,13 +325,16 @@ export function pilotByRegionPairs(): { region: string; subject: string }[] {
   return out;
 }
 
-/** sitemap 용 전체 (지역×과목) 조합 — 963 + 확장. 지역 축 전량. */
+/** sitemap 용 전체 (지역×과목) 조합 — 963 + 확장 + 신도시 지명. 지역 축 전량. */
 export function allByRegionPairs(): { region: string; subject: string }[] {
   const out: { region: string; subject: string }[] = [];
   for (const region of powerRegionSlugs) {
     for (const s of POWER_SUBJECTS) out.push({ region, subject: s.slug });
   }
   for (const region of allExpansionRegionSlugs()) {
+    for (const s of POWER_SUBJECTS) out.push({ region, subject: s.slug });
+  }
+  for (const region of allDistrictSlugs()) {
     for (const s of POWER_SUBJECTS) out.push({ region, subject: s.slug });
   }
   return out;

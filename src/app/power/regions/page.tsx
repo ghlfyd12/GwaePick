@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { powerRegionIndexGroups } from "@/data/powerRegionsExpansion";
+import { powerDistrictGroups } from "@/data/powerDistricts";
 import { site } from "@/data/site";
 
 /*
@@ -43,6 +44,8 @@ export const metadata: Metadata = {
 export default function PowerRegionsIndexPage() {
   const groups = powerRegionIndexGroups();
   const totalSigungu = groups.reduce((n, g) => n + g.sigungu.length, 0);
+  const districtGroups = powerDistrictGroups();
+  const totalDistricts = districtGroups.reduce((n, g) => n + g.districts.length, 0);
 
   return (
     <>
@@ -90,6 +93,41 @@ export default function PowerRegionsIndexPage() {
             </li>
           ))}
         </ul>
+
+        {/* 신도시·주요 생활권 — 권역별 지명 → 지명별 영어회화 페이지 */}
+        <section aria-labelledby="districts-heading" className="mt-16">
+          <h2
+            id="districts-heading"
+            className="break-keep text-2xl font-bold text-ink sm:text-3xl"
+          >
+            신도시·주요 생활권
+          </h2>
+          <p className="mt-3 break-keep text-base leading-relaxed text-muted sm:text-lg">
+            행정구역으로 찾기 어려운 {totalDistricts}개 신도시·택지지구·생활권도 방문·온라인
+            1:1 수업을 준비했습니다.
+          </p>
+          <ul className="mt-8 space-y-8">
+            {districtGroups.map((group) => (
+              <li key={group.region}>
+                <h3 className="break-keep border-b border-line pb-2 text-lg font-bold text-ink sm:text-xl">
+                  {group.region}
+                </h3>
+                <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
+                  {group.districts.map((d) => (
+                    <li key={d.slug}>
+                      <Link
+                        href={`/power/by-region/${encodeURIComponent(d.slug)}/english-conversation`}
+                        className="break-keep text-[13px] font-medium text-ink transition-colors hover:text-accent hover:underline sm:text-sm"
+                      >
+                        {d.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        </section>
       </div>
     </>
   );
