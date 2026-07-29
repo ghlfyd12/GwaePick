@@ -3,18 +3,12 @@ import { supabaseServer, isSupabaseConfigured } from "@/lib/supabase/server";
 import {
   NAME_MAX,
   MEMO_MAX,
-  LESSON_TYPES,
   isGrade,
   isLessonType,
   isSchoolFallback,
   normalizePhone,
 } from "@/data/applyFormOptions";
 import { recordInquiryToNotion } from "@/lib/notionInquiry";
-
-/** 수업 형태 코드 → 라벨(Notion 본문 표기용). */
-const LESSON_LABEL: Record<string, string> = Object.fromEntries(
-  LESSON_TYPES.map((t) => [t.value, t.label]),
-);
 
 /*
  * 신청폼 제출 — POST /api/inquiries
@@ -254,7 +248,7 @@ export async function POST(request: Request) {
     schoolLabel: schoolName ?? (schoolFallback || "(미입력)"),
     grade: data.grade!,
     subjectNames,
-    lessonLabel: LESSON_LABEL[data.lessonType!] ?? data.lessonType!,
+    lessonType: data.lessonType!, // 코드(visit/remote/any) — notionInquiry 에서 옵션명으로 매핑.
     memo: memoBody,
   });
 

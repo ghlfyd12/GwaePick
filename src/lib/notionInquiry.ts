@@ -22,6 +22,25 @@ import { SERVICE } from "@/data/service";
 /** 표준폼 유입임을 기존 폼과 구분하는 출처 표시. */
 export const INQUIRY_SOURCE_LABEL = "표준폼";
 
+/**
+ * 표준폼 전용으로 추가된 Notion 속성명(scripts/ensure-notion-inquiry-props.ts 로 생성).
+ * 기존 "학년"·"과목" multi_select(홈 폼용)와 겹치지 않도록 "표준" 접두를 쓴다.
+ * 오타 시 기록이 통째로 실패하므로 상수 한 곳에서만 관리한다.
+ */
+export const STANDARD_PROP = {
+  school: "학교", // rich_text
+  grade: "표준학년", // select
+  subject: "표준과목", // multi_select
+  lessonType: "수업 형태", // select
+} as const;
+
+/** 수업 형태 코드 → Notion "수업 형태" select 옵션명. */
+const LESSON_NOTION_OPTION: Record<string, string> = {
+  visit: "방문",
+  remote: "비대면",
+  any: "무관",
+};
+
 const NOTION_TIMEOUT_MS = 5000;
 
 export type InquiryNotionInput = {
@@ -31,10 +50,12 @@ export type InquiryNotionInput = {
   regionName: string;
   /** 학교명 또는 대체 선택지("학교 미정" 등). 없으면 "(미입력)". */
   schoolLabel: string;
+  /** 신청폼 grade 표시명(초1~N수) — "표준학년" select 값. */
   grade: string;
+  /** 과목명 목록 — "표준과목" multi_select 값. */
   subjectNames: string[];
-  /** 수업 형태 라벨(방문 수업 / 비대면 수업 / 상관없음). */
-  lessonLabel: string;
+  /** 수업 형태 코드(visit/remote/any) — "수업 형태" select 로 매핑. */
+  lessonType: string;
   /** 상담 내용 원문(태그 제외). 비면 빈 문자열. */
   memo: string;
 };
@@ -55,21 +76,6 @@ function inquiryNotionClient(): Client {
 function richText(content: string) {
   const s = (content ?? "").trim() || "(없음)";
   return [{ type: "text" as const, text: { content: s.slice(0, 2000) } }];
-}
-
-/** 문의내용 본문 — 전용 속성이 없는 필드(학교·학년·과목·수업형태)를 사람이 읽기 쉽게 모은다. */
-function composeBody(input: InquiryNotionInput): string {
-  const lines = [
-    input.memo.trim() ? input.memo.trim() : "(상담 내용 없음)",
-    "",
-    "── 신청 정보 ──",
-    `학교: ${input.schoolLabel}`,
-    `학년: ${input.grade}`,
-    `과목: ${input.subjectNames.join(", ") || "(없음)"}`,
-    `수업 형태: ${input.lessonLabel}`,
-    `출처: ${INQUIRY_SOURCE_LABEL}(/apply)`,
-  ];
-  return lines.join("\n");
 }
 
 /** 일시적 오류만 1회 재시도(rate_limit / 5xx / 타임아웃). 그 외는 즉시 throw. */
@@ -104,6 +110,8 @@ export async function recordInquiryToNotion(
   }
 
   const P = NOTION_PROP;
+  const S = STANDARD_PROP;
+  const lessonOption = LESSON_NOTION_OPTION[input.lessonType] ?? input.lessonType;
   const properties = {
     [P.name]: {
       title: [
@@ -115,12 +123,22 @@ export async function recordInquiryToNotion(
     },
     ...(input.phone.trim() ? { [P.phone]: { phone_number: input.phone.trim() } } : {}),
     [P.region]: { rich_text: richText(input.regionName) },
-    [P.message]: { rich_text: richText(composeBody(input)) },
+    // 문의내용 본문에는 상담 내용(사용자 입력)만 남긴다 — 나머지는 아래 전용 속성으로.
+    [P.message]: { rich_text: richText(input.memo) },
     // 표준폼 유입 표시 — 기존 폼(Referer 기록)과 구분.
     [P.source]: { rich_text: richText(`${INQUIRY_SOURCE_LABEL} (/apply)`) },
     // 서비스·상담 상태는 기존 옵션에 이미 존재하는 값만 쓴다(스키마 변경 없음).
     [P.service]: { select: { name: SERVICE.main } },
     [P.status]: { select: { name: CONSULT_STATUS_NEW } },
+    // 표준폼 전용 속성(2-A 보강) — 학교·학년·과목·수업형태를 본문 대신 속성으로 기록.
+    [S.school]: { rich_text: richText(input.schoolLabel) },
+    [S.grade]: { select: { name: input.grade } },
+    [S.subject]: {
+      multi_select: input.subjectNames
+        .filter((n) => n.trim())
+        .map((name) => ({ name: name.trim() })),
+    },
+    [S.lessonType]: { select: { name: lessonOption } },
   };
 
   try {
