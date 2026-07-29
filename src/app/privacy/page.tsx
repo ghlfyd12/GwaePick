@@ -2,13 +2,10 @@ import type { Metadata } from "next";
 import { site } from "@/data/site";
 
 /*
- * 개인정보처리방침(/privacy) — 초안.
+ * 개인정보처리방침(/privacy).
  *
- * ⚠️ 아래 문구는 초안이며, 최종 문구·보유 기간·문의처는 운영자가 확정한다.
- *    보유 기간은 임시로 "1년"으로 두었고, 문의처는 placeholder 다.
- *    확정 시 이 파일의 해당 항목만 교체하면 된다(구조 변경 불필요).
- *
- * 공개 페이지이므로 noindex 를 걸지 않는다. 신청폼(/apply) 동의 문구에서 새 탭으로 연결된다.
+ * 공개 페이지이므로 noindex 를 걸지 않는다. 신청폼(/apply·홈 #consult) 동의 문구에서
+ * 새 탭으로 연결된다. 문의처는 site.ts 의 카카오톡 채널 링크를 단일 소스로 쓴다.
  */
 
 export const metadata: Metadata = {
@@ -61,11 +58,8 @@ export default function PrivacyPage() {
 
           <Section title="3. 보유 및 이용 기간">
             <p>
-              상담 완료 후 1년간 보관한 뒤 지체 없이 파기합니다. 관계 법령에 따라
+              수집일로부터 1년간 보관한 뒤 지체 없이 파기합니다. 관계 법령에 따라
               보존이 필요한 경우 해당 기간 동안 보관합니다.
-            </p>
-            <p className="mt-2 text-sm text-muted">
-              (보유 기간은 초안이며 운영자 확정 후 갱신됩니다.)
             </p>
           </Section>
 
@@ -81,11 +75,16 @@ export default function PrivacyPage() {
           </Section>
 
           <Section title="6. 문의처">
-            <p>
-              개인정보 처리에 관한 문의는 아래로 접수할 수 있습니다.
-            </p>
-            <p className="mt-2 text-muted">
-              (문의처 정보는 운영자 확정 후 기재됩니다.)
+            <p>개인정보 처리에 관한 문의는 아래 카카오톡 채널로 접수할 수 있습니다.</p>
+            <p className="mt-2">
+              <a
+                href={site.contact.kakaoChannelUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent underline underline-offset-2"
+              >
+                카카오톡 채널로 문의하기
+              </a>
             </p>
           </Section>
         </div>

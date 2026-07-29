@@ -10,6 +10,7 @@ import {
   normalizePhone,
   type SchoolFallback,
 } from "@/data/applyFormOptions";
+import type { SidoOption, SubjectOption } from "@/lib/inquiryOptions";
 
 /*
  * 신청폼 본체(클라이언트).
@@ -20,13 +21,6 @@ import {
  *
  * 색은 accent 토큰(메인=코랄)만 쓴다 — 브랜드색 하드코딩 금지(CLAUDE.md §3).
  */
-
-export type SidoOption = {
-  code: string;
-  name: string;
-  sigungu: { code: string; name: string }[];
-};
-export type SubjectOption = { id: number; name: string; group: string };
 
 type SchoolHit = {
   school_code: string;
@@ -57,9 +51,14 @@ const FIELD_MESSAGE: Record<string, string> = {
 export default function ApplyForm({
   regions,
   subjects,
+  successTitle = "신청이 접수되었습니다",
+  successBody = "상담 선생님이 신청 내용을 확인한 뒤 순서대로 연락드립니다. 통화가 편한 시간이 있다면 회신 문자로 알려 주세요.",
 }: {
   regions: SidoOption[];
   subjects: SubjectOption[];
+  /** 제출 완료 화면 제목·본문 — 홈/apply 가 다른 카피를 쓸 수 있게 주입. */
+  successTitle?: string;
+  successBody?: string;
 }) {
   const uid = useId();
   const [name, setName] = useState("");
@@ -229,11 +228,8 @@ export default function ApplyForm({
         role="status"
         className="rounded-xl border border-line bg-white p-8 text-center"
       >
-        <p className="text-lg font-bold text-ink">신청이 접수되었습니다</p>
-        <p className="mt-3 text-base text-muted">
-          상담 선생님이 신청 내용을 확인한 뒤 순서대로 연락드립니다. 통화가 편한
-          시간이 있다면 회신 문자로 알려 주세요.
-        </p>
+        <p className="text-lg font-bold text-ink">{successTitle}</p>
+        <p className="mt-3 text-base text-muted">{successBody}</p>
       </div>
     );
   }

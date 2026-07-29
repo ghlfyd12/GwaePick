@@ -50,6 +50,12 @@ function coreSitemap(lastModified: Date): MetadataRoute.Sitemap {
     { url: `${base}/`, lastModified, changeFrequency: "weekly", priority: 1 },
   ];
 
+  // 신청폼·개인정보처리방침(2-B 공개 전환) — 코어 사이트맵에 포함.
+  const consultPages: MetadataRoute.Sitemap = [
+    { url: `${base}/apply`, lastModified, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${base}/privacy`, lastModified, changeFrequency: "yearly", priority: 0.3 },
+  ];
+
   const regionPages: MetadataRoute.Sitemap = regions.map((r) => ({
     url: `${base}/${enc(r.id)}`,
     lastModified,
@@ -154,6 +160,7 @@ function coreSitemap(lastModified: Date): MetadataRoute.Sitemap {
 
   return [
     ...home,
+    ...consultPages,
     ...regionPages,
     ...subjectDetailPages,
     ...pseoPages,

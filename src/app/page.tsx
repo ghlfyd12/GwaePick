@@ -4,9 +4,17 @@ import WhyUs from "@/components/sections/WhyUs";
 import TeacherIntro from "@/components/sections/TeacherIntro";
 import Teachers from "@/components/sections/Teachers";
 import ReviewVideos from "@/components/ReviewVideos";
-import ConsultForm from "@/components/ConsultForm";
+import InquirySection from "@/app/(consult)/apply/InquirySection";
 import BlogSection from "@/components/blog/BlogSection";
 import { site } from "@/data/site";
+import { consultFormConfig } from "@/data/consultFormOptions";
+import { SERVICE } from "@/data/service";
+
+/*
+ * 홈은 #consult 상담 섹션이 Supabase 선택지를 읽으므로 ISR 로 둔다.
+ * 기존 블로그 섹션 revalidate(3시간)와 동일 창을 유지한다(선택지는 자주 바뀌지 않음).
+ */
+export const revalidate = 10800;
 
 /*
  * 메인 페이지 구조화 데이터(JSON-LD) — 구글이 '지식의참견'을 교육 서비스(Organization)로 인지하도록.
@@ -80,8 +88,16 @@ export default function Home() {
       {/* 네이버 블로그 최신글 연계 (RSS · ISR). 수집 실패/미설정 시 자동 숨김. */}
       <BlogSection />
 
-      {/* 무료 상담 신청 폼 — 모든 CTA 의 앵커 목적지(#consult) */}
-      <ConsultForm />
+      {/* 무료 상담 신청 폼 — 모든 CTA 의 앵커 목적지(#consult).
+          표준 폼(ApplyForm) 공유. 섹션 제목·안내 문구는 기존 홈 카피 유지. */}
+      <InquirySection
+        eyebrow={consultFormConfig(SERVICE.main).header.eyebrow}
+        titleTop={consultFormConfig(SERVICE.main).header.titleTop}
+        titleAccent={consultFormConfig(SERVICE.main).header.titleAccent}
+        intro={consultFormConfig(SERVICE.main).header.intro}
+        successTitle="상담 신청이 접수되었습니다"
+        successBody="상담 선생님이 곧 연락드립니다."
+      />
     </>
   );
 }
