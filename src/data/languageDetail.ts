@@ -193,14 +193,14 @@ export function buildLanguageMetadata(slug: LanguageSlug): Metadata {
       url: canonical,
       type: "website",
       locale: "ko_KR",
-      siteName: site.name,
-      images: [site.ogImage],
+      siteName: site.power.name,
+      images: [site.power.ogImage],
     },
     twitter: {
       card: "summary_large_image",
       title: data.metaTitle,
       description: data.metaDescription,
-      images: [site.ogImage],
+      images: [site.power.ogImage],
     },
   };
 }

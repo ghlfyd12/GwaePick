@@ -60,15 +60,15 @@ export async function generateMetadata({
       description,
       type: "website",
       locale: "ko_KR",
-      siteName: site.name,
+      siteName: site.power.name,
       url: canonical,
-      images: [site.ogImage],
+      images: [site.power.ogImage],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [site.ogImage],
+      images: [site.power.ogImage],
     },
   };
 }

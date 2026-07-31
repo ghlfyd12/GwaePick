@@ -26,8 +26,8 @@ export const metadata: Metadata = {
     url: "/power/teachers",
     type: "website",
     locale: "ko_KR",
-    siteName: site.name,
-    images: [site.ogImage],
+    siteName: site.power.name,
+    images: [site.power.ogImage],
   },
 };
 

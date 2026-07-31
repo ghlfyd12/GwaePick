@@ -38,15 +38,15 @@ export const metadata: Metadata = {
     description: PAGE_DESCRIPTION,
     type: "website",
     locale: "ko_KR",
-    siteName: site.name,
+    siteName: site.power.name,
     url: "/power",
-    images: [site.ogImage],
+    images: [site.power.ogImage],
   },
   twitter: {
     card: "summary_large_image",
     title: PAGE_TITLE,
     description: PAGE_DESCRIPTION,
-    images: [site.ogImage],
+    images: [site.power.ogImage],
   },
 };
 

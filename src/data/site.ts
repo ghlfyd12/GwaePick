@@ -32,10 +32,26 @@ export const site = {
    * metadataBase 기준 절대 URL 로 변환된다. 자체 openGraph 를 정의하는 하위 페이지도 이 값을 함께 지정해 상속한다.
    */
   ogImage: {
-    url: "/images/whyus-1.png",
+    url: "/og/og-default.jpg",
     width: 1024,
-    height: 609,
+    height: 677,
     alt: "지식의참견 — 직접 가르쳐 본 선생님이 1:1로 연결하는 맞춤 과외",
+  },
+
+  /**
+   * 어학의참견(/power 및 하위) 전용 OG/브랜드 — 메인(지식의참견)과 분리한다.
+   * Next.js 는 openGraph 를 얕게 병합(하위가 openGraph 를 정의하면 부모 images 소실)하므로,
+   * /power 각 페이지·빌더에서 site.ogImage/site.name 대신 이 값을 지정해 어학 이미지·사이트명으로 오버라이드한다.
+   * (메인 경로에는 노출되지 않아 브랜드가 섞이지 않는다.)
+   */
+  power: {
+    name: "어학의참견",
+    ogImage: {
+      url: "/og/og-power.jpg",
+      width: 896,
+      height: 597,
+      alt: "어학의참견 — 직접 가르쳐 온 선생님이 1:1로 연결하는 맞춤 어학 과외",
+    },
   },
 
   /** 핵심 슬로건 (CLAUDE.md 고정 규칙) */

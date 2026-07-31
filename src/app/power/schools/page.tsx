@@ -28,14 +28,14 @@ export const metadata: Metadata = {
     url: "/power/schools",
     type: "website",
     locale: "ko_KR",
-    siteName: site.name,
-    images: [site.ogImage],
+    siteName: site.power.name,
+    images: [site.power.ogImage],
   },
   twitter: {
     card: "summary_large_image",
     title: PAGE_TITLE,
     description: PAGE_DESCRIPTION,
-    images: [site.ogImage],
+    images: [site.power.ogImage],
   },
 };
 
