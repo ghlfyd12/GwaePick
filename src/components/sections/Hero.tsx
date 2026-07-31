@@ -1,160 +1,56 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Image from "next/image";
 import CTAButton from "@/components/ui/CTAButton";
 import QuickSearch from "@/components/QuickSearch";
-import { heroContent, heroBgBlur } from "@/data/heroContent";
+import { heroContent } from "@/data/heroContent";
+import styles from "./Hero.module.css";
 
 /*
- * Hero(상단) 섹션 — 배경 2슬라이드 크로스페이드 + 슬라이드별 오버레이.
+ * Hero(상단) 섹션 — 단일 배경 사진 + 차분한 모션.
  *
- * 전환(자동전환 없음):
- *  - PC(hover 가능): 히어로에 마우스를 올리면 뉴스 슬라이드로, 떼면 메인으로 페이드.
- *  - 터치(hover 불가): 히어로 탭으로 메인↔뉴스 토글 + 하단 점 2개로 수동 전환.
- *  - prefers-reduced-motion: 페이드를 즉시 전환으로 최소화.
+ * 슬라이더(2028 입시 뉴스 슬라이드)는 제거되어 단일 섹션이다(라이브러리 미사용).
+ * 모션(Hero.module.css):
+ *  - 배경 켄번즈: scale(1)→scale(1.08) 25초 1회 후 유지(무한반복 없음).
+ *  - 텍스트 순차 페이드업: 헤드라인 → 하위 버튼 3종(서브 요소) → 주 CTA, 0.15초 간격 스태거, 1회.
+ *  - prefers-reduced-motion: reduce 시 모든 모션 비활성(즉시 표시). transform/opacity 만 사용(CLS 없음).
  *
- * 슬라이드:
- *  - main(사진): fill + object-cover, 오버레이(헤드라인+CTA) 표시. 인물 회피 위해 좌상단 배치.
- *  - news(인포그래픽): object-contain + 최대폭 캡(확대 깨짐 방지) + 밝은 여백, 오버레이 숨김.
- *
- * 보라색 전체 오버레이 없음. 가독성은 텍스트 그림자 + 좌측 국소 중립(검정) 스크림만.
- * 카피/슬라이드/옵션은 모두 heroContent.ts 에서만 가져온다(하드코딩 금지).
- * 페이지 유일의 <h1> 은 항상 DOM 에 존재(뉴스 슬라이드에선 opacity 로만 숨김).
+ * 카피/이미지/버튼은 모두 heroContent.ts 에서만 가져온다(하드코딩 금지).
+ * 페이지 유일의 <h1> 은 이 섹션의 헤드라인.
  */
 export default function Hero() {
-  const { activeVariant, headlines, cta, heroSlides, fadeMs, heroSideBanners } =
+  const { activeVariant, headlines, cta, heroSideBanners, heroBackground } =
     heroContent;
   const headline = headlines[activeVariant];
 
-  // 0 = 메인 슬라이드(기본), 1 = 뉴스 슬라이드
-  const [current, setCurrent] = useState(0);
-
-  // hover 가능 기기(PC) 여부 — 터치는 탭/점으로 대체
-  const [canHover, setCanHover] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
-    const update = () => setCanHover(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
-
-  // prefers-reduced-motion: 페이드 최소화
-  const [reducedMotion, setReducedMotion] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => setReducedMotion(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
-
-  const transitionMs = reducedMotion ? 0 : fadeMs;
-  const slideCount = heroSlides.length;
-  const showOverlay = heroSlides[current]?.showOverlay ?? true;
-  // 보조 배너는 뉴스(인포그래픽) 슬라이드에서만 노출
-  const isNewsSlide = heroSlides[current]?.fit === "contain";
-
-  // PC: hover 로 뉴스(마지막) 슬라이드 ↔ 메인. 터치: 탭으로 토글.
-  const handleEnter = () => canHover && setCurrent(slideCount - 1);
-  const handleLeave = () => canHover && setCurrent(0);
-  const handleTap = () => {
-    if (!canHover) setCurrent((c) => (c === 0 ? slideCount - 1 : 0));
-  };
-
   return (
     <>
-    <section
-      id="hero"
-      aria-labelledby="hero-heading"
-      className="relative flex min-h-[58svh] items-start overflow-hidden md:min-h-[88vh] md:items-center"
-      onMouseEnter={handleEnter}
-      onMouseLeave={handleLeave}
-      onClick={handleTap}
-    >
-      {/* 배경 슬라이드(맨 뒤) — opacity 크로스페이드 */}
-      <div className="absolute inset-0" aria-hidden="true">
-        {heroSlides.map((slide, i) => (
-          <div
-            key={slide.id}
-            className="absolute inset-0 transition-opacity ease-in-out"
-            style={{
-              opacity: i === current ? 1 : 0,
-              transitionDuration: `${transitionMs}ms`,
-            }}
-          >
-            {slide.fit === "contain" ? (
-              // 인포그래픽 슬라이드: (뒤)교실 배경(블러) → (앞)인포그래픽(선명, contain).
-              <div className="relative h-full w-full">
-                {/* 풀배경 교실 사진 — 메인과 공유되는 heroBgBlur 만 배경에 적용.
-                    blur 의 가장자리 비침을 막기 위해 살짝 확대(scale-110). 인포그래픽/배너에는 블러 없음. */}
-                {slide.bgImage && (
-                  <Image
-                    src={slide.bgImage}
-                    alt=""
-                    aria-hidden="true"
-                    fill
-                    priority={i === 0}
-                    sizes="100vw"
-                    className="scale-110 object-cover"
-                    style={{ filter: heroBgBlur }}
-                  />
-                )}
-                {/* 인포그래픽: 전체가 보이게 + 히어로 영역에 거의 꽉 차게(가로 widthPct·세로 maxHeightPct).
-                    상단에 보조 배너 행을 띄울 공간을 위해 약간 아래로 정렬(이미지 크기 자체는 유지). */}
-                <div className="relative flex h-full w-full items-start justify-center pt-[136px] sm:pt-[104px] md:pt-[96px]">
-                  <Image
-                    src={slide.src}
-                    alt={slide.alt}
-                    width={1255}
-                    height={771}
-                    priority={i === 0}
-                    sizes="92vw"
-                    className="object-contain"
-                    style={{
-                      width: `${slide.widthPct ?? 90}%`,
-                      height: "auto",
-                      maxHeight: `${slide.maxHeightPct ?? 85}%`,
-                    }}
-                  />
-                </div>
-              </div>
-            ) : (
-              // 사진: 영역을 꽉 채움(잘려도 무방), object-position 으로 인물 회피
-              <Image
-                src={slide.src}
-                alt={slide.alt}
-                fill
-                priority={i === 0}
-                sizes="100vw"
-                className="object-cover"
-                style={{ objectPosition: slide.objectPosition }}
-              />
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* 오버레이 그룹(스크림 + 헤드라인 + CTA) — 활성 슬라이드의 showOverlay 에 따라 페이드.
-          h1 은 언마운트하지 않고 opacity 로만 숨겨 항상 DOM 에 1개 존재. */}
-      <div
-        className="pointer-events-none absolute inset-0 z-10 transition-opacity ease-in-out"
-        style={{
-          opacity: showOverlay ? 1 : 0,
-          transitionDuration: `${transitionMs}ms`,
-        }}
-        aria-hidden={!showOverlay}
+      <section
+        id="hero"
+        aria-labelledby="hero-heading"
+        className="relative flex min-h-[58svh] items-start overflow-hidden md:min-h-[88vh] md:items-center"
       >
-        {/* 가독성용 국소 중립 스크림 — 좌측만 옅게(검정), 전체 색 오버레이 아님 */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/35 via-black/10 to-transparent md:from-black/40 md:via-transparent" />
+        {/* 배경 사진(맨 뒤) — 켄번즈(느린 확대). object-cover 로 꽉 채움. */}
+        <div className="absolute inset-0" aria-hidden="true">
+          <Image
+            src={heroBackground.src}
+            alt={heroBackground.alt}
+            fill
+            priority
+            sizes="100vw"
+            className={`object-cover ${styles.kenburns}`}
+            style={{ objectPosition: heroBackground.objectPosition }}
+          />
+        </div>
 
-        {/* 전경 콘텐츠 — 상단·좌측, 폭 제한으로 중앙/우측 인물 회피. 모바일은 더 위로(인물 얼굴 회피). */}
-        <div className="relative mx-auto w-full max-w-6xl px-5 pt-8 sm:px-6 md:pt-20">
+        {/* 가독성용 국소 중립 스크림 — 좌측만 옅게(검정), 전체 색 오버레이 아님. */}
+        <div className="absolute inset-0 z-10 bg-gradient-to-r from-black/35 via-black/10 to-transparent md:from-black/40 md:via-transparent" />
+
+        {/* 전경 콘텐츠 — 상단·좌측, 폭 제한으로 중앙/우측 인물 회피. */}
+        <div className="relative z-20 mx-auto w-full max-w-6xl px-5 pt-8 sm:px-6 md:pt-20">
           <div className="max-w-md">
             <h1
               id="hero-heading"
-              className="text-[1.3rem] font-bold leading-snug text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.45)] md:text-[2.5rem] md:leading-[1.3] lg:text-5xl lg:leading-[1.25]"
+              className={`${styles.fadeUp} text-[1.3rem] font-bold leading-snug text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.45)] md:text-[2.5rem] md:leading-[1.3] lg:text-5xl lg:leading-[1.25]`}
+              style={{ animationDelay: "0s" }}
             >
               {/* break:true 조각 뒤에는 모바일에서만(md:hidden) 줄바꿈 — 데스크톱은 자연 줄바꿈 유지. */}
               {headline.map((seg, i) => (
@@ -171,10 +67,27 @@ export default function Hero() {
               ))}
             </h1>
 
-            {/* CTA — 데스크톱만(모바일은 상단 헤더 '무료상담'으로 이동). 오버레이 보일 때만 클릭 가능. */}
+            {/* 하위 버튼 3종(서브 요소) — 헤드라인 아래. 모바일은 작은 알약으로 줄바꿈(가로 스크롤 없음). */}
+            <nav
+              aria-label="바로가기"
+              className={`${styles.fadeUp} mt-5 flex flex-wrap gap-2 sm:gap-2.5`}
+              style={{ animationDelay: "0.15s" }}
+            >
+              {heroSideBanners.map((banner) => (
+                <a
+                  key={banner.href}
+                  href={banner.href}
+                  className="inline-flex items-center justify-center rounded-full bg-accent/95 px-4 py-2 text-[13px] font-semibold text-white shadow-md backdrop-blur-sm transition hover:-translate-y-0.5 hover:bg-accent-dark hover:shadow-lg sm:px-5 sm:py-2.5 sm:text-sm"
+                >
+                  {banner.label}
+                </a>
+              ))}
+            </nav>
+
+            {/* 주 CTA — 데스크톱만(모바일은 상단 헤더 '무료상담'으로 이동). */}
             <div
-              className="pointer-events-auto mt-7 hidden md:block"
-              onClick={(e) => e.stopPropagation()}
+              className={`${styles.fadeUp} mt-6 hidden md:block`}
+              style={{ animationDelay: "0.3s" }}
             >
               <CTAButton
                 href={cta.href}
@@ -186,51 +99,9 @@ export default function Hero() {
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* 보조 배너 — 뉴스 슬라이드에서만, 인포그래픽 상단 가운데(위 여백)에 가로 정렬.
-          메인 슬라이드에서는 렌더하지 않아 자리도 차지하지 않는다. */}
-      {isNewsSlide && (
-        <nav
-          aria-label="추가 안내 바로가기"
-          onClick={(e) => e.stopPropagation()}
-          className="pointer-events-auto absolute left-1/2 top-3 z-20 flex w-full max-w-3xl -translate-x-1/2 flex-wrap items-center justify-center gap-2 px-4 sm:top-5 sm:gap-3"
-        >
-          {heroSideBanners.map((banner) => (
-            <a
-              key={banner.href}
-              href={banner.href}
-              className="inline-flex items-center justify-center rounded-full bg-accent/95 px-6 py-3 text-base font-semibold text-white shadow-md backdrop-blur-sm transition hover:-translate-y-0.5 hover:bg-accent-dark hover:shadow-lg sm:px-7 sm:py-3.5"
-            >
-              {banner.label}
-            </a>
-          ))}
-        </nav>
-      )}
-
-      {/* 페이지네이션 점 — 수동 전환(특히 터치) */}
-      <div className="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 gap-2.5">
-        {heroSlides.map((slide, i) => (
-          <button
-            key={slide.id}
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setCurrent(i);
-            }}
-            aria-label={`${i + 1}번 이미지 보기`}
-            aria-current={i === current}
-            className={`h-2.5 rounded-full transition-all ${
-              i === current
-                ? "w-6 bg-white shadow"
-                : "w-2.5 bg-white/60 shadow hover:bg-white/90"
-            }`}
-          />
-        ))}
-      </div>
-    </section>
-
-      {/* 모바일 전용 — 사진 아래 흰 배경 빠른 검색(학교/지역). 흰 배경이라 라벨 보정 불필요. 데스크톱은 전용 페이지. */}
+      {/* 모바일 전용 — 사진 아래 흰 배경 빠른 검색(학교/지역). 데스크톱은 전용 페이지. */}
       <div className="border-b border-line bg-white px-5 py-5 md:hidden">
         <QuickSearch
           kind="school"

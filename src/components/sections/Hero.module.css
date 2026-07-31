@@ -1,0 +1,52 @@
+/*
+ * 메인 히어로 모션 — 차분한 톤. transform/opacity 만 사용해 CLS 없음.
+ * 효과를 클래스로 분리(kenburns / fadeUp)해 켄번즈만 끄기 쉽게 유지한다.
+ * prefers-reduced-motion: reduce 환경에서는 두 모션 모두 비활성(즉시 표시).
+ */
+
+/* A. 배경 켄번즈 — scale(1)→scale(1.08), 25초, ease-out, 1회 후 확대 상태 유지(both). 무한반복 없음. */
+.kenburns {
+  transform-origin: center;
+  animation: heroKenburns 25s ease-out both;
+  will-change: transform;
+}
+
+@keyframes heroKenburns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.08);
+  }
+}
+
+/* B. 텍스트 순차 페이드업 — opacity 0→1 + translateY(16px→0), 0.6초, ease-out, 1회.
+   지연(스태거)은 인라인 style 의 animation-delay 로 요소마다 부여한다. */
+.fadeUp {
+  opacity: 0;
+  animation: heroFadeUp 0.6s ease-out both;
+  will-change: transform, opacity;
+}
+
+@keyframes heroFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* C. 접근성 — 모션 최소화 선호 시 즉시 표시(모든 모션 제거). */
+@media (prefers-reduced-motion: reduce) {
+  .kenburns {
+    animation: none;
+  }
+  .fadeUp {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
