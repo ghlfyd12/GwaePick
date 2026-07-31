@@ -17,6 +17,7 @@ import { selectSchoolContent } from "@/lib/contentVariant";
 import SchoolStruggles from "@/components/school/SchoolStruggles";
 import SchoolExamPrep from "@/components/school/SchoolExamPrep";
 import SchoolRegionLinks from "@/components/SchoolRegionLinks";
+import type { SchoolArticle } from "@/data/schoolArticleSections";
 
 /*
  * SchoolSubjectDetail — 학교×과목 상세(서버 컴포넌트). 지역 상세(DongSubjectDetail)와 동일 골격·디자인.
@@ -37,6 +38,7 @@ export default function SchoolSubjectDetail({
   sigunguName,
   subject,
   otherSchools,
+  article = null,
 }: {
   schoolSlug: string;
   schoolName: string;
@@ -48,6 +50,8 @@ export default function SchoolSubjectDetail({
   sigunguName: string;
   subject: Subject;
   otherSchools: { name: string; slug: string }[];
+  /** 아티클형 목차 섹션(파일럿 고교×핵심5과목만). null 이면 렌더하지 않아 기존 출력과 동일. */
+  article?: SchoolArticle | null;
 }) {
   const region = `${sidoLabel} ${sigunguName}`;
   // H1 의 지역 파트 — 정식명이 있으면 "{시군구} {정식명}", 없으면 "{시군구}"만(메타 title 과 동일 규칙).
@@ -142,6 +146,62 @@ export default function SchoolSubjectDetail({
       <div className="mx-auto max-w-3xl space-y-12 px-4 py-12 sm:px-6 sm:py-16">
         {/* 2. 학교 맞춤 도입 */}
         <p className="break-keep text-base leading-relaxed text-muted sm:text-lg">{intro}</p>
+
+        {/* 2-1. 아티클형 목차 + 소제목 섹션(파일럿 고교×핵심5과목만) — 없으면 미렌더(기존과 동일) */}
+        {article && (
+          <div className="space-y-8">
+            {/* 상단 앵커 목차 — 초기 SSR HTML 에 <a href="#..."> 로 존재(JS 의존 없음) */}
+            <nav
+              aria-label="목차"
+              className="rounded-2xl border border-line bg-surface p-5 sm:p-6"
+            >
+              <p className="text-sm font-semibold text-accent">목차</p>
+              <ul className="mt-3 space-y-2">
+                {article.toc.map((t) => (
+                  <li key={t.id}>
+                    <a
+                      href={`#${t.id}`}
+                      className="break-keep text-base font-medium text-ink underline-offset-4 hover:text-accent hover:underline sm:text-lg"
+                    >
+                      {t.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+
+            {/* 소제목(H2) 4개 + 본문 — 전체 펼침(접기 없음) */}
+            {article.sections.map((s) => (
+              <section
+                key={s.id}
+                id={s.id}
+                aria-labelledby={`${s.id}-heading`}
+                className="scroll-mt-24"
+              >
+                <h2
+                  id={`${s.id}-heading`}
+                  className="break-keep text-xl font-bold text-ink sm:text-2xl"
+                >
+                  {s.heading}
+                </h2>
+                <p className="mt-3 break-keep text-base leading-relaxed text-muted sm:text-lg">
+                  {s.body}
+                </p>
+                {/* 섹션 4 아래 — 기존 스타일 "무료 상담 신청" CTA(상담폼 #consult 로 이동) */}
+                {s.id === "consult-check" && (
+                  <div className="mt-6">
+                    <a
+                      href="#consult"
+                      className="inline-flex min-h-14 w-full max-w-xs items-center justify-center rounded-full bg-accent px-7 py-3 text-base font-semibold text-white shadow-md transition-colors hover:bg-accent-dark sm:w-auto sm:text-lg"
+                    >
+                      무료 상담 신청
+                    </a>
+                  </div>
+                )}
+              </section>
+            ))}
+          </div>
+        )}
 
         {/* 3. 왜 1:1 과외일까요 */}
         <section>

@@ -13,6 +13,11 @@ import { expandSchoolName } from "@/lib/schoolName";
 import { resolveSubjectCopy } from "@/lib/subjectCopy";
 import { buildSchoolFaq } from "@/data/schoolDetailCopy";
 import {
+  isArticlePilotSchool,
+  articlePilotSchoolSlugs,
+} from "@/data/articlePilotSchools";
+import { buildSchoolArticle } from "@/data/schoolArticleSections";
+import {
   buildSchoolMeta,
   shortRegion,
   serviceJsonLd,
@@ -33,14 +38,23 @@ export const revalidate = false;
 
 const slugKey = (s: string) => decodeURIComponent(s).normalize("NFC");
 
-/** 파일럿 — 앞쪽 학교 일부 × 6과목만 미리 생성. 나머지는 ISR. */
+/** 파일럿 — 앞쪽 학교 일부 × 과목 + 아티클 파일럿 샘플만 미리 생성. 나머지는 ISR. */
 export function generateStaticParams() {
   const seedSchools = SCHOOLS.flatMap((sido) =>
     sido.sigungu.flatMap((sg) => sg.schools),
   ).slice(0, 4);
-  return seedSchools.flatMap((sc) =>
+  const base = seedSchools.flatMap((sc) =>
     subjects.map((subj) => ({ sido: sc.slug, subject: subj.slug })),
   );
+  // 아티클 목차 파일럿 샘플(SSR 아티팩트 검증용) — 파일럿 고교 소수 × 전 과목(핵심5=아티클, 역사 등=무변화 확인).
+  const articleSamples = articlePilotSchoolSlugs()
+    .slice(0, 3)
+    .flatMap((slug) => subjects.map((subj) => ({ sido: slug, subject: subj.slug })));
+  const seen = new Set(base.map((p) => `${p.sido}/${p.subject}`));
+  return [
+    ...base,
+    ...articleSamples.filter((p) => !seen.has(`${p.sido}/${p.subject}`)),
+  ];
 }
 
 function resolve(sidoParam: string, subjectParam: string) {
@@ -85,6 +99,11 @@ export default async function SchoolSubjectPage({
   // 학교급 오버라이드(초등 등)를 병합한 과목 카피 — 렌더 전용. slug·label 은 불변이라 JSON-LD·메타 영향 없음.
   const subjForRender = resolveSubjectCopy(subj, ctx.school.level);
 
+  // 아티클형 목차 섹션 — 전환 우선 지역 고교(파일럿) × 핵심 5과목만. 그 외는 null(기존 출력 불변).
+  const article = isArticlePilotSchool(ctx.school.slug)
+    ? buildSchoolArticle(ctx.school.name, subj.label, subj.slug)
+    : null;
+
   const canonical = `/tutoring/by-school/${ctx.school.slug}/${subj.slug}`;
   const regionShort = isAmbiguousSchoolName(ctx.school.name)
     ? shortRegion(ctx.sigunguName)
@@ -118,6 +137,7 @@ export default async function SchoolSubjectPage({
       sigunguName={ctx.sigunguName}
       subject={subjForRender}
       otherSchools={sameRegionSchools(ctx, 13)}
+      article={article}
       />
     </>
   );
