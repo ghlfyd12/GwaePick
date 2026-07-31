@@ -76,22 +76,30 @@ export type ExamRegion = {
 /**
  * 전국 253 시군구 → 라우트 가능한 한글 slug 매핑(모듈 로드 시 1회 계산).
  * 후보 우선순위: [시군구명, "{시도short} {시군구명}", "{시도} {시군구명}"] 중
- * 963(isKnownPowerRegion) 또는 확장(isExpansionRegionSlug)이 해석하는 첫 값.
+ * 963(isKnownPowerRegion) 또는 확장(isExpansionRegionSlug)이 해석하고 아직 안 쓰인 첫 값.
+ *
+ * 유일성 보장(usedSlugs): 광역시 동명 구(중구·남구·북구·동구·서구·강서구)가 여러 시도에 걸쳐
+ * 같은 평면명("중구")으로 붕괴하지 않도록, 이미 다른 시군구가 claim 한 slug 는 건너뛴다.
+ * REGIONS(sidoRegions)를 확장 모듈과 동일 순서로 순회하므로, 첫 등장 시군구가 평면명을 갖고
+ * 나머지는 접미 slug("부산 중구")를 갖는다 → 회화 축(byRegionSubject)의 지역 slug 표기와 정확히 일치.
  */
 export const examRegions: ExamRegion[] = (() => {
   const out: ExamRegion[] = [];
+  const usedSlugs = new Set<string>();
   for (const sido of REGIONS) {
     const short = SIDO_SHORT[sido.label] ?? sido.label;
     for (const sg of sido.sigungu) {
       const candidates = [sg.name, `${short} ${sg.name}`, `${sido.label} ${sg.name}`];
       let slug: string | null = null;
       for (const c of candidates) {
+        if (usedSlugs.has(nfc(c))) continue; // 이미 다른 시군구가 claim → 다음 후보로
         if (isKnownPowerRegion(c) || isExpansionRegionSlug(c)) {
           slug = c;
           break;
         }
       }
       if (!slug) continue; // 라우트 미해석 시군구는 제외(회화 페이지가 없으므로 링크 대상 부적합)
+      usedSlugs.add(nfc(slug));
       const name = isKnownPowerRegion(slug)
         ? resolvePowerRegionName(slug)
         : getExpansionRegion(slug)?.name ?? slug;

@@ -6,6 +6,7 @@
  */
 import { SITEMAP_URLS_PER_FILE, SCHOOL_SITEMAP_CHUNKS } from "@/lib/schoolSitemap";
 import { allByRegionPairs } from "@/data/byRegionSubject";
+import { allByExamPairs } from "@/data/byRegionExam";
 
 /** 지역 축 전체 (지역×과목) 조합 — 모듈 1회 계산. */
 export const POWER_REGION_PAIRS = allByRegionPairs();
@@ -17,6 +18,22 @@ export const POWER_REGION_SITEMAP_CHUNKS = Math.max(
   Math.ceil(POWER_REGION_PAIR_COUNT / SITEMAP_URLS_PER_FILE),
 );
 
-/** 전체 사이트맵 파일 수(단일 소스) = 코어 1 + 학교 청크 + 파워 지역 청크. robots·index·sitemap 공유. */
+/** 어학시험 축 전체 (지역×시험) 조합 — 253 시군구 × 13시험. 모듈 1회 계산. */
+export const POWER_EXAM_PAIRS = allByExamPairs();
+export const POWER_EXAM_PAIR_COUNT = POWER_EXAM_PAIRS.length;
+
+/** 어학시험 청크 수(최소 1) — 기존 청크 뒤에 append(기존 id 불변). */
+export const POWER_EXAM_SITEMAP_CHUNKS = Math.max(
+  1,
+  Math.ceil(POWER_EXAM_PAIR_COUNT / SITEMAP_URLS_PER_FILE),
+);
+
+/**
+ * 전체 사이트맵 파일 수(단일 소스) = 코어 1 + 학교 청크 + 파워 지역 청크 + 어학시험 청크.
+ * robots·index·sitemap 공유. 시험 청크는 항상 맨 뒤 id 라 기존 shard id(0..회화)가 바뀌지 않는다.
+ */
 export const TOTAL_SITEMAP_COUNT =
-  1 + SCHOOL_SITEMAP_CHUNKS + POWER_REGION_SITEMAP_CHUNKS;
+  1 +
+  SCHOOL_SITEMAP_CHUNKS +
+  POWER_REGION_SITEMAP_CHUNKS +
+  POWER_EXAM_SITEMAP_CHUNKS;

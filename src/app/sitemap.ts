@@ -19,6 +19,9 @@ import {
 import {
   POWER_REGION_PAIRS,
   POWER_REGION_PAIR_COUNT,
+  POWER_REGION_SITEMAP_CHUNKS,
+  POWER_EXAM_PAIRS,
+  POWER_EXAM_PAIR_COUNT,
   TOTAL_SITEMAP_COUNT,
 } from "@/lib/powerRegionSitemap";
 
@@ -191,6 +194,23 @@ function powerRegionSitemap(chunk: number, lastModified: Date): MetadataRoute.Si
   return out;
 }
 
+/** 어학시험 청크 — /power/by-region/{지역}/{시험} 한 청크(슬라이스). 회화 청크와 동일 인코딩. */
+function powerExamSitemap(chunk: number, lastModified: Date): MetadataRoute.Sitemap {
+  const start = chunk * SITEMAP_URLS_PER_FILE;
+  const end = Math.min(start + SITEMAP_URLS_PER_FILE, POWER_EXAM_PAIR_COUNT);
+  const out: MetadataRoute.Sitemap = [];
+  for (let p = start; p < end; p++) {
+    const { region, subject } = POWER_EXAM_PAIRS[p];
+    out.push({
+      url: `${base}/power/by-region/${enc(region)}/${subject}`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.5,
+    });
+  }
+  return out;
+}
+
 /** id 1..N — 학교×과목 상세 한 청크. 평탄화된 (학교,과목) 쌍을 슬라이스로만 생성(메모리 안전). */
 function schoolSitemap(chunk: number, lastModified: Date): MetadataRoute.Sitemap {
   const start = chunk * SITEMAP_URLS_PER_FILE;
@@ -216,8 +236,11 @@ export default async function sitemap({
 }): Promise<MetadataRoute.Sitemap> {
   const lastModified = new Date();
   const n = Number(await id);
-  // id 0 = 코어 / 1..S = 학교 청크 / S+1..S+P = 파워 지역 청크.
+  // id 0 = 코어 / 1..S = 학교 청크 / S+1..S+P = 파워 지역 청크 / 그 뒤 = 어학시험 청크(append).
   if (n <= 0) return coreSitemap(lastModified);
   if (n <= SCHOOL_SITEMAP_CHUNKS) return schoolSitemap(n - 1, lastModified);
-  return powerRegionSitemap(n - 1 - SCHOOL_SITEMAP_CHUNKS, lastModified);
+  const afterSchool = n - 1 - SCHOOL_SITEMAP_CHUNKS; // 0-based: 회화 청크 + 시험 청크
+  if (afterSchool < POWER_REGION_SITEMAP_CHUNKS)
+    return powerRegionSitemap(afterSchool, lastModified);
+  return powerExamSitemap(afterSchool - POWER_REGION_SITEMAP_CHUNKS, lastModified);
 }
