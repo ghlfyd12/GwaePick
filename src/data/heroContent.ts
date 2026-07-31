@@ -127,8 +127,8 @@ export const heroContent = {
    */
   heroSideBanners: [
     { label: "무료수업 문의하기", href: "#consult" },
-    { label: "과목별 커리큘럼보기", href: "#curriculum" },
-    { label: "수업후기", href: "#reviews" },
+    { label: "과목별 커리큘럼보기", href: "/tutoring/by-subject" },
+    { label: "수업후기", href: "/reviews" },
   ] satisfies SideBanner[],
 
   /**
