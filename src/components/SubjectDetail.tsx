@@ -5,6 +5,7 @@ import type { Subject } from "@/data/subjects";
 import { CONSULT_PHONE, STEPS, TRUST } from "@/data/dongPageCopy";
 import { buildSubjectFaq } from "@/data/subjectDetailCopy";
 import { buildSubjectKeywords } from "@/data/subjectKeywords";
+import { subjectHeroImages } from "@/data/subjectHeroImages";
 
 /*
  * SubjectDetail — 과목 단독 상세(서버 컴포넌트). SchoolSubjectDetail 패턴 축약판.
@@ -12,13 +13,18 @@ import { buildSubjectKeywords } from "@/data/subjectKeywords";
  * 콘텐츠는 subjects.ts(why/curriculum/forWhom/teaching) + buildSubjectFaq + buildSubjectKeywords 에서만.
  */
 
-// 과목 Hero 학습 사진 — 다른 페이지와 별개 에셋. 한 곳에서 관리(전 과목 공용).
-const SUBJECT_HERO_IMAGE = "/images/subject-students.png";
+// 과목별 이미지가 없을 때 쓰는 공용 fallback(전 과목 공통) — 신규 과목 대비용으로 유지.
+const SUBJECT_HERO_FALLBACK = {
+  src: "/images/subject-students.png",
+  alt: "교재로 함께 공부하는 학생들",
+};
 
 export default function SubjectDetail({ subject }: { subject: Subject }) {
   const faq = buildSubjectFaq(subject.label);
   const keywords = buildSubjectKeywords(subject.slug);
   const consultMessage = `${subject.label} 과외 문의드립니다.`;
+  // slug 로 과목별 이미지를 조회하고, 없으면 공용 이미지로 대체.
+  const hero = subjectHeroImages[subject.slug] ?? SUBJECT_HERO_FALLBACK;
 
   // JSON-LD(FAQPage·BreadcrumbList)는 라우트 레벨(lib/seo.ts)에서 중앙 삽입한다(중복 제거).
 
@@ -39,8 +45,8 @@ export default function SubjectDetail({ subject }: { subject: Subject }) {
           {/* 왼쪽 — 교재로 함께 공부하는 학생들 사진(고정 비율, 중심) */}
           <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl shadow-md">
             <Image
-              src={SUBJECT_HERO_IMAGE}
-              alt="교재로 함께 공부하는 학생들"
+              src={hero.src}
+              alt={hero.alt}
               fill
               priority
               sizes="(min-width: 768px) 512px, 100vw"
