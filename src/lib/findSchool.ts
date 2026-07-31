@@ -1,5 +1,6 @@
 import { SCHOOLS } from "@/data/schools";
 import type { School } from "@/data/schools";
+import { overrideSchoolLevel } from "@/data/schoolLevelOverrides";
 
 /*
  * 학교 slug 로 학교 + 소속 지역(시도/시군구)을 찾는다(서버 전용 — SCHOOLS 730KB 순회).
@@ -36,14 +37,18 @@ export function findSchoolBySlug(slug: string): SchoolContext | null {
   for (const sido of SCHOOLS) {
     for (const sg of sido.sigungu) {
       const school = sg.schools.find((s) => s.slug === slug);
-      if (school)
+      if (school) {
+        // 동명 학교 dedup 과정의 level 오배정 교정(schools.ts 원본 불변, slug 단위 덮어쓰기).
+        const fixedLevel = overrideSchoolLevel(school.slug);
+        const resolvedSchool = fixedLevel ? { ...school, level: fixedLevel } : school;
         return {
-          school,
+          school: resolvedSchool,
           sidoLabel: sido.label,
           sidoSlug: sido.slug,
           sigunguName: sg.name,
           sigunguSlug: sg.slug,
         };
+      }
     }
   }
   return null;
