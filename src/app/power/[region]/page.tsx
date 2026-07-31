@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import ConsultForm from "@/components/ConsultForm";
+import LessonModeSection from "@/components/power/LessonModeSection";
 import { site } from "@/data/site";
 import {
   powerRegionSlugs,
@@ -47,7 +48,7 @@ export async function generateMetadata({
   const name = resolvePowerRegionName(region);
 
   const title = `${name} 영어 회화 과외 추천 - 1:1 맞춤 원어민/교포 선생님 매칭 | 지식의 참견`;
-  const description = `학원을 다녀도 입이 떨어지지 않았다면 문제는 방법이 아닌 선생님입니다. ${name} 인근 방문 및 온라인 1:1 영어 회화 전문 과외. 검증된 선생님 상담 신청하기.`;
+  const description = `학원을 다녀도 입이 떨어지지 않았다면 문제는 방법이 아닌 선생님입니다. ${name} 전화·화상 1:1 영어 회화 전문 과외. 검증된 선생님 상담 신청하기.`;
   const canonical = `/power/${encodeURIComponent(region)}`;
 
   return {
@@ -98,7 +99,7 @@ export default async function PowerRegionPage({
   const learnerLines = [
     {
       title: "직장인 비즈니스 영어",
-      body: `회의·이메일·발표에서 바로 쓰는 표현부터, ${name} 인근 방문 또는 온라인으로 일정에 맞춰 수업합니다.`,
+      body: `회의·이메일·발표에서 바로 쓰는 표현부터, 전화·화상으로 일정에 맞춰 수업합니다.`,
     },
     {
       title: "왕초보 생활 회화",
@@ -149,7 +150,7 @@ export default async function PowerRegionPage({
           </div>
 
           <ul className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
-            {["방문·온라인 모두 가능", "원어민·교포 선생님", "무료 체험·교체 무료"].map(
+            {["전화·화상 모두 가능", "원어민·교포 선생님", "무료 체험·교체 무료"].map(
               (badge) => (
                 <li
                   key={badge}
@@ -177,7 +178,7 @@ export default async function PowerRegionPage({
             {name}에서 이렇게 도와드립니다
           </h2>
           <p className="mt-3 break-keep text-base leading-relaxed text-muted sm:text-lg">
-            {name} 인근 방문 수업과 온라인 수업을 모두 운영합니다. 직접 가르쳐 온
+            {name}에서도 전화 수업과 화상 수업으로 진행합니다. 직접 가르쳐 온
             상담 선생님이 먼저 수준을 확인하고, 목표에 가장 잘 맞는 선생님을
             연결해 드립니다.
           </p>
@@ -208,6 +209,11 @@ export default async function PowerRegionPage({
               채우는 수업으로 설계합니다. 한 번 수업해 보고 맞지 않으면 선생님
               교체도 부담 없이 도와드립니다.
             </p>
+          </div>
+
+          {/* 비대면 수업 방식 안내 (전화·화상) */}
+          <div className="mt-12">
+            <LessonModeSection bare />
           </div>
 
           {/* 지역별 어학과목(유형 A) 진입 링크 — 영어회화 외 4과목까지 확장 */}

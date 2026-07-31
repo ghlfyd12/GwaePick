@@ -255,7 +255,7 @@ export default function PowerRegionsBrowser({
           신도시·주요 생활권
         </h2>
         <p className="mt-3 break-keep text-base leading-relaxed text-muted sm:text-lg">
-          행정구역으로 찾기 어려운 {totalDistricts}개 신도시·택지지구·생활권도 방문·온라인
+          행정구역으로 찾기 어려운 {totalDistricts}개 신도시·택지지구·생활권도 전화·화상
           1:1 수업을 준비했습니다.
         </p>
         <ul className="mt-8 space-y-3">

@@ -27,7 +27,7 @@ export const dynamicParams = false;
 
 const PAGE_TITLE = "지역별 어학과외 영어회화 일본어 중국어 1:1 | 어학의참견";
 const PAGE_DESCRIPTION =
-  "전국 시·도·시군구별 영어·일본어·중국어 1:1 회화·과외 안내. 우리 동네에서 방문·온라인으로 시작할 수 있도록 지역별 어학 수업 페이지를 모았습니다.";
+  "전국 시·도·시군구별 영어·일본어·중국어 1:1 회화·과외 안내. 우리 동네에서 전화·화상으로 시작할 수 있도록 지역별 어학 수업 페이지를 모았습니다.";
 
 export const metadata: Metadata = {
   title: { absolute: PAGE_TITLE },

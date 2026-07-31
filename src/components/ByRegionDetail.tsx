@@ -4,6 +4,7 @@ import JsonLd from "@/components/JsonLd";
 import { site } from "@/data/site";
 import { buildByRegionData } from "@/data/byRegionSubject";
 import { examReverseGroupForConversation } from "@/data/byRegionExam";
+import LessonModeSection from "@/components/power/LessonModeSection";
 
 /*
  * ByRegionDetail — /power/by-region/[region]/[subject] 공용 상세 템플릿(서버 컴포넌트).
@@ -88,7 +89,7 @@ export default function ByRegionDetail({
             {data.label}, {data.regionName}에서 이렇게 준비합니다
           </h2>
           <p className="mx-auto mt-3 max-w-2xl break-keep text-center text-sm leading-relaxed text-muted sm:text-base">
-            방문·온라인 모두 가능합니다. 지금 수준과 목표에 맞춰 필요한 것부터 1:1로 채웁니다.
+            전화·화상으로 어디서든 가능합니다. 지금 수준과 목표에 맞춰 필요한 것부터 1:1로 채웁니다.
           </p>
           <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
             {data.cards.map((c) => (
@@ -120,6 +121,9 @@ export default function ByRegionDetail({
             드립니다. 첫 상담은 무료입니다.
           </p>
         </section>
+
+        {/* ── 3-1. 비대면 수업 방식 안내 (전화·화상) ─────────────────── */}
+        <LessonModeSection bare />
 
         {/* ── 4. 내부 링크: 같은 지역 다른 과목 + 상위 지역 페이지 ──── */}
         <section aria-labelledby="links-heading">

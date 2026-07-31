@@ -3,6 +3,7 @@ import ConsultForm from "@/components/ConsultForm";
 import JsonLd from "@/components/JsonLd";
 import { site } from "@/data/site";
 import { buildByExamData } from "@/data/byRegionExam";
+import LessonModeSection from "@/components/power/LessonModeSection";
 
 /*
  * ByRegionExamDetail — /power/by-region/[region]/[exam] 공용 상세 템플릿(서버 컴포넌트).
@@ -105,35 +106,8 @@ export default function ByRegionExamDetail({
           </p>
         </section>
 
-        {/* ── 4. 수업 안내 ─────────────────────────────────────────── */}
-        <section aria-labelledby="class-heading">
-          <h2
-            id="class-heading"
-            className="break-keep text-center text-2xl font-bold text-ink sm:text-3xl"
-          >
-            수업 안내
-          </h2>
-          <ul className="mx-auto mt-8 grid max-w-2xl grid-cols-1 gap-4 sm:grid-cols-3">
-            <li className="rounded-3xl border border-line bg-white p-6 shadow-sm">
-              <p className="break-keep text-base font-bold text-accent">수업 시간</p>
-              <p className="mt-2 break-keep text-sm leading-relaxed text-muted sm:text-base">
-                오전 9시부터 밤 12시까지 일정에 맞춰 유연하게 운영합니다.
-              </p>
-            </li>
-            <li className="rounded-3xl border border-line bg-white p-6 shadow-sm">
-              <p className="break-keep text-base font-bold text-accent">수업 방식</p>
-              <p className="mt-2 break-keep text-sm leading-relaxed text-muted sm:text-base">
-                전화 수업 10·20·30분, 화상 수업 20·30분 중에서 고릅니다.
-              </p>
-            </li>
-            <li className="rounded-3xl border border-line bg-white p-6 shadow-sm">
-              <p className="break-keep text-base font-bold text-accent">수업 횟수</p>
-              <p className="mt-2 break-keep text-sm leading-relaxed text-muted sm:text-base">
-                주 2회·3회·5회 중 목표와 일정에 맞춰 정합니다.
-              </p>
-            </li>
-          </ul>
-        </section>
+        {/* ── 4. 비대면 수업 방식 안내 (전화·화상) — 공용 섹션 ────────── */}
+        <LessonModeSection bare />
 
         {/* ── 5. 관련 페이지 링크 ──────────────────────────────────── */}
         <section aria-labelledby="links-heading">

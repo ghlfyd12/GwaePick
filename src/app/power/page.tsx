@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import ConsultForm from "@/components/ConsultForm";
 import CaseGroup from "@/components/power/CaseGroup";
+import LessonModeSection from "@/components/power/LessonModeSection";
 import { site } from "@/data/site";
 import { powerHomeRegionChips } from "@/data/powerHomeRegionChips";
 import { powerHero, powerClosing } from "@/data/languagePrograms";
@@ -232,6 +233,9 @@ export default function PowerPage() {
         </div>
       </section>
 
+      {/* ── 3-1. 비대면 수업 방식 안내 (전화·화상) ─────────────────── */}
+      <LessonModeSection />
+
       {/* ── 4. 학교별 안내 배너 ────────────────────────────────────── */}
       <section aria-labelledby="power-school-heading" className="px-5 py-14 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-5xl">
@@ -280,7 +284,7 @@ export default function PowerPage() {
             지역별 어학과외
           </h2>
           <p className="mx-auto mt-3 max-w-2xl break-keep text-base leading-relaxed text-muted sm:text-lg">
-            우리 동네에서 방문·온라인으로 시작할 수 있습니다.
+            우리 동네에서 전화·화상으로 시작할 수 있습니다.
           </p>
           <ul className="mt-8 flex flex-wrap justify-center gap-2.5">
             {powerHomeRegionChips.map((chip) => (
