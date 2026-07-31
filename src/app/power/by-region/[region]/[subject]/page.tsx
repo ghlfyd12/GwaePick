@@ -1,28 +1,44 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ByRegionDetail from "@/components/ByRegionDetail";
+import ByRegionExamDetail from "@/components/ByRegionExamDetail";
 import {
   pilotByRegionPairs,
   isByRegionAllowed,
   buildByRegionMetadata,
 } from "@/data/byRegionSubject";
+import { isExamSlug } from "@/data/power/exams";
+import {
+  isByExamAllowed,
+  buildByExamMetadata,
+  examPilotPairs,
+  examPilotRegionSlugs,
+} from "@/data/byRegionExam";
 
 /*
- * /power/by-region/[region]/[subject] — 어학의참견 유형 A(지역×어학과목).
+ * /power/by-region/[region]/[subject] — 어학의참견 유형 A.
  *
- * subject 5종: english-conversation / chinese-conversation / chinese-tutoring
- *            / japanese-conversation / japanese-tutoring
- * 대상: powerRegionSlugs(≈960) × 5과목. 빌드 시간 절감을 위해 파일럿만 SSG + 나머지 ISR.
- * dynamicParams=true 이지만 유효 지역(powerRegionSlugs 정확 일치) + 유효 과목만 렌더하고,
- * 무효 조합은 404 로 떨어뜨린다(스팸 크롤 URL 방지).
- * (/power/[region] 단일 세그먼트 catch-all 과 4세그 깊이라 충돌하지 않는다.)
+ * [subject] 세그먼트가 두 축을 겸한다:
+ *   1) 어학과목(회화·과외) 5종 → ByRegionDetail (byRegionSubject)
+ *   2) 어학시험 13종(toeic·jlpt·hsk …) → ByRegionExamDetail (byRegionExam)
+ * isExamSlug 로 분기한다. 유효 지역 + 유효 slug 만 렌더하고 무효 조합은 404(스팸 크롤 URL 방지).
+ * dynamicParams=true, revalidate=false(데이터는 정적 TS — 시간 기반 재생성 없음).
  */
 export const dynamicParams = true;
-// 재배포 전까지 영구 캐시 — 콘텐츠는 data 기준(시간 기반 재생성 없음).
 export const revalidate = false;
 
+/** 시험 지역축 파일럿 시군구 × 회화 3언어 — 역방향 시험 링크 SSG 검증용. */
+const EXAM_PILOT_CONVERSATION_SUBJECTS = [
+  "english-conversation",
+  "japanese-conversation",
+  "chinese-conversation",
+] as const;
+
 export function generateStaticParams() {
-  return pilotByRegionPairs();
+  const examPilotConversation = examPilotRegionSlugs().flatMap((region) =>
+    EXAM_PILOT_CONVERSATION_SUBJECTS.map((subject) => ({ region, subject })),
+  );
+  return [...pilotByRegionPairs(), ...examPilotPairs(), ...examPilotConversation];
 }
 
 export async function generateMetadata({
@@ -31,6 +47,10 @@ export async function generateMetadata({
   params: Promise<{ region: string; subject: string }>;
 }): Promise<Metadata> {
   const { region, subject } = await params;
+  if (isExamSlug(subject)) {
+    if (!isByExamAllowed(region, subject)) return {};
+    return buildByExamMetadata(region, subject);
+  }
   if (!isByRegionAllowed(region, subject)) return {};
   return buildByRegionMetadata(region, subject);
 }
@@ -41,6 +61,10 @@ export default async function ByRegionPage({
   params: Promise<{ region: string; subject: string }>;
 }) {
   const { region, subject } = await params;
+  if (isExamSlug(subject)) {
+    if (!isByExamAllowed(region, subject)) notFound();
+    return <ByRegionExamDetail regionParam={region} examSlug={subject} />;
+  }
   if (!isByRegionAllowed(region, subject)) notFound();
   return <ByRegionDetail regionParam={region} subjectSlug={subject} />;
 }

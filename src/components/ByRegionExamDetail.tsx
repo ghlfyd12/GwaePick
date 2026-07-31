@@ -2,45 +2,32 @@ import Link from "next/link";
 import ConsultForm from "@/components/ConsultForm";
 import JsonLd from "@/components/JsonLd";
 import { site } from "@/data/site";
-import { buildByRegionData } from "@/data/byRegionSubject";
-import { examReverseGroupForConversation } from "@/data/byRegionExam";
+import { buildByExamData } from "@/data/byRegionExam";
 
 /*
- * ByRegionDetail — /power/by-region/[region]/[subject] 공용 상세 템플릿(서버 컴포넌트).
+ * ByRegionExamDetail — /power/by-region/[region]/[exam] 공용 상세 템플릿(서버 컴포넌트).
  *
- * 지역×어학과목(회화·과외) 페이지. 헤더·푸터·플로팅 CTA 는 루트 layout 상속.
+ * 지역×어학시험 페이지. 헤더·푸터·플로팅 CTA(카톡 상담·상담전화연결·무료 상담 신청)는 루트 layout 상속.
  * 색은 accent 토큰만 — /power 스코프(.power-theme)에서 퍼플로 렌더된다(코랄 하드코딩 없음).
- * "수행평가" 단어를 쓰지 않는다(지역 축은 성인·왕초보·기초 프레이밍).
+ * 워딩(CLAUDE.md·지침서): 금지 표현·과장 문장부호·성과 보장 문구 미사용. 시험 지도 경험 중심.
  */
 
 const CONSULT_ANCHOR = "#consult";
 const SITE_URL = site.url.replace(/\/$/, "");
 const abs = (path: string) => `${SITE_URL}${path}`;
 
-export default function ByRegionDetail({
+export default function ByRegionExamDetail({
   regionParam,
-  subjectSlug,
+  examSlug,
 }: {
   regionParam: string;
-  subjectSlug: string;
+  examSlug: string;
 }) {
-  const data = buildByRegionData(regionParam, subjectSlug);
+  const data = buildByExamData(regionParam, examSlug);
   if (!data) return null;
 
-  // 이 지역에 시험 페이지가 있으면(시군구축), 같은 언어 시험 준비 페이지 링크 그룹을 노출한다.
-  const examGroup = examReverseGroupForConversation(regionParam, subjectSlug);
-
-  const canonical = `/power/by-region/${encodeURIComponent(data.regionSlug)}/${subjectSlug}`;
+  const canonical = `/power/by-region/${encodeURIComponent(data.regionSlug)}/${examSlug}`;
   const jsonLd = [
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      mainEntity: data.faq.map((f) => ({
-        "@type": "Question",
-        name: f.q,
-        acceptedAnswer: { "@type": "Answer", text: f.a },
-      })),
-    },
     {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
@@ -79,30 +66,30 @@ export default function ByRegionDetail({
       </section>
 
       <div className="mx-auto max-w-3xl space-y-14 px-5 py-14 sm:px-6 sm:py-20">
-        {/* ── 2. 과목 특화 3카드 ──────────────────────────────────── */}
-        <section aria-labelledby="cards-heading">
+        {/* ── 2. 준비 포인트 3카드 ─────────────────────────────────── */}
+        <section aria-labelledby="prep-heading">
           <h2
-            id="cards-heading"
+            id="prep-heading"
             className="break-keep text-center text-2xl font-bold text-ink sm:text-3xl"
           >
-            {data.label}, {data.regionName}에서 이렇게 준비합니다
+            {data.prepHeading}
           </h2>
           <p className="mx-auto mt-3 max-w-2xl break-keep text-center text-sm leading-relaxed text-muted sm:text-base">
-            방문·온라인 모두 가능합니다. 지금 수준과 목표에 맞춰 필요한 것부터 1:1로 채웁니다.
+            {data.prepSubtitle}
           </p>
           <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {data.cards.map((c) => (
-              <li key={c.title} className="rounded-3xl border border-line bg-white p-6 shadow-sm">
-                <p className="break-keep text-lg font-bold text-accent">{c.title}</p>
+            {data.exam.prepPoints.map((p) => (
+              <li key={p.title} className="rounded-3xl border border-line bg-white p-6 shadow-sm">
+                <p className="break-keep text-lg font-bold text-accent">{p.title}</p>
                 <p className="mt-2 break-keep text-sm leading-relaxed text-muted sm:text-base">
-                  {c.desc}
+                  {p.desc}
                 </p>
               </li>
             ))}
           </ul>
         </section>
 
-        {/* ── 3. 상담 선생님 연결 안내(원어민·교포 1:1) ────────────── */}
+        {/* ── 3. 연결 안내 ─────────────────────────────────────────── */}
         <section
           aria-labelledby="match-heading"
           className="rounded-3xl bg-accent/10 px-6 py-10 sm:px-8"
@@ -111,17 +98,44 @@ export default function ByRegionDetail({
             id="match-heading"
             className="break-keep text-center text-2xl font-bold text-ink sm:text-3xl"
           >
-            원어민·교포 선생님, 1:1로 연결합니다
+            호흡이 맞는 선생님과 1:1로 준비합니다
           </h2>
           <p className="mx-auto mt-4 max-w-2xl break-keep text-center text-base leading-relaxed text-muted sm:text-lg">
-            직접 가르쳐 온 상담 선생님이 {data.regionName}의 생활 반경과 목표를 먼저
-            듣습니다. 발음과 회화는 원어민 선생님, 문법과 설명은 한국어로 짚어 주는 교포
-            선생님 중에서 호흡이 맞는 분을 1:1로 연결하고, 잘 맞지 않으면 다시 연결해
-            드립니다. 첫 상담은 무료입니다.
+            {data.matchBody}
           </p>
         </section>
 
-        {/* ── 4. 내부 링크: 같은 지역 다른 과목 + 상위 지역 페이지 ──── */}
+        {/* ── 4. 수업 안내 ─────────────────────────────────────────── */}
+        <section aria-labelledby="class-heading">
+          <h2
+            id="class-heading"
+            className="break-keep text-center text-2xl font-bold text-ink sm:text-3xl"
+          >
+            수업 안내
+          </h2>
+          <ul className="mx-auto mt-8 grid max-w-2xl grid-cols-1 gap-4 sm:grid-cols-3">
+            <li className="rounded-3xl border border-line bg-white p-6 shadow-sm">
+              <p className="break-keep text-base font-bold text-accent">수업 시간</p>
+              <p className="mt-2 break-keep text-sm leading-relaxed text-muted sm:text-base">
+                오전 9시부터 밤 12시까지 일정에 맞춰 유연하게 운영합니다.
+              </p>
+            </li>
+            <li className="rounded-3xl border border-line bg-white p-6 shadow-sm">
+              <p className="break-keep text-base font-bold text-accent">수업 방식</p>
+              <p className="mt-2 break-keep text-sm leading-relaxed text-muted sm:text-base">
+                전화 수업 10·20·30분, 화상 수업 20·30분 중에서 고릅니다.
+              </p>
+            </li>
+            <li className="rounded-3xl border border-line bg-white p-6 shadow-sm">
+              <p className="break-keep text-base font-bold text-accent">수업 횟수</p>
+              <p className="mt-2 break-keep text-sm leading-relaxed text-muted sm:text-base">
+                주 2회·3회·5회 중 목표와 일정에 맞춰 정합니다.
+              </p>
+            </li>
+          </ul>
+        </section>
+
+        {/* ── 5. 관련 페이지 링크 ──────────────────────────────────── */}
         <section aria-labelledby="links-heading">
           <h2
             id="links-heading"
@@ -130,63 +144,14 @@ export default function ByRegionDetail({
             {data.regionName} 어학 관련 페이지
           </h2>
           <ul className="mt-6 flex flex-wrap justify-center gap-3">
-            <li>
-              <Link
-                href={data.regionHubLink.href}
-                className="inline-flex min-h-12 items-center break-keep rounded-full border border-accent bg-accent/5 px-5 py-2.5 text-sm font-semibold text-accent transition-colors hover:bg-accent/10 sm:text-base"
-              >
-                {data.regionHubLink.label}
-              </Link>
-            </li>
-            {data.otherSubjects.map((s) => (
-              <li key={s.href}>
+            {data.relatedLinks.map((l) => (
+              <li key={l.href}>
                 <Link
-                  href={s.href}
+                  href={l.href}
                   className="inline-flex min-h-12 items-center break-keep rounded-full border border-accent/40 bg-white px-5 py-2.5 text-sm font-semibold text-accent transition-colors hover:bg-accent/5 sm:text-base"
                 >
-                  {s.label}
+                  {l.label}
                 </Link>
-              </li>
-            ))}
-          </ul>
-
-          {/* 이 지역의 언어별 어학시험 준비 페이지(역방향 링크) — 시군구축에서만 노출 */}
-          {examGroup && (
-            <div className="mt-8">
-              <h3 className="break-keep text-center text-base font-bold text-ink sm:text-lg">
-                이 지역의 {examGroup.languageLabel} 시험 준비
-              </h3>
-              <ul className="mt-4 flex flex-wrap justify-center gap-2.5">
-                {examGroup.links.map((l) => (
-                  <li key={l.href}>
-                    <Link
-                      href={l.href}
-                      className="inline-flex min-h-11 items-center break-keep rounded-full border border-accent/40 bg-white px-4 py-2 text-sm font-semibold text-accent transition-colors hover:bg-accent/5"
-                    >
-                      {l.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </section>
-
-        {/* ── 5. FAQ ──────────────────────────────────────────────── */}
-        <section aria-labelledby="faq-heading">
-          <h2
-            id="faq-heading"
-            className="break-keep text-center text-2xl font-bold text-ink sm:text-3xl"
-          >
-            자주 묻는 질문
-          </h2>
-          <ul className="mt-8 space-y-4">
-            {data.faq.map((f) => (
-              <li key={f.q} className="rounded-3xl border border-line bg-white p-6 shadow-sm">
-                <p className="break-keep text-base font-bold text-ink sm:text-lg">Q. {f.q}</p>
-                <p className="mt-2 break-keep text-sm leading-relaxed text-muted sm:text-base">
-                  {f.a}
-                </p>
               </li>
             ))}
           </ul>
@@ -204,7 +169,7 @@ export default function ByRegionDetail({
             오늘 상담으로, 그 첫걸음을
           </h2>
           <p className="mx-auto mt-4 max-w-xl break-keep text-base leading-relaxed text-muted sm:text-lg">
-            {data.regionName} {data.label}, 맞는 선생님과 함께라면 차근히 시작할 수
+            {data.regionName} {data.exam.name}, 맞는 선생님과 함께라면 차근히 준비할 수
             있습니다. 지금 상담으로 시작하세요.
           </p>
           <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -224,8 +189,8 @@ export default function ByRegionDetail({
         </section>
       </div>
 
-      {/* ── 상담 폼(#consult) — 진입 지역·과목 프리필. /power 스코프라 어학 폼으로 자동 분기. ── */}
-      <ConsultForm defaultMessage={`${data.regionName} ${data.label} 1:1 상담 문의드립니다.`} />
+      {/* ── 상담 폼(#consult) — 진입 지역·시험 프리필. /power 스코프라 어학 폼으로 자동 분기. ── */}
+      <ConsultForm defaultMessage={`${data.regionName} ${data.exam.name} 1:1 상담 문의드립니다.`} />
     </>
   );
 }
