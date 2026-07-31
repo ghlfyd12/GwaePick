@@ -240,14 +240,14 @@ export function buildByExamMetadata(
       url: canonical,
       type: "website",
       locale: "ko_KR",
-      siteName: site.power.name,
-      images: [site.power.ogImage],
+      siteName: site.name,
+      images: [site.ogImage],
     },
     twitter: {
       card: "summary_large_image",
       title: data.metaTitle,
       description: data.metaDescription,
-      images: [site.power.ogImage],
+      images: [site.ogImage],
     },
   };
 }
