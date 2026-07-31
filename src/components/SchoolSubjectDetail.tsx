@@ -18,6 +18,8 @@ import SchoolStruggles from "@/components/school/SchoolStruggles";
 import SchoolExamPrep from "@/components/school/SchoolExamPrep";
 import SchoolRegionLinks from "@/components/SchoolRegionLinks";
 import type { SchoolArticle } from "@/data/schoolArticleSections";
+import PageBanner from "@/components/PageBanner";
+import { buildSchoolBanner } from "@/data/pageBannerCopy";
 
 /*
  * SchoolSubjectDetail — 학교×과목 상세(서버 컴포넌트). 지역 상세(DongSubjectDetail)와 동일 골격·디자인.
@@ -224,6 +226,9 @@ export default function SchoolSubjectDetail({
             </div>
           )}
         </section>
+
+        {/* 3-1. 공용 안내 배너 (재학생 맞춤 문구 — 학교급 분기) */}
+        <PageBanner content={buildSchoolBanner(schoolName, subject.label, levelLabel)} />
 
         {/* 4. 커리큘럼 4단계 */}
         <section>

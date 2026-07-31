@@ -6,6 +6,8 @@ import { CONSULT_PHONE, STEPS, TRUST } from "@/data/dongPageCopy";
 import { buildSubjectFaq } from "@/data/subjectDetailCopy";
 import { buildSubjectKeywords } from "@/data/subjectKeywords";
 import { subjectHeroImages } from "@/data/subjectHeroImages";
+import PageBanner from "@/components/PageBanner";
+import { buildSubjectBanner } from "@/data/pageBannerCopy";
 
 /*
  * SubjectDetail — 과목 단독 상세(서버 컴포넌트). SchoolSubjectDetail 패턴 축약판.
@@ -100,6 +102,9 @@ export default function SubjectDetail({ subject }: { subject: Subject }) {
             </div>
           )}
         </section>
+
+        {/* 2-1. 공용 안내 배너 (과목 맞춤 문구) */}
+        <PageBanner content={buildSubjectBanner(subject.label)} />
 
         {/* 3. 커리큘럼 4단계 */}
         <section>

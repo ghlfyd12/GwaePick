@@ -3,6 +3,8 @@ import Link from "next/link";
 import ConsultForm from "@/components/ConsultForm";
 import type { Subject } from "@/data/subjects";
 import SubjectTabs from "@/components/SubjectTabs";
+import PageBanner from "@/components/PageBanner";
+import { buildRegionBanner } from "@/data/pageBannerCopy";
 import {
   CONSULT_PHONE,
   STEPS,
@@ -148,6 +150,9 @@ export default function DongSubjectDetail({
             </div>
           )}
         </section>
+
+        {/* 3-1. 공용 안내 배너 (지역 맞춤 문구) */}
+        <PageBanner content={buildRegionBanner(dong.name, subject.label)} />
 
         {/* 4. 커리큘럼 4단계 */}
         <section>
