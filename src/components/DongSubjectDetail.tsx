@@ -12,11 +12,14 @@ import {
   WHY_COMMON,
   REVIEW_PLACEHOLDERS,
   buildIntro,
+  buildSchoolIntro,
   buildFaq,
   neighborDongs,
   dongHref,
 } from "@/data/dongPageCopy";
 import { gradeBlock } from "@/data/gradeContent";
+import { pickRegionSchools } from "@/lib/regionSchoolPick";
+import { getSubjectUnits } from "@/data/subjectUnits";
 import RegionSchoolLinks from "@/components/RegionSchoolLinks";
 
 /*
@@ -55,6 +58,18 @@ export default function DongSubjectDetail({
   const faq = buildFaq(dong.name);
   // 학년 블록(변주) — 동 slug + 과목으로 3종 중 1종 선택(gradeContent). 미등록 과목이면 미노출.
   const gradeText = gradeBlock(subject.slug, dong.slug);
+  // 인근 학교(중2·고2) + 과목 단원 키워드 도입 문단 — 메타(title·desc)와 동일 소스.
+  const schoolPick = pickRegionSchools(sidoSlug, sigungu.slug);
+  const units = getSubjectUnits(subject.slug);
+  const schoolIntro = buildSchoolIntro({
+    dong: dong.name,
+    subject: subject.label,
+    middleSchools: schoolPick.middleSchools.map((s) => s.name),
+    highSchools: schoolPick.highSchools.map((s) => s.name),
+    midUnits: units.middle,
+    highUnits: units.high,
+    dongSlug: dong.slug,
+  });
   const consultMessage = `${sigungu.name} ${dong.name} ${subject.label} 과외 문의드립니다.`;
 
   // 내부 링크
@@ -128,6 +143,18 @@ export default function DongSubjectDetail({
       <div className="mx-auto max-w-3xl space-y-12 px-4 py-12 sm:px-6 sm:py-16">
         {/* 2. 지역 맞춤 도입(변주) */}
         <p className="break-keep text-base leading-relaxed text-muted sm:text-lg">{intro}</p>
+
+        {/* 2-1. 인근 학교(중등·고등) 도입 문단 — 학교급별 검색어 커버 */}
+        {(schoolIntro.middle || schoolIntro.high) && (
+          <div className="space-y-3">
+            {schoolIntro.middle && (
+              <p className="break-keep text-base leading-relaxed text-muted sm:text-lg">{schoolIntro.middle}</p>
+            )}
+            {schoolIntro.high && (
+              <p className="break-keep text-base leading-relaxed text-muted sm:text-lg">{schoolIntro.high}</p>
+            )}
+          </div>
+        )}
 
         {/* 3. 왜 1:1 과외일까요 */}
         <section>

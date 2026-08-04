@@ -113,6 +113,41 @@ export function buildIntro(slots: Slots, dongSlug: string): string {
   return out;
 }
 
+/**
+ * 인근 학교(중2·고2) + 과목 단원 키워드를 담은 중등·고등 도입 문단.
+ * title·description 과 문장을 복제하지 않고, 각 단원 키워드는 문단당 1회만 쓴다(스터핑 금지).
+ * 학교가 없는 학교급은 null 을 반환(호출부에서 미노출). 동 slug 해시로 A/B 변주.
+ */
+export function buildSchoolIntro(p: {
+  dong: string;
+  subject: string;
+  middleSchools: string[];
+  highSchools: string[];
+  midUnits: string[];
+  highUnits: string[];
+  dongSlug: string;
+}): { middle: string | null; high: string | null } {
+  const variant = pickVariant(p.dongSlug);
+  const midNames = p.middleSchools.join("·");
+  const highNames = p.highSchools.join("·");
+  const midU = p.midUnits.join(", ");
+  const highU = p.highUnits.join(", ");
+
+  const middle = midNames
+    ? variant === "A"
+      ? `${p.dong} 인근 ${midNames} 등 중학교 내신을 준비한다면, ${p.subject}에서 ${midU} 같은 단원이 처음 부담이 되는 시기입니다. 지금 어디서 막히는지부터 짚어 학교 시험 범위에 맞춰 개념을 다시 세웁니다.`
+      : `중학교 과정에서는 ${midNames} 내신을 준비하며, ${p.subject}의 ${midU}처럼 학년이 이어지는 단원을 만납니다. 1:1 수업은 빠진 부분을 먼저 찾아 지금 진도에 맞춰 채워 갑니다.`
+    : null;
+
+  const high = highNames
+    ? variant === "A"
+      ? `고등학교 과정에서는 ${highNames} 내신과 함께 ${p.subject} ${highU}처럼 수능까지 이어지는 범위를 준비합니다. 학생의 수준과 목표 시기에 맞춰 내신과 수능의 비중을 조절하며 약한 단원부터 보완합니다.`
+      : `${highNames} 등 고등학교 내신을 준비하는 학생은 ${p.subject} ${highU} 등을 내신과 수능 양쪽으로 다뤄야 합니다. 한 명에게 맞춘 진도로 어려운 단원을 반복해 익히며 시험 실수를 줄여 갑니다.`
+    : null;
+
+  return { middle, high };
+}
+
 /** "왜 1:1 과외일까요?" 공통 문단. */
 export const WHY_COMMON =
   "학원 한 반에서 여러 학생이 같은 진도를 나가는 동안, 정작 우리 아이가 어디서 멈췄는지는 지나치기 쉽습니다. 1:1 수업은 그 한 명에게 집중하기 때문에, 모르는 것을 모른다고 말할 수 있고 그 자리에서 바로 메울 수 있습니다.";

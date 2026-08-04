@@ -20,6 +20,7 @@ import {
   subjectBySlug as subjectBySlugEn,
 } from "@/data/subjects";
 import { PILOT, buildFaq } from "@/data/dongPageCopy";
+import { pickRegionSchools } from "@/lib/regionSchoolPick";
 import DongSubjectDetail from "@/components/DongSubjectDetail";
 import JsonLd from "@/components/JsonLd";
 import {
@@ -101,14 +102,20 @@ export async function generateMetadata({
     });
   }
 
-  // 신규 동×과목 상세
+  // 신규 동×과목 상세 — 인근 학교(중2·고2)와 과목 단원 키워드를 title/description 에 주입.
   const rn = resolveNew(sido, seg2, seg3, seg4);
   if (rn) {
     const { sg, dong, subj, sidoSlug } = rn;
+    const pick = pickRegionSchools(sidoSlug, sg.slug);
     return buildRegionMeta({
       regionName: dong.name,
       subjectLabel: subj.label,
       subjectSlug: subj.slug,
+      dongSchools: {
+        sigunguName: sg.name,
+        middleSchools: pick.middleSchools.map((s) => s.name),
+        highSchools: pick.highSchools.map((s) => s.name),
+      },
       canonicalPath: `/tutoring/by-region/${sidoSlug}/${sg.slug}/${dong.slug}/${subj.slug}`,
     });
   }

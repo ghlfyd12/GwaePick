@@ -21,6 +21,8 @@ import {
   type TitleLevel,
 } from "@/data/seoTitlePhrases";
 import { resolveTitleKeyword, type TitlePageType } from "@/data/titleKeywords";
+import { buildRegionDongTitle } from "@/lib/regionSchoolPick";
+import { getSubjectUnits } from "@/data/subjectUnits";
 
 const SITE_NAME = site.name; // 지식의참견
 const SITE_URL = site.url.replace(/\/$/, ""); // 배포 기준 도메인(단일 소스)
@@ -223,9 +225,58 @@ export interface RegionMetaInput {
   gradeLabel?: string;
   /** 학교급 — 학년을 알 수 있는 경로에서만 지정(지역 페이지 기본은 고등 기준). */
   level?: TitleLevel;
+  /**
+   * 동×과목 상세 전용 — 인근 학교(중2·고2 이름)와 시군구명.
+   * 지정 시 중·고 통합형 title/description(학교·단원 주입)을 쓴다.
+   * 미지정(허브·레거시·학년 세그먼트)은 기존 문구 유지.
+   */
+  dongSchools?: {
+    sigunguName: string;
+    middleSchools: string[];
+    highSchools: string[];
+  };
   canonicalPath: string;
 }
+
+/** 동×과목 — 중·고 학교와 과목 단원 키워드를 주입한 단일 description(회전 없음). */
+function regionDongDescription(p: {
+  regionName: string;
+  subjectLabel: string;
+  subjectSlug?: string;
+  middleSchools: string[];
+  highSchools: string[];
+}): string {
+  const units = getSubjectUnits(p.subjectSlug ?? "");
+  const G = p.regionName;
+  const J = p.subjectLabel;
+  const midNames = p.middleSchools.join("·");
+  const highNames = p.highSchools.join("·");
+  const midUnits = units.middle.join("·");
+  const highUnits = units.high.join("·");
+  const midClause = midNames ? `${midNames} 내신과 ${midUnits}` : `${midUnits}`;
+  const highClause = highNames ? `${highNames} ${highUnits}` : `${highUnits}`;
+  return `${G} ${J}과외, 중1·중2·중3·고1·고2·고3 학년별 1:1 맞춤. ${midClause}, ${highClause} 대비. 직접 가르쳐 본 상담 선생님이 아이에게 맞는 ${J} 선생님을 찾아드립니다.`;
+}
+
 export function buildRegionMeta(p: RegionMetaInput): Metadata {
+  // 동×과목 상세(학교 주입) — 중·고 통합형 title/description.
+  if (p.subjectLabel && p.dongSchools && !p.gradeLabel) {
+    const title = buildRegionDongTitle({
+      dong: p.regionName,
+      subjectLabel: p.subjectLabel,
+      sigunguName: p.dongSchools.sigunguName,
+      mid1: p.dongSchools.middleSchools[0],
+      high1: p.dongSchools.highSchools[0],
+    });
+    const description = regionDongDescription({
+      regionName: p.regionName,
+      subjectLabel: p.subjectLabel,
+      subjectSlug: p.subjectSlug,
+      middleSchools: p.dongSchools.middleSchools,
+      highSchools: p.dongSchools.highSchools,
+    });
+    return baseMetadata(title, description, p.canonicalPath);
+  }
   if (p.subjectLabel) {
     // description 은 기존과 동일하게 "학년 과목" 결합 문구를 쓴다.
     const subjectPhrase = p.gradeLabel
