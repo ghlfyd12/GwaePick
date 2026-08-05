@@ -47,9 +47,31 @@ export const isLessonType = (v: unknown): v is LessonType =>
 export const isSchoolFallback = (v: unknown): v is SchoolFallback =>
   typeof v === "string" && (SCHOOL_FALLBACKS as readonly string[]).includes(v);
 
-/** 이름·연락처 제한(서버 검증과 화면 maxLength 가 같은 값을 쓴다). */
+/**
+ * 대표 과목 드롭다운 — 세부 과목 대신 상위 분류 하나만 고르게 한다(입력 최소화).
+ *
+ * label 은 화면 표시명, subjectName 은 Supabase subjects 테이블의 실재 과목명이다.
+ * 폼은 주입받은 subjects 목록에서 subjectName 으로 subject_id 를 찾아 `[id]` 단일 배열로 보낸다.
+ * (데이터·스키마 무변경 — 여기서 상위 분류만 골라 쓴다.)
+ *   - "사회"→통합사회, "과학"→통합과학, "역사"→한국사 로 대표 매핑한다.
+ *   - subjects 에 없는 subjectName 은 폼에서 자동 제외된다(방어적).
+ */
+export const REPRESENTATIVE_SUBJECTS = [
+  { label: "국어", subjectName: "국어" },
+  { label: "영어", subjectName: "영어" },
+  { label: "수학", subjectName: "수학" },
+  { label: "사회", subjectName: "통합사회" },
+  { label: "과학", subjectName: "통합과학" },
+  { label: "역사", subjectName: "한국사" },
+  { label: "논술", subjectName: "논술" },
+  { label: "코딩", subjectName: "코딩" },
+  { label: "전과목", subjectName: "전과목" },
+] as const;
+
+/** 이름·연락처·상세주소 제한(서버 검증과 화면 maxLength 가 같은 값을 쓴다). */
 export const NAME_MAX = 50;
 export const MEMO_MAX = 1000;
+export const DETAIL_MAX = 100;
 
 /** 한국 휴대폰 번호 → 숫자만 남긴 정규화 값. 형식이 아니면 null. */
 export function normalizePhone(raw: string): string | null {

@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 const COLLECTED = [
   "이름",
   "연락처",
-  "지역(시/도·시/군/구)",
+  "주소(시/도·시/군/구·상세주소)",
   "학교",
   "학년",
   "희망 과목",

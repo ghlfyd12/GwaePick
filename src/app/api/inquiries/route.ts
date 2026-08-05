@@ -75,8 +75,12 @@ type InquiryPayload = {
   /** 학교를 못 고른 사유("목록에 없음" 등). schoolCode 가 없을 때만 의미가 있다. */
   schoolFallback?: string | null;
   grade?: string;
-  lessonType?: string;
+  /** 희망 수업 형태 — 선택. 미선택(null/빈값)이면 'any'(무관)로 저장한다. */
+  lessonType?: string | null;
   subjectIds?: number[];
+  /** 주소 검색 결과(도로명/지번) + 상세주소 — memo 태그·Notion 본문으로 기록(전용 컬럼 없음). */
+  roadAddress?: string;
+  addressDetail?: string;
   memo?: string;
   agree?: boolean;
   /** 유입 UTM 5종 + referrer — 전용 컬럼/속성에 분리 저장(폼 UI 미노출). */
@@ -147,7 +151,8 @@ export async function POST(request: Request) {
   if (!sigunguCode) invalid.push("sigunguCode");
 
   if (!isGrade(data.grade)) invalid.push("grade");
-  if (!isLessonType(data.lessonType)) invalid.push("lessonType");
+  // 수업 형태는 선택 — 유효한 코드면 그대로, 아니면 'any'(무관)로 저장한다.
+  const lessonType = isLessonType(data.lessonType) ? data.lessonType : "any";
 
   const subjectIds = Array.isArray(data.subjectIds)
     ? [...new Set(data.subjectIds.filter((v) => Number.isInteger(v) && v > 0))]
@@ -156,10 +161,10 @@ export async function POST(request: Request) {
 
   if (data.agree !== true) invalid.push("agree");
 
+  // 학교는 선택 — 미입력 제출을 허용한다. 대체 선택지 값이 오면 형식만 검증한다.
   const schoolCode = (data.schoolCode ?? "").trim();
   const schoolFallback = (data.schoolFallback ?? "").trim();
   if (schoolFallback && !isSchoolFallback(schoolFallback)) invalid.push("schoolFallback");
-  if (!schoolCode && !schoolFallback) invalid.push("school");
 
   if (invalid.length) return bad(invalid);
 
@@ -212,8 +217,18 @@ export async function POST(request: Request) {
     schoolName = school.data.school_name;
   }
 
-  /* ── 3) memo 조립 — 본문 + [학교:...]. UTM 은 전용 컬럼으로 분리되어 memo 에 넣지 않는다. */
+  /* ── 3) memo 조립 — 본문 + [주소:...] + [학교:...]. UTM 은 전용 컬럼으로 분리되어 memo 에 넣지 않는다.
+   *   주소 전용 컬럼이 없으므로 도로명/지번 + 상세주소를 [주소:...] 태그로 memo 에 남긴다(운영자 매칭 참고용). */
+  const addressText = [
+    (data.roadAddress ?? "").trim(),
+    (data.addressDetail ?? "").trim(),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .slice(0, MEMO_MAX);
+
   const tags: string[] = [];
+  if (addressText) tags.push(`[주소:${addressText}]`);
   if (!schoolCode && schoolFallback) tags.push(`[학교:${schoolFallback}]`);
 
   const memoBody = (data.memo ?? "").trim().slice(0, MEMO_MAX);
@@ -234,7 +249,7 @@ export async function POST(request: Request) {
       sigungu_code: sigunguCode,
       school_code: schoolCode || null,
       grade: data.grade,
-      lesson_type: data.lessonType,
+      lesson_type: lessonType,
       // 유입 UTM — 전용 컬럼(모두 nullable text).
       ...utm,
     })
@@ -275,8 +290,9 @@ export async function POST(request: Request) {
     schoolLabel: schoolName ?? (schoolFallback || "(미입력)"),
     grade: data.grade!,
     subjectNames,
-    lessonType: data.lessonType!, // 코드(visit/remote/any) — notionInquiry 에서 옵션명으로 매핑.
-    memo: memoBody,
+    lessonType, // 코드(visit/remote/any) — notionInquiry 에서 옵션명으로 매핑('any'→무관).
+    // 문의내용 본문에 주소를 함께 남긴다(운영자 매칭 참고 — Supabase 는 memo [주소:...] 태그로 별도 보관).
+    memo: [memoBody, addressText ? `주소: ${addressText}` : ""].filter(Boolean).join("\n"),
     utm, // 정제된 UTM 5종 + referrer(각 rich_text 속성으로 기록).
   });
 

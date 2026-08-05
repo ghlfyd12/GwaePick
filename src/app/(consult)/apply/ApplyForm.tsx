@@ -5,8 +5,10 @@ import {
   GRADES,
   LESSON_TYPES,
   SCHOOL_FALLBACKS,
+  REPRESENTATIVE_SUBJECTS,
   NAME_MAX,
   MEMO_MAX,
+  DETAIL_MAX,
   normalizePhone,
   type SchoolFallback,
 } from "@/data/applyFormOptions";
@@ -14,10 +16,13 @@ import type { SidoOption, SubjectOption } from "@/lib/inquiryOptions";
 import { getUtm } from "@/lib/utm";
 
 /*
- * 신청폼 본체(클라이언트).
+ * 신청폼 본체(클라이언트) — 단순화판.
  *
  * 선택지(지역·과목)는 서버 컴포넌트(page.tsx)가 넘겨준다. 이 컴포넌트는 Supabase 를 모른다.
- * 학교 자동완성만 GET /api/schools/search 를 부르고, 제출은 POST /api/inquiries 로 보낸다.
+ * 입력 최소화: 필수 5개(이름·연락처·학년·과목·주소)만으로 신청된다.
+ *   - 과목: 대표 과목 드롭다운 1개(REPRESENTATIVE_SUBJECTS) → subject_id 를 [id] 배열로 전송.
+ *   - 주소: 다음(Daum) 우편번호 검색 → sido/sigungu 를 기존 지역 코드로 해석해 전송(API·DB 무변경).
+ *   - 학교·수업형태·문의사항: 선택. 학교 자동완성은 GET /api/schools/search, 제출은 POST /api/inquiries.
  * 검증은 서버가 최종 판단하며, 여기서는 같은 규칙으로 먼저 걸러 왕복을 줄인다.
  *
  * 색은 accent 토큰(메인=코랄)만 쓴다 — 브랜드색 하드코딩 금지(CLAUDE.md §3).
@@ -31,21 +36,17 @@ type SchoolHit = {
   sigungu_name: string;
 };
 
-/** 과목 그룹 표시 순서(시드 데이터의 subject_group 값). */
-const GROUP_ORDER = ["수학", "영어", "국어", "과학", "사탐", "논술", "기타"];
-
-/** 서버가 돌려주는 필드명 → 화면 메시지. */
+/** 서버가 돌려주는 필드명 → 화면 메시지. (지역 코드 오류는 주소 영역으로 모은다.) */
 const FIELD_MESSAGE: Record<string, string> = {
   name: "이름을 입력해 주세요.",
   phone: "연락처 형식을 확인해 주세요. (예: 010-1234-5678)",
-  sidoCode: "지역을 선택해 주세요.",
-  sigunguCode: "시/군/구를 선택해 주세요.",
-  school: "학교를 선택하거나 아래 항목 중 하나를 골라 주세요.",
+  address: "주소를 검색해 주세요.",
+  school: "학교 항목을 다시 선택해 주세요.",
   schoolCode: "학교를 다시 선택해 주세요.",
   schoolFallback: "학교 항목을 다시 선택해 주세요.",
   grade: "학년을 선택해 주세요.",
-  lessonType: "희망 수업 형태를 선택해 주세요.",
-  subjectIds: "과목을 1개 이상 선택해 주세요.",
+  subject: "과목을 선택해 주세요.",
+  subjectIds: "과목을 선택해 주세요.",
   agree: "개인정보 수집·이용에 동의해 주세요.",
 };
 
@@ -64,14 +65,22 @@ export default function ApplyForm({
   const uid = useId();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [grade, setGrade] = useState("");
+  const [subjectId, setSubjectId] = useState<number | "">("");
+
+  // 주소 — 검색 결과에서 지역 코드를 해석해 보관한다(제출 payload 는 기존 sidoCode/sigunguCode 유지).
   const [sidoCode, setSidoCode] = useState("");
   const [sigunguCode, setSigunguCode] = useState("");
+  const [baseAddress, setBaseAddress] = useState(""); // 도로명/지번 표시용
+  const [addressDetail, setAddressDetail] = useState("");
+  const [postcodeOpen, setPostcodeOpen] = useState(false);
+
+  // 학교 — 선택(미입력 제출 허용).
   const [schoolQuery, setSchoolQuery] = useState("");
   const [school, setSchool] = useState<SchoolHit | null>(null);
   const [schoolFallback, setSchoolFallback] = useState<SchoolFallback | "">("");
-  const [grade, setGrade] = useState("");
+
   const [lessonType, setLessonType] = useState("");
-  const [subjectIds, setSubjectIds] = useState<number[]>([]);
   const [memo, setMemo] = useState("");
   const [agree, setAgree] = useState(false);
 
@@ -80,21 +89,13 @@ export default function ApplyForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
 
-  const sigunguList = useMemo(
-    () => regions.find((r) => r.code === sidoCode)?.sigungu ?? [],
-    [regions, sidoCode],
-  );
-
-  const groupedSubjects = useMemo(() => {
-    const map = new Map<string, SubjectOption[]>();
-    for (const s of subjects) {
-      const list = map.get(s.group) ?? [];
-      list.push(s);
-      map.set(s.group, list);
-    }
-    return [...map.entries()].sort(
-      (a, b) => GROUP_ORDER.indexOf(a[0]) - GROUP_ORDER.indexOf(b[0]),
-    );
+  // 대표 과목 옵션 — subjects 에 실재하는 과목명만 사용(방어적). label 은 표시, id 는 저장.
+  const subjectOptions = useMemo(() => {
+    const byName = new Map(subjects.map((s) => [s.name, s.id]));
+    return REPRESENTATIVE_SUBJECTS.flatMap((r) => {
+      const id = byName.get(r.subjectName);
+      return id ? [{ id, label: r.label }] : [];
+    });
   }, [subjects]);
 
   const clearError = (key: string) =>
@@ -102,7 +103,6 @@ export default function ApplyForm({
 
   /* ── 학교 자동완성 — 250ms 디바운스 + 이전 요청 취소 ─────────────── */
   const boxRef = useRef<HTMLDivElement>(null);
-  // 검색 가능 조건은 렌더 시점에 파생한다(effect 안에서 setState 로 지우지 않는다).
   const canSearch = !school && schoolQuery.trim().length >= 2;
 
   useEffect(() => {
@@ -151,24 +151,64 @@ export default function ApplyForm({
     setSchoolQuery("");
   };
 
-  const toggleSubject = (id: number) => {
-    setSubjectIds((prev) =>
-      prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id],
-    );
-    clearError("subjectIds");
+  /* ── 주소 검색(Daum 우편번호) ────────────────────────────────────── */
+  const postcodeLayerRef = useRef<HTMLDivElement>(null);
+
+  const openPostcode = async () => {
+    try {
+      await loadDaumPostcode();
+    } catch {
+      setErrors((e) => ({
+        ...e,
+        address: "주소 검색을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
+      }));
+      return;
+    }
+    setPostcodeOpen(true);
   };
+
+  // 레이어가 열리면 그 자리에 우편번호 위젯을 임베드한다(팝업 차단 회피).
+  useEffect(() => {
+    if (!postcodeOpen) return;
+    const el = postcodeLayerRef.current;
+    const daum = getDaum();
+    if (!el || !daum?.Postcode) return;
+    el.innerHTML = "";
+    new daum.Postcode({
+      oncomplete: (data) => {
+        const base = data.roadAddress || data.jibunAddress || "";
+        const resolved = resolveRegion(regions, data.sido, data.sigungu);
+        if (!resolved) {
+          // schools 캐시에 없는 지역(극히 드묾) — 다른 주소로 재검색을 유도한다.
+          setErrors((e) => ({
+            ...e,
+            address: "이 주소의 지역을 자동으로 인식하지 못했습니다. 다른 주소로 검색해 주세요.",
+          }));
+          setSidoCode("");
+          setSigunguCode("");
+          setBaseAddress("");
+          setPostcodeOpen(false);
+          return;
+        }
+        setSidoCode(resolved.sidoCode);
+        setSigunguCode(resolved.sigunguCode);
+        setBaseAddress(base);
+        clearError("address");
+        setPostcodeOpen(false);
+      },
+      width: "100%",
+      height: "100%",
+    }).embed(el);
+  }, [postcodeOpen, regions]);
 
   /* ── 제출 ───────────────────────────────────────────────────────── */
   const validate = () => {
     const e: Record<string, string> = {};
     if (!name.trim()) e.name = FIELD_MESSAGE.name;
     if (!normalizePhone(phone)) e.phone = FIELD_MESSAGE.phone;
-    if (!sidoCode) e.sidoCode = FIELD_MESSAGE.sidoCode;
-    if (!sigunguCode) e.sigunguCode = FIELD_MESSAGE.sigunguCode;
-    if (!school && !schoolFallback) e.school = FIELD_MESSAGE.school;
     if (!grade) e.grade = FIELD_MESSAGE.grade;
-    if (!lessonType) e.lessonType = FIELD_MESSAGE.lessonType;
-    if (subjectIds.length === 0) e.subjectIds = FIELD_MESSAGE.subjectIds;
+    if (!subjectId) e.subject = FIELD_MESSAGE.subject;
+    if (!sidoCode || !sigunguCode) e.address = FIELD_MESSAGE.address;
     if (!agree) e.agree = FIELD_MESSAGE.agree;
     return e;
   };
@@ -194,8 +234,13 @@ export default function ApplyForm({
           schoolCode: school?.school_code ?? null,
           schoolFallback: school ? null : schoolFallback || null,
           grade,
-          lessonType,
-          subjectIds,
+          // 수업 형태는 선택 — 미선택이면 서버가 'any'(무관)로 저장한다.
+          lessonType: lessonType || null,
+          // 대표 과목 단일 선택을 기존 배열 계약에 맞춰 [id] 로 감싼다.
+          subjectIds: subjectId ? [subjectId] : [],
+          // 주소 — 도로명/지번 + 상세주소(선택). 서버가 memo 태그·Notion 본문으로 기록.
+          roadAddress: baseAddress,
+          addressDetail: addressDetail.trim(),
           memo: memo.trim(),
           agree,
           // 유입 UTM 5종 + referrer(전용 컬럼/속성에 분리 저장).
@@ -210,7 +255,11 @@ export default function ApplyForm({
       }
       if (res.status === 400 && Array.isArray(json.fields)) {
         const mapped: Record<string, string> = {};
-        for (const f of json.fields) mapped[f] = FIELD_MESSAGE[f] ?? "다시 확인해 주세요.";
+        for (const f of json.fields) {
+          // 지역 코드 오류는 주소 영역에 표시한다.
+          const key = f === "sidoCode" || f === "sigunguCode" ? "address" : f;
+          mapped[key] = FIELD_MESSAGE[key] ?? "다시 확인해 주세요.";
+        }
         setErrors(mapped);
         setStatus("idle");
         return;
@@ -274,68 +323,95 @@ export default function ApplyForm({
         />
       </Field>
 
-      {/* 지역 — 시/도 → 시/군/구 */}
+      {/* 학년 */}
+      <Field id={`${uid}-grade`} label="학년" error={err("grade")} required>
+        <select
+          id={`${uid}-grade`}
+          value={grade}
+          onChange={(e) => {
+            setGrade(e.target.value);
+            clearError("grade");
+          }}
+          aria-invalid={Boolean(err("grade"))}
+          className={inputClass(Boolean(err("grade")))}
+        >
+          <option value="">학년 선택</option>
+          {GRADES.map((g) => (
+            <option key={g} value={g}>
+              {g}
+            </option>
+          ))}
+        </select>
+      </Field>
+
+      {/* 희망 과목 — 대표 과목 단일 선택 */}
+      <Field id={`${uid}-subject`} label="희망 과목" error={err("subject")} required>
+        <select
+          id={`${uid}-subject`}
+          value={subjectId}
+          onChange={(e) => {
+            setSubjectId(e.target.value ? Number(e.target.value) : "");
+            clearError("subject");
+          }}
+          aria-invalid={Boolean(err("subject"))}
+          className={inputClass(Boolean(err("subject")))}
+        >
+          <option value="">과목 선택</option>
+          {subjectOptions.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.label}
+            </option>
+          ))}
+        </select>
+      </Field>
+
+      {/* 주소 — Daum 우편번호 검색 + 상세주소(선택) */}
       <fieldset>
         <legend className="mb-2 block text-base font-semibold text-ink">
-          지역 <RequiredMark />
+          주소 <RequiredMark />
         </legend>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div>
-            <label htmlFor={`${uid}-sido`} className="sr-only">
-              시/도
-            </label>
-            <select
-              id={`${uid}-sido`}
-              value={sidoCode}
-              onChange={(e) => {
-                setSidoCode(e.target.value);
-                setSigunguCode("");
-                clearError("sidoCode");
-              }}
-              aria-invalid={Boolean(err("sidoCode"))}
-              className={inputClass(Boolean(err("sidoCode")))}
-            >
-              <option value="">시/도 선택</option>
-              {regions.map((r) => (
-                <option key={r.code} value={r.code}>
-                  {r.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label htmlFor={`${uid}-sigungu`} className="sr-only">
-              시/군/구
-            </label>
-            <select
-              id={`${uid}-sigungu`}
-              value={sigunguCode}
-              disabled={!sidoCode}
-              onChange={(e) => {
-                setSigunguCode(e.target.value);
-                clearError("sigunguCode");
-              }}
-              aria-invalid={Boolean(err("sigunguCode"))}
-              className={`${inputClass(Boolean(err("sigunguCode")))} disabled:bg-surface-alt disabled:text-muted`}
-            >
-              <option value="">
-                {sidoCode ? "시/군/구 선택" : "시/도를 먼저 선택"}
-              </option>
-              {sigunguList.map((s) => (
-                <option key={s.code} value={s.code}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={baseAddress}
+            readOnly
+            aria-invalid={Boolean(err("address"))}
+            placeholder="주소 검색을 눌러 주소를 선택해 주세요"
+            className={`${inputClass(Boolean(err("address")))} cursor-default bg-surface-alt`}
+          />
+          <button
+            type="button"
+            onClick={openPostcode}
+            className="min-h-12 shrink-0 rounded-lg border border-accent px-4 text-base font-semibold text-accent transition-colors hover:bg-accent/5"
+          >
+            주소 검색
+          </button>
         </div>
-        <ErrorText text={err("sidoCode") || err("sigunguCode")} />
+        {baseAddress && (
+          <div className="mt-3">
+            <label htmlFor={`${uid}-address-detail`} className="sr-only">
+              상세주소
+            </label>
+            <input
+              id={`${uid}-address-detail`}
+              type="text"
+              value={addressDetail}
+              maxLength={DETAIL_MAX}
+              autoComplete="address-line2"
+              onChange={(e) => setAddressDetail(e.target.value)}
+              placeholder="상세주소 (동·호수 등, 선택)"
+              className={inputClass(false)}
+            />
+          </div>
+        )}
+        <ErrorText text={err("address")} />
       </fieldset>
 
-      {/* 학교 — 자동완성 + 대체 선택지 */}
+      {/* 학교 — 선택. 자동완성 + 대체 선택지 */}
       <fieldset>
         <legend className="mb-2 block text-base font-semibold text-ink">
-          학교 <RequiredMark />
+          학교{" "}
+          <span className="text-sm font-normal text-muted">(선택)</span>
         </legend>
 
         <div ref={boxRef} className="relative">
@@ -428,69 +504,11 @@ export default function ApplyForm({
         <ErrorText text={err("school")} />
       </fieldset>
 
-      {/* 학년 */}
-      <Field id={`${uid}-grade`} label="학년" error={err("grade")} required>
-        <select
-          id={`${uid}-grade`}
-          value={grade}
-          onChange={(e) => {
-            setGrade(e.target.value);
-            clearError("grade");
-          }}
-          aria-invalid={Boolean(err("grade"))}
-          className={inputClass(Boolean(err("grade")))}
-        >
-          <option value="">학년 선택</option>
-          {GRADES.map((g) => (
-            <option key={g} value={g}>
-              {g}
-            </option>
-          ))}
-        </select>
-      </Field>
-
-      {/* 과목 — 다중 선택 */}
+      {/* 희망 수업 형태 — 선택 */}
       <fieldset>
         <legend className="mb-2 block text-base font-semibold text-ink">
-          과목 <RequiredMark />
-          <span className="ml-2 text-sm font-normal text-muted">
-            여러 개 선택할 수 있습니다
-          </span>
-        </legend>
-        <div className="space-y-4">
-          {groupedSubjects.map(([group, list]) => (
-            <div key={group}>
-              <p className="mb-2 text-sm font-semibold text-muted">{group}</p>
-              <div className="flex flex-wrap gap-2">
-                {list.map((s) => {
-                  const on = subjectIds.includes(s.id);
-                  return (
-                    <button
-                      key={s.id}
-                      type="button"
-                      aria-pressed={on}
-                      onClick={() => toggleSubject(s.id)}
-                      className={`min-h-11 rounded-full border px-4 text-base transition-colors ${
-                        on
-                          ? "border-accent bg-accent text-white"
-                          : "border-line bg-white text-ink hover:bg-surface-alt"
-                      }`}
-                    >
-                      {s.name}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-        <ErrorText text={err("subjectIds")} />
-      </fieldset>
-
-      {/* 희망 수업 형태 */}
-      <fieldset>
-        <legend className="mb-2 block text-base font-semibold text-ink">
-          희망 수업 형태 <RequiredMark />
+          희망 수업 형태{" "}
+          <span className="text-sm font-normal text-muted">(선택)</span>
         </legend>
         <div className="space-y-2">
           {LESSON_TYPES.map((t) => (
@@ -505,10 +523,7 @@ export default function ApplyForm({
                 name={`${uid}-lesson`}
                 value={t.value}
                 checked={lessonType === t.value}
-                onChange={() => {
-                  setLessonType(t.value);
-                  clearError("lessonType");
-                }}
+                onChange={() => setLessonType(t.value)}
                 className="h-5 w-5 accent-accent"
               />
               <span className="text-base text-ink">{t.label}</span>
@@ -516,7 +531,6 @@ export default function ApplyForm({
             </label>
           ))}
         </div>
-        <ErrorText text={err("lessonType")} />
       </fieldset>
 
       {/* 상담 내용(선택) */}
@@ -576,8 +590,134 @@ export default function ApplyForm({
       >
         {status === "submitting" ? "접수하는 중" : "무료 상담 신청"}
       </button>
+
+      {/* 우편번호 검색 레이어 — 팝업 차단 없이 화면 안에서 검색한다. */}
+      {postcodeOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="우편번호 검색"
+        >
+          <div className="flex h-[70vh] max-h-[560px] w-full max-w-md flex-col overflow-hidden rounded-xl bg-white shadow-xl">
+            <div className="flex items-center justify-between border-b border-line px-4 py-3">
+              <span className="text-base font-semibold text-ink">주소 검색</span>
+              <button
+                type="button"
+                onClick={() => setPostcodeOpen(false)}
+                className="min-h-11 rounded-md px-3 text-base text-muted hover:text-ink"
+              >
+                닫기
+              </button>
+            </div>
+            <div ref={postcodeLayerRef} className="flex-1" />
+          </div>
+        </div>
+      )}
     </form>
   );
+}
+
+/* ── Daum 우편번호 로딩·지역 해석 ─────────────────────────────────────── */
+
+type DaumPostcodeData = {
+  sido: string;
+  sigungu: string;
+  roadAddress: string;
+  jibunAddress: string;
+  zonecode: string;
+  userSelectedType?: string;
+};
+
+type DaumPostcodeInstance = { open: () => void; embed: (el: HTMLElement) => void };
+type DaumNamespace = {
+  Postcode: new (opts: {
+    oncomplete: (data: DaumPostcodeData) => void;
+    width?: string | number;
+    height?: string | number;
+  }) => DaumPostcodeInstance;
+};
+
+/**
+ * window.daum 접근 — 전역 타입 선언(declare global) 대신 지역 캐스팅으로 읽는다.
+ * (같은 프로젝트의 다른 폼도 Window.daum 을 선언하므로 전역 병합 충돌을 피한다.)
+ */
+function getDaum(): DaumNamespace | undefined {
+  return (window as unknown as { daum?: DaumNamespace }).daum;
+}
+
+const DAUM_POSTCODE_SRC =
+  "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+
+/** 공식 CDN 스크립트를 1회만 로드한다(폼이 있는 페이지에서만 실행). */
+function loadDaumPostcode(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (typeof window === "undefined") return reject(new Error("no window"));
+    if (getDaum()?.Postcode) return resolve();
+    const existing = document.getElementById("daum-postcode-script");
+    if (existing) {
+      existing.addEventListener("load", () => resolve());
+      existing.addEventListener("error", () => reject(new Error("load failed")));
+      return;
+    }
+    const s = document.createElement("script");
+    s.id = "daum-postcode-script";
+    s.src = DAUM_POSTCODE_SRC;
+    s.async = true;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error("load failed"));
+    document.head.appendChild(s);
+  });
+}
+
+/**
+ * Daum 이 돌려준 시/도·시/군/구 표시명 → 기존 지역 코드(sido_code/sigungu_code).
+ *
+ * Daum 은 시/도를 약칭(서울·경기·강원…) 위주로, schools 캐시는 전체명(서울특별시…)으로 쓰므로
+ * 시/도는 교육청 코드 별칭표로, 시/군/구는 같은 시/도의 후보에서 공백 무시 매칭으로 찾는다.
+ * (regions 는 schools 캐시에서 파생되므로 코드/이름이 저장값과 정확히 일치한다.)
+ * 매칭에 실패하면 null — 호출측이 재검색을 유도한다.
+ */
+const SIDO_CODE_BY_NAME: Record<string, string> = {
+  서울: "B10", 서울특별시: "B10",
+  부산: "C10", 부산광역시: "C10",
+  대구: "D10", 대구광역시: "D10",
+  인천: "E10", 인천광역시: "E10",
+  광주: "F10", 광주광역시: "F10",
+  대전: "G10", 대전광역시: "G10",
+  울산: "H10", 울산광역시: "H10",
+  세종: "I10", 세종특별자치시: "I10",
+  경기: "J10", 경기도: "J10",
+  강원: "K10", 강원도: "K10", 강원특별자치도: "K10",
+  충북: "M10", 충청북도: "M10",
+  충남: "N10", 충청남도: "N10",
+  전북: "P10", 전라북도: "P10", 전북특별자치도: "P10",
+  전남: "Q10", 전라남도: "Q10",
+  경북: "R10", 경상북도: "R10",
+  경남: "S10", 경상남도: "S10",
+  제주: "T10", 제주도: "T10", 제주특별자치도: "T10",
+};
+
+function resolveRegion(
+  regions: SidoOption[],
+  sido: string,
+  sigungu: string,
+): { sidoCode: string; sigunguCode: string } | null {
+  const code = SIDO_CODE_BY_NAME[(sido ?? "").trim()];
+  if (!code) return null;
+  const sidoOpt = regions.find((r) => r.code === code);
+  if (!sidoOpt) return null;
+
+  const norm = (s: string) => (s ?? "").replace(/\s+/g, "");
+  const target = norm(sigungu);
+  let match = target
+    ? sidoOpt.sigungu.find((s) => norm(s.name) === target)
+    : undefined;
+  // 시/군/구가 비었거나(세종 등) 후보가 하나뿐이면 그 값을 쓴다.
+  if (!match && sidoOpt.sigungu.length === 1) match = sidoOpt.sigungu[0];
+  if (!match) return null;
+
+  return { sidoCode: sidoOpt.code, sigunguCode: match.code };
 }
 
 /* ── 작은 조각들 ─────────────────────────────────────────────────────── */
