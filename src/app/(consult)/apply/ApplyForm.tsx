@@ -44,9 +44,10 @@ const FIELD_MESSAGE: Record<string, string> = {
   school: "학교 항목을 다시 선택해 주세요.",
   schoolCode: "학교를 다시 선택해 주세요.",
   schoolFallback: "학교 항목을 다시 선택해 주세요.",
-  grade: "학년을 선택해 주세요.",
-  subject: "과목을 선택해 주세요.",
-  subjectIds: "과목을 선택해 주세요.",
+  grade: "학년을 1개 이상 선택해 주세요.",
+  grades: "학년을 1개 이상 선택해 주세요.",
+  subject: "과목을 1개 이상 선택해 주세요.",
+  subjectIds: "과목을 1개 이상 선택해 주세요.",
   agree: "개인정보 수집·이용에 동의해 주세요.",
 };
 
@@ -65,8 +66,9 @@ export default function ApplyForm({
   const uid = useId();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [grade, setGrade] = useState("");
-  const [subjectId, setSubjectId] = useState<number | "">("");
+  // 학년·과목은 다중 선택(각각 독립 저장 — inquiry_grades / inquiry_subjects).
+  const [grades, setGrades] = useState<string[]>([]);
+  const [subjectIds, setSubjectIds] = useState<number[]>([]);
 
   // 주소 — 검색 결과에서 지역 코드를 해석해 보관한다(제출 payload 는 기존 sidoCode/sigunguCode 유지).
   const [sidoCode, setSidoCode] = useState("");
@@ -100,6 +102,17 @@ export default function ApplyForm({
 
   const clearError = (key: string) =>
     setErrors((e) => (e[key] ? { ...e, [key]: "" } : e));
+
+  const toggleGrade = (g: string) => {
+    setGrades((prev) => (prev.includes(g) ? prev.filter((v) => v !== g) : [...prev, g]));
+    clearError("grade");
+  };
+  const toggleSubject = (id: number) => {
+    setSubjectIds((prev) =>
+      prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id],
+    );
+    clearError("subject");
+  };
 
   /* ── 학교 자동완성 — 250ms 디바운스 + 이전 요청 취소 ─────────────── */
   const boxRef = useRef<HTMLDivElement>(null);
@@ -206,8 +219,8 @@ export default function ApplyForm({
     const e: Record<string, string> = {};
     if (!name.trim()) e.name = FIELD_MESSAGE.name;
     if (!normalizePhone(phone)) e.phone = FIELD_MESSAGE.phone;
-    if (!grade) e.grade = FIELD_MESSAGE.grade;
-    if (!subjectId) e.subject = FIELD_MESSAGE.subject;
+    if (grades.length === 0) e.grade = FIELD_MESSAGE.grade;
+    if (subjectIds.length === 0) e.subject = FIELD_MESSAGE.subject;
     if (!sidoCode || !sigunguCode) e.address = FIELD_MESSAGE.address;
     if (!agree) e.agree = FIELD_MESSAGE.agree;
     return e;
@@ -233,11 +246,12 @@ export default function ApplyForm({
           sigunguCode,
           schoolCode: school?.school_code ?? null,
           schoolFallback: school ? null : schoolFallback || null,
-          grade,
+          // 학년 다중 선택 — 각 학년을 독립 저장(inquiry_grades). grade 컬럼엔 대표(첫) 학년.
+          grades,
           // 수업 형태는 선택 — 미선택이면 서버가 'any'(무관)로 저장한다.
           lessonType: lessonType || null,
-          // 대표 과목 단일 선택을 기존 배열 계약에 맞춰 [id] 로 감싼다.
-          subjectIds: subjectId ? [subjectId] : [],
+          // 대표 과목 다중 선택 — inquiry_subjects 에 각 과목 독립 저장.
+          subjectIds,
           // 주소 — 도로명/지번 + 상세주소(선택). 서버가 memo 태그·Notion 본문으로 기록.
           roadAddress: baseAddress,
           addressDetail: addressDetail.trim(),
@@ -323,47 +337,67 @@ export default function ApplyForm({
         />
       </Field>
 
-      {/* 학년 */}
-      <Field id={`${uid}-grade`} label="학년" error={err("grade")} required>
-        <select
-          id={`${uid}-grade`}
-          value={grade}
-          onChange={(e) => {
-            setGrade(e.target.value);
-            clearError("grade");
-          }}
-          aria-invalid={Boolean(err("grade"))}
-          className={inputClass(Boolean(err("grade")))}
-        >
-          <option value="">학년 선택</option>
-          {GRADES.map((g) => (
-            <option key={g} value={g}>
-              {g}
-            </option>
-          ))}
-        </select>
-      </Field>
+      {/* 학년 — 다중 선택 */}
+      <fieldset>
+        <legend className="mb-2 block text-base font-semibold text-ink">
+          학년 <RequiredMark />
+          <span className="ml-2 text-sm font-normal text-muted">
+            여러 개 선택할 수 있습니다
+          </span>
+        </legend>
+        <div className="flex flex-wrap gap-2">
+          {GRADES.map((g) => {
+            const on = grades.includes(g);
+            return (
+              <button
+                key={g}
+                type="button"
+                aria-pressed={on}
+                onClick={() => toggleGrade(g)}
+                className={`min-h-11 rounded-full border px-4 text-base transition-colors ${
+                  on
+                    ? "border-accent bg-accent text-white"
+                    : "border-line bg-white text-ink hover:bg-surface-alt"
+                }`}
+              >
+                {g}
+              </button>
+            );
+          })}
+        </div>
+        <ErrorText text={err("grade")} />
+      </fieldset>
 
-      {/* 희망 과목 — 대표 과목 단일 선택 */}
-      <Field id={`${uid}-subject`} label="희망 과목" error={err("subject")} required>
-        <select
-          id={`${uid}-subject`}
-          value={subjectId}
-          onChange={(e) => {
-            setSubjectId(e.target.value ? Number(e.target.value) : "");
-            clearError("subject");
-          }}
-          aria-invalid={Boolean(err("subject"))}
-          className={inputClass(Boolean(err("subject")))}
-        >
-          <option value="">과목 선택</option>
-          {subjectOptions.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.label}
-            </option>
-          ))}
-        </select>
-      </Field>
+      {/* 희망 과목 — 대표 과목 다중 선택 */}
+      <fieldset>
+        <legend className="mb-2 block text-base font-semibold text-ink">
+          희망 과목 <RequiredMark />
+          <span className="ml-2 text-sm font-normal text-muted">
+            여러 개 선택할 수 있습니다
+          </span>
+        </legend>
+        <div className="flex flex-wrap gap-2">
+          {subjectOptions.map((s) => {
+            const on = subjectIds.includes(s.id);
+            return (
+              <button
+                key={s.id}
+                type="button"
+                aria-pressed={on}
+                onClick={() => toggleSubject(s.id)}
+                className={`min-h-11 rounded-full border px-4 text-base transition-colors ${
+                  on
+                    ? "border-accent bg-accent text-white"
+                    : "border-line bg-white text-ink hover:bg-surface-alt"
+                }`}
+              >
+                {s.label}
+              </button>
+            );
+          })}
+        </div>
+        <ErrorText text={err("subject")} />
+      </fieldset>
 
       {/* 주소 — Daum 우편번호 검색 + 상세주소(선택) */}
       <fieldset>

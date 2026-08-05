@@ -51,6 +51,14 @@ CREATE TABLE IF NOT EXISTS inquiry_subjects (
   PRIMARY KEY (inquiry_id, subject_id)
 );
 
+-- 학년 다중 선택 — 각 학년을 독립 행으로 저장(과목 inquiry_subjects 와 대칭).
+-- inquiries.grade 에는 대표(첫) 학년을 남기고, 전체 학년은 이 테이블에 둔다.
+CREATE TABLE IF NOT EXISTS inquiry_grades (
+  inquiry_id    BIGINT REFERENCES inquiries(inquiry_id) ON DELETE CASCADE,
+  grade         VARCHAR(10) NOT NULL,          -- 초1~고3/예비중1/예비고1/성인
+  PRIMARY KEY (inquiry_id, grade)
+);
+
 -- ---------- 3. 수요 집계 & 키워드 엔진 ----------
 
 CREATE TABLE IF NOT EXISTS demand_agg (
@@ -126,6 +134,7 @@ ALTER TABLE schools          ENABLE ROW LEVEL SECURITY;
 ALTER TABLE subjects         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE inquiries        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE inquiry_subjects ENABLE ROW LEVEL SECURITY;
+ALTER TABLE inquiry_grades   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE demand_agg       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE keyword_queue    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE published_posts  ENABLE ROW LEVEL SECURITY;

@@ -74,7 +74,8 @@ type InquiryPayload = {
   schoolCode?: string | null;
   /** 학교를 못 고른 사유("목록에 없음" 등). schoolCode 가 없을 때만 의미가 있다. */
   schoolFallback?: string | null;
-  grade?: string;
+  /** 학년 다중 선택. 각 학년을 inquiry_grades 에 독립 저장하고, 대표(첫) 학년을 grade 컬럼에 둔다. */
+  grades?: string[];
   /** 희망 수업 형태 — 선택. 미선택(null/빈값)이면 'any'(무관)로 저장한다. */
   lessonType?: string | null;
   subjectIds?: number[];
@@ -150,7 +151,11 @@ export async function POST(request: Request) {
   if (!sidoCode) invalid.push("sidoCode");
   if (!sigunguCode) invalid.push("sigunguCode");
 
-  if (!isGrade(data.grade)) invalid.push("grade");
+  // 학년 다중 선택 — 중복 제거 + 허용값만. 최소 1개 필요.
+  const grades = Array.isArray(data.grades)
+    ? [...new Set(data.grades.filter((g): g is string => isGrade(g)))]
+    : [];
+  if (grades.length === 0) invalid.push("grade");
   // 수업 형태는 선택 — 유효한 코드면 그대로, 아니면 'any'(무관)로 저장한다.
   const lessonType = isLessonType(data.lessonType) ? data.lessonType : "any";
 
@@ -248,7 +253,7 @@ export async function POST(request: Request) {
       sido_code: sidoCode,
       sigungu_code: sigunguCode,
       school_code: schoolCode || null,
-      grade: data.grade,
+      grade: grades[0], // 대표(첫) 학년 — 전체 학년은 inquiry_grades 에 독립 저장.
       lesson_type: lessonType,
       // 유입 UTM — 전용 컬럼(모두 nullable text).
       ...utm,
@@ -262,13 +267,23 @@ export async function POST(request: Request) {
   }
 
   const inquiryId = inserted.data.inquiry_id as number;
-  const linked = await supabase
-    .from("inquiry_subjects")
-    .insert(subjectIds.map((subject_id) => ({ inquiry_id: inquiryId, subject_id })));
 
-  if (linked.error) {
-    // 과목 없는 신청은 집계에서 의미가 없으므로 방금 만든 행을 지운다(정리 로직).
-    console.error("[inquiries] 과목 연결 실패 — 신청 행을 되돌립니다:", linked.error.message);
+  // 과목·학년을 각각 조인 테이블에 독립 행으로 저장한다(다중 선택 → 각 항목 1행).
+  const [linkedSubjects, linkedGrades] = await Promise.all([
+    supabase
+      .from("inquiry_subjects")
+      .insert(subjectIds.map((subject_id) => ({ inquiry_id: inquiryId, subject_id }))),
+    supabase
+      .from("inquiry_grades")
+      .insert(grades.map((grade) => ({ inquiry_id: inquiryId, grade }))),
+  ]);
+
+  if (linkedSubjects.error || linkedGrades.error) {
+    // 과목·학년 없는 신청은 집계에서 의미가 없으므로 방금 만든 행을 지운다(캐스케이드 정리).
+    console.error(
+      "[inquiries] 과목/학년 연결 실패 — 신청 행을 되돌립니다:",
+      linkedSubjects.error?.message ?? linkedGrades.error?.message,
+    );
     const rollback = await supabase.from("inquiries").delete().eq("inquiry_id", inquiryId);
     if (rollback.error) {
       console.error("[inquiries] 되돌리기 실패(수동 정리 필요) inquiry_id:", inquiryId);
@@ -288,11 +303,17 @@ export async function POST(request: Request) {
     phone: phone!, // 위 검증에서 형식이 확인됨(null 이면 이미 400 반환).
     regionName,
     schoolLabel: schoolName ?? (schoolFallback || "(미입력)"),
-    grade: data.grade!,
+    grade: grades[0], // 표준학년(select)은 대표 학년 1개 — 전체 학년은 아래 본문에 함께 남긴다.
     subjectNames,
     lessonType, // 코드(visit/remote/any) — notionInquiry 에서 옵션명으로 매핑('any'→무관).
-    // 문의내용 본문에 주소를 함께 남긴다(운영자 매칭 참고 — Supabase 는 memo [주소:...] 태그로 별도 보관).
-    memo: [memoBody, addressText ? `주소: ${addressText}` : ""].filter(Boolean).join("\n"),
+    // 문의내용 본문에 다중 학년·주소를 함께 남긴다(운영자 참고 — Supabase 는 inquiry_grades·memo 태그로 별도 보관).
+    memo: [
+      memoBody,
+      grades.length > 1 ? `학년: ${grades.join(", ")}` : "",
+      addressText ? `주소: ${addressText}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n"),
     utm, // 정제된 UTM 5종 + referrer(각 rich_text 속성으로 기록).
   });
 
