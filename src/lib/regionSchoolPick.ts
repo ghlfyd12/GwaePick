@@ -12,6 +12,8 @@
  */
 import { schoolsInSigungu, type IndexedSchool } from "@/lib/schoolRegionIndex";
 import { regionFeaturedSchools } from "@/data/regionFeaturedSchools";
+import { regionGeneralSchools } from "@/data/regionGeneralSchools.generated";
+import { resolveSchoolSigunguSlug } from "@/data/sigunguSlugMap";
 
 const GRADE_TAIL = "중1 중2 중3 고1 고2 고3 1:1";
 /** 학교세그먼트("중1·고1") 최대 길이(공백 포함 글자수). 초과 시 폴백. */
@@ -22,46 +24,59 @@ export type RegionSchoolPick = {
   highSchools: IndexedSchool[];
 };
 
-/** 오버라이드(지정 slug) → 가나다순 폴백으로 학교급별 최대 2개를 채운다. */
+/**
+ * 3단 폴백으로 학교급별 최대 2개를 채운다.
+ *  1) 수동 지정(regionFeaturedSchools) → 2) 자동 생성(regionGeneralSchools) → 3) 가나다순(pool 순서).
+ * 각 단계는 부족분만 다음 단계로 넘기고, 이미 담긴 학교는 중복 없이 건너뛴다.
+ */
 function pickLevel(
   pool: IndexedSchool[],
-  overrideSlugs: string[] | undefined,
+  tiers: (string[] | undefined)[],
   max = 2,
 ): IndexedSchool[] {
   const bySlug = new Map(pool.map((s) => [s.slug, s]));
   const picked: IndexedSchool[] = [];
   const used = new Set<string>();
-  for (const slug of overrideSlugs ?? []) {
-    const s = bySlug.get(slug);
-    if (s && !used.has(s.slug)) {
-      picked.push(s);
-      used.add(s.slug);
+  const add = (s: IndexedSchool | undefined) => {
+    if (s && !used.has(s.slug)) { picked.push(s); used.add(s.slug); }
+  };
+  // 1·2단계: 지정 slug 순서대로.
+  for (const slugs of tiers) {
+    for (const slug of slugs ?? []) {
+      if (picked.length >= max) break;
+      add(bySlug.get(slug));
     }
     if (picked.length >= max) break;
   }
-  // 부족분은 가나다순(pool 은 schoolRegionIndex 에서 이미 가나다순) 으로 보충.
+  // 3단계: 가나다순(pool 은 schoolRegionIndex 에서 이미 가나다순) 으로 보충.
   for (const s of pool) {
     if (picked.length >= max) break;
-    if (!used.has(s.slug)) {
-      picked.push(s);
-      used.add(s.slug);
-    }
+    add(s);
   }
   return picked;
 }
 
-/** 시군구의 인근 학교 — 중2·고2(오버라이드 우선 → 가나다순). */
+/** route 시군구 slug → 자동 생성(schools 풀) 키의 엔트리. 직접 일치 우선, 미스 시 시군구 매핑 경유. */
+function autoEntry(sidoSlug: string, sigunguSlug: string): { middle?: string[]; high?: string[] } | undefined {
+  const direct = regionGeneralSchools[`${sidoSlug}/${sigunguSlug}`];
+  if (direct) return direct;
+  const mapped = resolveSchoolSigunguSlug(sidoSlug, sigunguSlug);
+  return mapped ? regionGeneralSchools[`${sidoSlug}/${mapped}`] : undefined;
+}
+
+/** 시군구의 인근 학교 — 중2·고2(수동 → 자동 → 가나다순 3단 폴백). */
 export function pickRegionSchools(
   sidoSlug: string,
   sigunguSlug: string,
 ): RegionSchoolPick {
   const pool = schoolsInSigungu(sidoSlug, sigunguSlug);
-  const override = regionFeaturedSchools[`${sidoSlug}/${sigunguSlug}`];
+  const manual = regionFeaturedSchools[`${sidoSlug}/${sigunguSlug}`];
+  const auto = autoEntry(sidoSlug, sigunguSlug);
   const middlePool = pool.filter((s) => s.level === "middle");
   const highPool = pool.filter((s) => s.level === "high");
   return {
-    middleSchools: pickLevel(middlePool, override?.middle),
-    highSchools: pickLevel(highPool, override?.high),
+    middleSchools: pickLevel(middlePool, [manual?.middle, auto?.middle]),
+    highSchools: pickLevel(highPool, [manual?.high, auto?.high]),
   };
 }
 
