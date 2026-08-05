@@ -58,7 +58,26 @@ export type InquiryNotionInput = {
   lessonType: string;
   /** 상담 내용 원문(태그 제외). 비면 빈 문자열. */
   memo: string;
+  /** 유입 UTM 5종 + referrer — 각 rich_text 속성으로 기록(빈 값은 속성 생략). */
+  utm?: {
+    utm_source?: string | null;
+    utm_medium?: string | null;
+    utm_campaign?: string | null;
+    utm_term?: string | null;
+    utm_content?: string | null;
+    referrer?: string | null;
+  };
 };
+
+/** UTM 속성명 — Notion DB 속성명과 동일(scripts/ensure-notion-utm-props.ts 로 생성). */
+const UTM_PROP_KEYS = [
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+  "utm_term",
+  "utm_content",
+  "referrer",
+] as const;
 
 let _client: Client | null = null;
 function inquiryNotionClient(): Client {
@@ -112,6 +131,14 @@ export async function recordInquiryToNotion(
   const P = NOTION_PROP;
   const S = STANDARD_PROP;
   const lessonOption = LESSON_NOTION_OPTION[input.lessonType] ?? input.lessonType;
+
+  // UTM 5종 + referrer — 값이 있는 것만 rich_text 속성으로 추가(빈 값은 생략).
+  const utmProps: Record<string, { rich_text: { type: "text"; text: { content: string } }[] }> = {};
+  for (const key of UTM_PROP_KEYS) {
+    const value = (input.utm?.[key] ?? "").trim();
+    if (value) utmProps[key] = { rich_text: richText(value) };
+  }
+
   const properties = {
     [P.name]: {
       title: [
@@ -139,6 +166,8 @@ export async function recordInquiryToNotion(
         .map((name) => ({ name: name.trim() })),
     },
     [S.lessonType]: { select: { name: lessonOption } },
+    // 유입 UTM 5종 + referrer(값 있는 것만).
+    ...utmProps,
   };
 
   try {

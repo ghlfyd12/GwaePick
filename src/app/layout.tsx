@@ -5,6 +5,7 @@ import Header from "@/components/layout/Header";
 import FooterSwitch from "@/components/layout/FooterSwitch";
 import FloatingButtons from "@/components/layout/FloatingButtons";
 import RootShell from "@/components/layout/RootShell";
+import UtmCapture from "@/components/UtmCapture";
 import { site } from "@/data/site";
 
 /*
@@ -88,6 +89,8 @@ export default function RootLayout({
   return (
     <html lang="ko" className={pretendard.variable}>
       <body className="flex min-h-dvh flex-col bg-white text-ink">
+        {/* 유입 UTM first-touch 캡처(화면 비노출) — 홈·/apply 등 모든 진입점 커버 */}
+        <UtmCapture />
         <RootShell>
           <Header />
           <main className="flex-1">{children}</main>

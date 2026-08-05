@@ -11,6 +11,7 @@ import {
   type SchoolFallback,
 } from "@/data/applyFormOptions";
 import type { SidoOption, SubjectOption } from "@/lib/inquiryOptions";
+import { getUtm } from "@/lib/utm";
 
 /*
  * 신청폼 본체(클라이언트).
@@ -179,9 +180,8 @@ export default function ApplyForm({
     if (Object.keys(found).length > 0) return;
 
     setStatus("submitting");
-    // 유입 파라미터는 제출 시점에만 필요하므로 주소창에서 직접 읽는다
-    // (useSearchParams 는 정적 페이지에서 Suspense 경계를 요구해 폼 전체 hydration 을 막는다).
-    const query = new URLSearchParams(window.location.search);
+    // 최초 유입(first-touch) UTM 을 sessionStorage 에서 읽어 함께 전송한다(폼 UI 에는 미노출).
+    const utm = getUtm();
     try {
       const res = await fetch("/api/inquiries", {
         method: "POST",
@@ -198,9 +198,8 @@ export default function ApplyForm({
           subjectIds,
           memo: memo.trim(),
           agree,
-          // 유입 파라미터 — 서버가 memo 끝에 [utm:...] 로 덧붙인다.
-          utmSource: query.get("utm_source") ?? undefined,
-          utmCampaign: query.get("utm_campaign") ?? undefined,
+          // 유입 UTM 5종 + referrer(전용 컬럼/속성에 분리 저장).
+          utm,
         }),
       });
       const json = await res.json().catch(() => ({}));

@@ -79,10 +79,37 @@ type InquiryPayload = {
   subjectIds?: number[];
   memo?: string;
   agree?: boolean;
-  /** 유입 파라미터 — memo 끝에 [utm:...] 형태로 덧붙인다(Phase 3 에서 컬럼 분리 예정). */
-  utmSource?: string;
-  utmCampaign?: string;
+  /** 유입 UTM 5종 + referrer — 전용 컬럼/속성에 분리 저장(폼 UI 미노출). */
+  utm?: {
+    utm_source?: string;
+    utm_medium?: string;
+    utm_campaign?: string;
+    utm_term?: string;
+    utm_content?: string;
+    referrer?: string;
+  };
 };
+
+/** UTM 키 목록 — Supabase 컬럼·Notion 속성명과 동일(단일 소스). */
+const UTM_FIELDS = [
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+  "utm_term",
+  "utm_content",
+  "referrer",
+] as const;
+type UtmField = (typeof UTM_FIELDS)[number];
+
+/** payload.utm → trim + 200자 정제된 레코드(모든 키 존재, 빈 값은 null). */
+function cleanUtm(raw: InquiryPayload["utm"]): Record<UtmField, string | null> {
+  const out = {} as Record<UtmField, string | null>;
+  for (const key of UTM_FIELDS) {
+    const v = (raw?.[key] ?? "").trim().slice(0, 200);
+    out[key] = v || null;
+  }
+  return out;
+}
 
 const bad = (fields: string[]) =>
   NextResponse.json({ ok: false, error: "VALIDATION_FAILED", fields }, { status: 400 });
@@ -185,17 +212,15 @@ export async function POST(request: Request) {
     schoolName = school.data.school_name;
   }
 
-  /* ── 3) memo 조립 — 본문 + [학교:...] + [utm:...] ─────────────────── */
+  /* ── 3) memo 조립 — 본문 + [학교:...]. UTM 은 전용 컬럼으로 분리되어 memo 에 넣지 않는다. */
   const tags: string[] = [];
   if (!schoolCode && schoolFallback) tags.push(`[학교:${schoolFallback}]`);
-  const utm = [
-    data.utmSource ? `source=${String(data.utmSource).slice(0, 50)}` : "",
-    data.utmCampaign ? `campaign=${String(data.utmCampaign).slice(0, 50)}` : "",
-  ].filter(Boolean);
-  if (utm.length) tags.push(`[utm:${utm.join(",")}]`);
 
   const memoBody = (data.memo ?? "").trim().slice(0, MEMO_MAX);
   const memo = [memoBody, ...tags].filter(Boolean).join(" ").trim() || null;
+
+  // UTM 5종 + referrer — trim + 200자 정제(빈 값은 null).
+  const utm = cleanUtm(data.utm);
 
   /* ── 4) 저장 — inquiries → inquiry_subjects(실패 시 되돌린다) ─────── */
   const inserted = await supabase
@@ -210,6 +235,8 @@ export async function POST(request: Request) {
       school_code: schoolCode || null,
       grade: data.grade,
       lesson_type: data.lessonType,
+      // 유입 UTM — 전용 컬럼(모두 nullable text).
+      ...utm,
     })
     .select("inquiry_id")
     .single();
@@ -250,6 +277,7 @@ export async function POST(request: Request) {
     subjectNames,
     lessonType: data.lessonType!, // 코드(visit/remote/any) — notionInquiry 에서 옵션명으로 매핑.
     memo: memoBody,
+    utm, // 정제된 UTM 5종 + referrer(각 rich_text 속성으로 기록).
   });
 
   if (!notion.ok) {
