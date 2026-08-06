@@ -1,6 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // 동적 썸네일 라우트(/api/thumb)가 서버리스 함수 번들에 Pretendard 서브셋 폰트·배경
+  // 이미지를 포함하도록 파일 추적에 명시(process.cwd() 기준 fs 읽기 대상). 없으면 Vercel 에서
+  // ENOENT 로 렌더 실패할 수 있어 로컬 검증과 동일하게 배포에서도 파일을 확보한다.
+  outputFileTracingIncludes: {
+    "/api/thumb/[type]/[slug]/[subject]": [
+      "./src/fonts/Pretendard-Bold-subset.ttf",
+      "./public/images/school-students.png",
+    ],
+  },
   // 네이버 블로그 RSS 썸네일 호스트 허용(next/image). 썸네일은 unoptimized 로도 렌더하지만
   // 호스트 허용을 함께 두어 안전하게 처리한다. (blogthumb.pstatic.net, *.phinf.naver.net 등)
   images: {

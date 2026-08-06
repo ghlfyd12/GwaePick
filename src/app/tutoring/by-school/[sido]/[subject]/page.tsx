@@ -77,6 +77,7 @@ export async function generateMetadata({
     schoolName: ctx.school.name,
     subjectLabel: subj.label,
     subjectSlug: subj.slug,
+    schoolSlug: ctx.school.slug,
     // 동명이교(지역 접미사 slug)만 title 앞에 짧은 지역명을 붙여 검색어와 어순을 맞춘다.
     regionShort: isAmbiguousSchoolName(ctx.school.name)
       ? shortRegion(ctx.sigunguName)

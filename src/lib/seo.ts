@@ -23,6 +23,7 @@ import {
 import { resolveTitleKeyword, type TitlePageType } from "@/data/titleKeywords";
 import { buildRegionDongTitle } from "@/lib/regionSchoolPick";
 import { getSubjectUnits } from "@/data/subjectUnits";
+import { isThumbEligible, thumbPath, thumbAlt, THUMB_SIZE } from "@/lib/thumb";
 
 const SITE_NAME = site.name; // 지식의참견
 const SITE_URL = site.url.replace(/\/$/, ""); // 배포 기준 도메인(단일 소스)
@@ -131,7 +132,15 @@ const SUBJECT_DESC: ReadonlyArray<(p: { subjectLabel: string }) => string> = [
 ];
 
 /* ── 공통 Metadata 조립 ──────────────────────────────────────────────── */
-function baseMetadata(title: string, description: string, canonicalPath: string): Metadata {
+/** OG/트위터 이미지 형태 — 기본 정적 OG 와 동적 썸네일이 같은 모양을 공유. */
+type OgImage = { url: string; width: number; height: number; alt: string };
+
+function baseMetadata(
+  title: string,
+  description: string,
+  canonicalPath: string,
+  ogImage: OgImage = OG_IMAGE,
+): Metadata {
   return {
     title: { absolute: title },
     description,
@@ -144,9 +153,9 @@ function baseMetadata(title: string, description: string, canonicalPath: string)
       siteName: SITE_NAME,
       locale: "ko_KR",
       type: "website",
-      images: [OG_IMAGE],
+      images: [ogImage],
     },
-    twitter: { card: "summary", title, description, images: [OG_IMAGE] },
+    twitter: { card: "summary", title, description, images: [ogImage] },
   };
 }
 
@@ -189,6 +198,8 @@ export interface SchoolMetaInput {
   subjectLabel: string;
   /** subjects.ts 의 과목 slug — title 문구 조회 키. */
   subjectSlug?: string;
+  /** 학교 slug — 동적 썸네일 og:image URL(파일럿: 고교×핵심5과목) 생성에 쓰인다. */
+  schoolSlug?: string;
   /** 동명이교(지역 접미사) 학교만 지정 — title 앞에 짧은 지역명이 붙는다. */
   regionShort?: string;
   /** 학교급 — description 프레이밍 + title 문구(초·중 override) 선택에 쓰인다. 미지정 시 고등 기준. */
@@ -212,7 +223,17 @@ export function buildSchoolMeta(p: SchoolMetaInput): Metadata {
         ? SCHOOL_DESC_MIDDLE
         : SCHOOL_DESC;
   const description = pick(descSet, p.canonicalPath)(p);
-  return baseMetadata(title, description, p.canonicalPath);
+  // 파일럿: 고교×핵심5과목만 페이지별 텍스트 썸네일을 og:image 로 사용(그 외는 기본 정적 OG).
+  const og: OgImage | undefined =
+    p.schoolSlug && p.subjectSlug && p.level && isThumbEligible(p.level, p.subjectSlug)
+      ? {
+          url: thumbPath(p.schoolSlug, p.subjectSlug),
+          width: THUMB_SIZE.width,
+          height: THUMB_SIZE.height,
+          alt: thumbAlt(p.schoolName, p.subjectLabel),
+        }
+      : undefined;
+  return baseMetadata(title, description, p.canonicalPath, og);
 }
 
 export interface RegionMetaInput {

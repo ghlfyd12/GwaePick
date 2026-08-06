@@ -20,6 +20,7 @@ import SchoolRegionLinks from "@/components/SchoolRegionLinks";
 import type { SchoolArticle } from "@/data/schoolArticleSections";
 import PageBanner from "@/components/PageBanner";
 import { buildSchoolBanner } from "@/data/pageBannerCopy";
+import { THUMB_SUBJECTS, thumbPath, thumbAlt } from "@/lib/thumb";
 
 /*
  * SchoolSubjectDetail — 학교×과목 상세(서버 컴포넌트). 지역 상세(DongSubjectDetail)와 동일 골격·디자인.
@@ -62,9 +63,20 @@ export default function SchoolSubjectDetail({
   const why = buildWhySchool(schoolName, levelLabel);
   const faq = buildSchoolFaq(schoolName, levelLabel);
   const isElem = levelLabel === "초등학교";
+  // 파일럿: 고교×핵심5과목은 히어로를 페이지별 텍스트 썸네일(생성 라우트)로 교체.
+  // 그 외(초·중·타 과목)는 기존 학생 사진 유지 — 실측 후 별도 승인 시 확대.
+  const useThumb = levelLabel === "고등학교" && THUMB_SUBJECTS.has(subject.slug);
   // 히어로 이미지 — 초등만 새 이미지, 중·고는 기존 그대로(학교급 데이터 기준 분기).
-  const heroImage = isElem ? SCHOOL_HERO_IMAGE_ELEM : SCHOOL_HERO_IMAGE;
-  const heroAlt = isElem ? "함께 공부하는 초등학생들" : "교복을 입은 학생들";
+  const heroImage = useThumb
+    ? thumbPath(schoolSlug, subject.slug)
+    : isElem
+      ? SCHOOL_HERO_IMAGE_ELEM
+      : SCHOOL_HERO_IMAGE;
+  const heroAlt = useThumb
+    ? thumbAlt(schoolName, subject.label)
+    : isElem
+      ? "함께 공부하는 초등학생들"
+      : "교복을 입은 학생들";
   const displayName = schoolFullName ?? schoolName; // 정식명, 없으면 약칭
   const strategyCards = buildStrategyCards(schoolName, schoolFullName, levelLabel, subject.label, subject.why);
   const relatedKeywords = buildRelatedKeywords(schoolName, displayName, isElem);
