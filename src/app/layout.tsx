@@ -91,7 +91,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className={pretendard.variable}>
-      <body className="flex min-h-dvh flex-col bg-white text-ink">
+      {/* pb-* : 모바일 하단 고정 상담 바(FloatingButtons) 높이 + iOS 홈바 safe-area 만큼
+          바닥 여백을 둬 푸터 마지막 내용이 바에 가려지지 않게 한다. lg 이상은 바가 없어 0. */}
+      <body className="flex min-h-dvh flex-col bg-white pb-[calc(5rem+env(safe-area-inset-bottom))] text-ink lg:pb-0">
         {/* 유입 UTM first-touch 캡처(화면 비노출) — 홈·/apply 등 모든 진입점 커버 */}
         <UtmCapture />
         <RootShell>
