@@ -51,11 +51,14 @@ export const metadata: Metadata = {
    * 값은 metadataBase(site.url) 기준 절대 URL 로 렌더된다 — 한글 도메인은 punycode 표기.
    */
   alternates: { canonical: "/" },
-  // 구버전 favicon.ico 제거 후 icon.png 를 명시적으로 등록 + 캐시 무력화(?v=3)
+  // 파비콘: 딥네이비 배경 + 코랄 "참" 모노그램(app/icon.svg 마스터). 구 주황 마크 캐시 무력화(?v=4)
   icons: {
-    icon: "/icon.png?v=3",
-    shortcut: "/icon.png?v=3",
-    apple: "/icon.png?v=3",
+    icon: [
+      { url: "/icon.svg?v=4", type: "image/svg+xml" },
+      { url: "/icon.png?v=4", type: "image/png", sizes: "512x512" },
+    ],
+    shortcut: "/favicon.ico?v=4",
+    apple: "/apple-icon.png?v=4",
   },
   openGraph: {
     title: TITLE,
