@@ -52,10 +52,10 @@ function loadBackground(): Promise<string> {
 
 /* ── 텍스트 레이아웃 ────────────────────────────────────────────────────
  * 텍스트를 주인공으로 — 더 긴 줄이 이미지 폭의 ~90%(=TARGET_W)를 채우도록 폰트를 최대한 키운다.
- * 학교명(데이터 약칭 기준) 글자 수로 두 갈래:
+ * 학교명(데이터 약칭 기준) 글자 수로 두 갈래(둘 다 2줄·동일 폰트/띠 높이로 톤 통일):
  *   - 4자 이하: "{학교명}" / "{과목}과외" 2줄(학교명 표기).
  *   - 5자 이상: 긴 이름을 이미지에 넣으면 폰트가 작아져 가독성이 떨어지므로
- *     "1:1 {과목}과외" 폴백(학교명은 alt·본문에만 유지, 이미지에는 미표기).
+ *     "1:1" / "{과목}과외" 2줄 폴백(학교명은 alt·본문에만 유지, 이미지에는 미표기).
  */
 const TARGET_W = Math.round(W * 0.9); // 720px — 텍스트가 채울 목표 폭
 const MAX_FS = 180; // 2줄이 세로로 넘치지 않는 상한(짧은 이름의 과확대 방지)
@@ -92,8 +92,9 @@ function layout(name: string, subjectLabel: string): {
     const lines = [name, suffix];
     return { lines, fontSize: fitFontSize(lines) };
   }
-  const fallback = `1:1 ${suffix}`; // 예: "1:1 수학과외"
-  return { lines: [fallback], fontSize: fitFontSize([fallback]) };
+  // 폴백도 2줄 — 학교명 버전과 동일한 폰트/줄간격/띠 높이로 시각적 톤 통일.
+  const lines = ["1:1", suffix]; // 예: "1:1" / "수학과외"
+  return { lines, fontSize: fitFontSize(lines) };
 }
 
 function notFound(): Response {
