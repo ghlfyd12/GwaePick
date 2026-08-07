@@ -14,7 +14,10 @@ import { expandSchoolName } from "@/lib/schoolName";
  *   OR ILIKE 로 검색하고(중복 제거) 정식명 검색·부분 입력은 기존대로 유지한다.
  */
 
-export const runtime = "nodejs";
+// Edge 런타임 — 유저 근처 PoP 에서 실행해 미국 우회(iad1) 없이 아시아 Supabase 와 짧은 홉.
+// supabase-js v2 는 PostgREST REST(fetch 기반)만 사용하므로 Edge 호환. 모듈 스코프 클라 싱글턴은
+// supabaseServer() 가 이미 캐시하므로 웜 아이솔레이트에서 그대로 재사용된다. 검색 로직은 불변.
+export const runtime = "edge";
 /** 검색어마다 결과가 달라지므로 캐시하지 않는다. */
 export const dynamic = "force-dynamic";
 
