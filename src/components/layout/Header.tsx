@@ -70,7 +70,7 @@ export default function Header() {
     .filter((n): n is NavItem => Boolean(n));
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-line bg-white/95 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 isolate w-full border-b border-line bg-white">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-2 sm:gap-3 sm:px-3 md:h-20 lg:h-24 lg:gap-4">
         {/* 좌측: 로고 + 태그라인(데스크톱만). min-w-0 래퍼 — xl 좁은 폭에서 태그라인이 먼저 양보해
             가로 스크롤 방지(데스크톱 기존 동작과 동일). 모바일 빠른 메뉴는 우측으로 이동. */}
@@ -131,7 +131,7 @@ export default function Header() {
                 href={item.href}
                 onClick={closeAll}
                 aria-current={isActive(item.href) ? "page" : undefined}
-                className="whitespace-nowrap rounded-full border border-accent/40 px-2.5 py-1.5 text-sm font-semibold text-ink transition-colors hover:border-accent hover:text-accent"
+                className="inline-flex min-h-[44px] items-center whitespace-nowrap rounded-full border border-accent/40 px-2.5 text-sm font-semibold text-ink transition-colors hover:border-accent hover:text-accent"
               >
                 {item.label.replace(/\s*과외$/, "")}
               </Link>
@@ -139,7 +139,7 @@ export default function Header() {
             <Link
               href={ctaHref}
               onClick={closeAll}
-              className="whitespace-nowrap rounded-full bg-accent px-2.5 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-accent-dark"
+              className="inline-flex min-h-[44px] items-center whitespace-nowrap rounded-full bg-accent px-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-dark"
             >
               무료상담
             </Link>

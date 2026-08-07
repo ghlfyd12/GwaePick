@@ -4,10 +4,11 @@
  * prefers-reduced-motion: reduce 환경에서는 두 모션 모두 비활성(즉시 표시).
  */
 
-/* A. 배경 켄번즈 — scale(1)→scale(1.08), 25초, ease-out, 1회 후 확대 상태 유지(both). 무한반복 없음. */
+/* A. 배경 켄번즈 — scale(1)→scale(1.06), 22초, ease-out, 1회 후 확대 상태 유지(both). 무한반복 없음.
+   overflow:hidden 히어로 안에서 transform 만 사용 → 레이아웃 밀림(CLS) 없음. */
 .kenburns {
   transform-origin: center;
-  animation: heroKenburns 25s ease-out both;
+  animation: heroKenburns 22s ease-out both;
   will-change: transform;
 }
 
@@ -16,7 +17,7 @@
     transform: scale(1);
   }
   to {
-    transform: scale(1.08);
+    transform: scale(1.06);
   }
 }
 

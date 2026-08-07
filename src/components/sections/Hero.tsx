@@ -9,16 +9,15 @@ import styles from "./Hero.module.css";
  *
  * 슬라이더(2028 입시 뉴스 슬라이드)는 제거되어 단일 섹션이다(라이브러리 미사용).
  * 모션(Hero.module.css):
- *  - 배경 켄번즈: scale(1)→scale(1.08) 25초 1회 후 유지(무한반복 없음).
- *  - 텍스트 순차 페이드업: 헤드라인 → 하위 버튼 3종(서브 요소) → 주 CTA, 0.15초 간격 스태거, 1회.
+ *  - 배경 켄번즈: scale(1)→scale(1.06) 22초 1회 후 유지(무한반복 없음).
+ *  - 텍스트 순차 페이드업: 헤드라인 → 주 CTA(데스크톱), 0.15초 간격 스태거, 1회.
  *  - prefers-reduced-motion: reduce 시 모든 모션 비활성(즉시 표시). transform/opacity 만 사용(CLS 없음).
  *
- * 카피/이미지/버튼은 모두 heroContent.ts 에서만 가져온다(하드코딩 금지).
+ * 카피/이미지는 모두 heroContent.ts 에서만 가져온다(하드코딩 금지).
  * 페이지 유일의 <h1> 은 이 섹션의 헤드라인.
  */
 export default function Hero() {
-  const { activeVariant, headlines, cta, heroSideBanners, heroBackground } =
-    heroContent;
+  const { activeVariant, headlines, cta, heroBackground } = heroContent;
   const headline = headlines[activeVariant];
 
   return (
@@ -67,27 +66,10 @@ export default function Hero() {
               ))}
             </h1>
 
-            {/* 하위 버튼 3종(서브 요소) — 헤드라인 아래. 모바일은 작은 알약으로 줄바꿈(가로 스크롤 없음). */}
-            <nav
-              aria-label="바로가기"
-              className={`${styles.fadeUp} mt-5 flex flex-wrap gap-2 sm:gap-2.5`}
-              style={{ animationDelay: "0.15s" }}
-            >
-              {heroSideBanners.map((banner) => (
-                <a
-                  key={banner.href}
-                  href={banner.href}
-                  className="inline-flex items-center justify-center rounded-full bg-accent/95 px-4 py-2 text-[13px] font-semibold text-white shadow-md backdrop-blur-sm transition hover:-translate-y-0.5 hover:bg-accent-dark hover:shadow-lg sm:px-5 sm:py-2.5 sm:text-sm"
-                >
-                  {banner.label}
-                </a>
-              ))}
-            </nav>
-
             {/* 주 CTA — 데스크톱만(모바일은 상단 헤더 '무료상담'으로 이동). */}
             <div
-              className={`${styles.fadeUp} mt-6 hidden md:block`}
-              style={{ animationDelay: "0.3s" }}
+              className={`${styles.fadeUp} mt-8 hidden md:block`}
+              style={{ animationDelay: "0.15s" }}
             >
               <CTAButton
                 href={cta.href}
