@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import CTAButton from "@/components/ui/CTAButton";
@@ -64,13 +64,24 @@ export default function Header() {
     setMobileSub(null);
   };
 
+  // 모바일 메뉴 열림 시 배경 스크롤 잠금 — 닫힘/언마운트 시 원래 값으로 복원(누수 없음).
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
   // 모바일 헤더 로고 옆 빠른 메뉴 — site.nav 에서 학교별/지역별만 뽑아 사용(하드코딩 금지).
   const mobileQuick = ["/tutoring/by-school", "/tutoring/by-region"]
     .map((href) => site.nav.find((n) => n.href === href))
     .filter((n): n is NavItem => Boolean(n));
 
   return (
-    <header className="sticky top-0 z-50 isolate w-full border-b border-line bg-white">
+    <>
+      <header className="sticky top-0 z-50 isolate w-full border-b border-line bg-white">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-2 sm:gap-3 sm:px-3 md:h-20 lg:h-24 lg:gap-4">
         {/* 좌측: 로고 + 태그라인(데스크톱만). min-w-0 래퍼 — xl 좁은 폭에서 태그라인이 먼저 양보해
             가로 스크롤 방지(데스크톱 기존 동작과 동일). 모바일 빠른 메뉴는 우측으로 이동. */}
@@ -256,7 +267,18 @@ export default function Header() {
           </ul>
         </nav>
       )}
-    </header>
+      </header>
+
+      {/* 모바일 메뉴 스크림 — 헤더(z-50)보다 아래·본문보다 위(z-40). 탭하면 닫히고 뒤 콘텐츠
+          pointer 를 차단한다. iOS sticky 합성 버그 회피를 위해 backdrop-filter 없이 단순 반투명. */}
+      {open && (
+        <div
+          className="fixed inset-0 z-40 bg-black/35 md:hidden"
+          aria-hidden="true"
+          onClick={closeAll}
+        />
+      )}
+    </>
   );
 }
 
