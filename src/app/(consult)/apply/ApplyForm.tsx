@@ -114,13 +114,23 @@ export default function ApplyForm({
     clearError("subject");
   };
 
-  /* ── 학교 자동완성 — 250ms 디바운스 + 이전 요청 취소 ─────────────── */
+  /* ── 학교 자동완성 — 250ms 디바운스 + 이전 요청 취소 + 최신 응답만 반영 ─────── */
   const boxRef = useRef<HTMLDivElement>(null);
+  // 요청 시퀀스 토큰 — 늦게 도착한 이전 응답이 최신 결과를 덮어쓰지 않게 한다(iOS Safari 등).
+  const reqIdRef = useRef(0);
   const canSearch = !school && schoolQuery.trim().length >= 2;
 
   useEffect(() => {
     const q = schoolQuery.trim();
-    if (school || q.length < 2) return;
+    // 학교 선택됨 또는 2글자 미만(빈 입력 포함) → 이전 결과 즉시 비우고 드롭다운 닫기.
+    if (school || q.length < 2) {
+      setHits([]);
+      setSearching(false);
+      return;
+    }
+    // 입력이 바뀌면 이전 결과를 즉시 비워 옛 검색어 결과가 잔존하지 않게 한다.
+    setHits([]);
+    const myId = ++reqIdRef.current;
     const controller = new AbortController();
     const timer = setTimeout(async () => {
       setSearching(true);
@@ -129,11 +139,13 @@ export default function ApplyForm({
           signal: controller.signal,
         });
         const json = await res.json();
+        // 최신 요청이 아니면 폐기(순서 역전 방지).
+        if (myId !== reqIdRef.current) return;
         setHits(Array.isArray(json.schools) ? json.schools : []);
       } catch {
         /* 취소·네트워크 오류는 무시(다음 입력에서 다시 시도) */
       } finally {
-        setSearching(false);
+        if (myId === reqIdRef.current) setSearching(false);
       }
     }, 250);
     return () => {
