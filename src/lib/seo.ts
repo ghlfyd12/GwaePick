@@ -24,6 +24,7 @@ import { resolveTitleKeyword, type TitlePageType } from "@/data/titleKeywords";
 import { buildRegionDongTitle } from "@/lib/regionSchoolPick";
 import { getSubjectUnits } from "@/data/subjectUnits";
 import { isThumbEligible, thumbPath, thumbAlt, THUMB_SIZE } from "@/lib/thumb";
+import { SCHOOL_GRADE_PHRASE } from "@/data/schoolGradeKeywords";
 
 const SITE_NAME = site.name; // 지식의참견
 const SITE_URL = site.url.replace(/\/$/, ""); // 배포 기준 도메인(단일 소스)
@@ -51,6 +52,21 @@ function hashSlug(s: string): number {
   return h;
 }
 const pick = <T>(arr: readonly T[], key: string): T => arr[hashSlug(key) % arr.length];
+
+/**
+ * 학교 description 에 학년 구를 중앙 삽입 — 회전 3종 어느 문장이 선택돼도 동일 규칙.
+ * 학교명 head("{학교명} ") 직후에 학년 구를 넣어 잘린 스니펫 앞부분(≈45자 이내)에 학년 검색어를 노출하고,
+ * 학년 정보와 겹치는 "아이의 학년과 성향, " 은 제거해 중복·길이 증가를 억제한다.
+ * 학교명 head 를 못 찾으면(방어) 원문 그대로 반환한다.
+ */
+function insertGradePhrase(desc: string, schoolName: string, phrase: string): string {
+  const trimmed = desc.replace("아이의 학년과 성향, ", "");
+  const head = `${schoolName} `;
+  const at = trimmed.indexOf(head);
+  if (at < 0) return trimmed;
+  const pos = at + head.length;
+  return `${trimmed.slice(0, pos)}${phrase} ${trimmed.slice(pos)}`;
+}
 
 /* ── description 템플릿(120~155자, 핵심 키워드 앞 40자, 느낌표·금지어 없음) ── */
 /* 고등 기본 description — title 의 "기출·교과서·출제경향" 키워드를 문장으로 받는다. */
@@ -222,7 +238,12 @@ export function buildSchoolMeta(p: SchoolMetaInput): Metadata {
       : p.level === "middle"
         ? SCHOOL_DESC_MIDDLE
         : SCHOOL_DESC;
-  const description = pick(descSet, p.canonicalPath)(p);
+  // 학년 검색어 보강 — 학교급 학년 구를 학교명 head 직후(스니펫 앞부분)에 중앙 삽입.
+  const description = insertGradePhrase(
+    pick(descSet, p.canonicalPath)(p),
+    p.schoolName,
+    SCHOOL_GRADE_PHRASE[p.level ?? "high"],
+  );
   // 파일럿: 고교×핵심5과목만 페이지별 텍스트 썸네일을 og:image 로 사용(그 외는 기본 정적 OG).
   const og: OgImage | undefined =
     p.schoolSlug && p.subjectSlug && p.level && isThumbEligible(p.level, p.subjectSlug)
