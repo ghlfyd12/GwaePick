@@ -34,7 +34,6 @@ export default function Curriculum() {
         aria-hidden
         width={396}
         height={362}
-        unoptimized
         className="pointer-events-none absolute bottom-0 left-0 z-0 hidden h-[300px] w-auto select-none xl:block 2xl:h-[360px]"
       />
       <Image
@@ -43,7 +42,6 @@ export default function Curriculum() {
         aria-hidden
         width={357}
         height={423}
-        unoptimized
         className="pointer-events-none absolute bottom-0 right-0 z-0 hidden h-[360px] w-auto select-none xl:block 2xl:h-[460px]"
       />
 
@@ -61,8 +59,6 @@ export default function Curriculum() {
             height={graphic.height}
             sizes="(min-width: 768px) 60vw, 100vw"
             className="h-auto w-full object-contain"
-            // 개발 서버 이미지 최적화 이슈 회피. 배포 시 최적화를 원하면 제거.
-            unoptimized
           />
         </div>
 

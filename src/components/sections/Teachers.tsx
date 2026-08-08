@@ -296,8 +296,6 @@ export default function Teachers() {
                         fill
                         sizes="360px"
                         className="object-cover object-top transition-transform duration-300 ease-out group-hover:-translate-y-2"
-                        // 개발 서버 이미지 최적화 이슈 회피. 배포 시 최적화를 원하면 제거.
-                        unoptimized
                       />
                     </div>
 

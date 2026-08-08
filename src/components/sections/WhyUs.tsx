@@ -235,8 +235,6 @@ function Block({ block }: { block: WhyUsBlock }) {
             sizes="(min-width: 768px) 50vw, 100vw"
             // 영역을 채우되 인물이 어색하게 잘리지 않게 중앙 기준(필요 시 블록별로 조정).
             className="object-cover object-center"
-            // 개발 서버 이미지 최적화 이슈 회피용. 배포/최적화를 원하면 이 prop 제거.
-            unoptimized
           />
         </div>
       </div>

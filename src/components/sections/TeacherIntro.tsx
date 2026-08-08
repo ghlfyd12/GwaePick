@@ -28,8 +28,6 @@ export default function TeacherIntro() {
             fill
             sizes="(min-width: 768px) 40vw, 100vw"
             className="object-cover"
-            // 개발 서버 이미지 최적화 이슈 회피. 배포 시 최적화를 원하면 제거.
-            unoptimized
           />
         </div>
 
