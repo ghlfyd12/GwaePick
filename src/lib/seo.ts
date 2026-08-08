@@ -25,6 +25,10 @@ import { buildRegionDongTitle } from "@/lib/regionSchoolPick";
 import { getSubjectUnits } from "@/data/subjectUnits";
 import { isThumbEligible, thumbPath, thumbAlt, THUMB_SIZE } from "@/lib/thumb";
 import { SCHOOL_GRADE_PHRASE } from "@/data/schoolGradeKeywords";
+import { SCHOOL_PUBLISHED, SCHOOL_MODIFIED } from "@/data/contentMeta";
+
+/** ISO 날짜(YYYY-MM-DD) → KST 자정 ISO 8601 datetime. article:*_time · JSON-LD dates 용. */
+const isoKST = (d: string) => `${d}T00:00:00+09:00`;
 
 const SITE_NAME = site.name; // 지식의참견
 const SITE_URL = site.url.replace(/\/$/, ""); // 배포 기준 도메인(단일 소스)
@@ -254,7 +258,16 @@ export function buildSchoolMeta(p: SchoolMetaInput): Metadata {
           alt: thumbAlt(p.schoolName, p.subjectLabel),
         }
       : undefined;
-  return baseMetadata(title, description, p.canonicalPath, og);
+  // 검색결과 신선도 신호 — og:type("website")은 유지하고 article:*_time 을 raw meta 로 병기.
+  // 값은 contentMeta.ts 상수(콘텐츠 실제 변경 시에만 갱신). 지역·과목 페이지는 미포함.
+  const base = baseMetadata(title, description, p.canonicalPath, og);
+  return {
+    ...base,
+    other: {
+      "article:published_time": isoKST(SCHOOL_PUBLISHED),
+      "article:modified_time": isoKST(SCHOOL_MODIFIED),
+    },
+  };
 }
 
 export interface RegionMetaInput {
@@ -410,6 +423,21 @@ export function breadcrumbJsonLdFromNav(
   items: { label: string; href?: string }[],
 ): Json {
   return breadcrumbJsonLd(items.map((b) => ({ name: b.label, path: b.href })));
+}
+
+/**
+ * WebPage — 검색결과 신선도(발행/수정일) 신호. 학교×과목 페이지 전용.
+ * 날짜는 contentMeta.ts 상수(콘텐츠 실제 변경 시에만 갱신). 기존 Service/Breadcrumb/FAQ 와 별개 노드.
+ */
+export function webPageJsonLd(p: { name: string; canonicalPath: string }): Json {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: p.name,
+    url: absUrl(p.canonicalPath),
+    datePublished: isoKST(SCHOOL_PUBLISHED),
+    dateModified: isoKST(SCHOOL_MODIFIED),
+  };
 }
 
 /** FAQPage — 페이지에 실제 렌더링되는 Q&A 로만 구성(허위 문항 금지). */

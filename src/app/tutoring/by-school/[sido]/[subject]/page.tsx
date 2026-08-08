@@ -23,6 +23,7 @@ import {
   serviceJsonLd,
   breadcrumbJsonLd,
   faqJsonLd,
+  webPageJsonLd,
 } from "@/lib/seo";
 
 /*
@@ -123,6 +124,11 @@ export default async function SchoolSubjectPage({
     // FAQPage — SchoolSubjectDetail 이 실제로 렌더링하는 Q&A(buildSchoolFaq)와 동일 소스.
     // 학교급별 분기가 렌더와 JSON-LD 에 동일하게 반영되도록 같은 levelLabel 을 넘긴다.
     faqJsonLd(buildSchoolFaq(ctx.school.name, LEVEL_LABEL[ctx.school.level])),
+    // WebPage — 검색결과 신선도(발행/수정일) 신호. 날짜는 contentMeta.ts 상수.
+    webPageJsonLd({
+      name: `${ctx.school.name} ${subj.label}과외`,
+      canonicalPath: canonical,
+    }),
   ];
 
   return (
