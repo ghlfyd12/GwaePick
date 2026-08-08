@@ -14,7 +14,11 @@ import { site } from "@/data/site";
  * globals.css 의 --font-sans 가 이를 참조한다.
  */
 const pretendard = localFont({
-  src: "../fonts/PretendardVariable.woff2",
+  // KS X 1001 완성형(2,350) + 영문·숫자·라틴확장·기호 + 사이트/DB 실존 학교·지역명 문자 서브셋.
+  // 원본 대비 ~77% 경량(2.0MB→452KB). 가변 weight 축(45~920) 유지 → 굵기 사용처 불변.
+  // KS X 1001 밖 미래 입력만 시스템 한글폰트(--font-sans 폴백)로 렌더(토푸 없음).
+  // 롤백용 원본 PretendardVariable.woff2 는 보존.
+  src: "../fonts/Pretendard-subset.woff2",
   display: "swap",
   weight: "45 920",
   variable: "--font-pretendard",
