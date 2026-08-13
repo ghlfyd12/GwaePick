@@ -5,6 +5,25 @@ import HeroSearch from "@/components/HeroSearch";
 import DetailTrustBlock from "@/components/DetailTrustBlock";
 import koreaSido from "@/data/korea-sido.json";
 import { sidoList } from "@/data/sido";
+import { regions, type Region } from "@/data/regions";
+
+/*
+ * 지역 랜딩(122개 /[id]) 인바운드 링크용 — province 별로 묶는다(regions 등장 순서 보존).
+ * regions.ts 는 자동 생성 파일이라 건드리지 않고 여기서 파생만 한다.
+ * 서버 컴포넌트가 아래 섹션에서 전부 정적 <a> 로 렌더 → 122개 전 페이지 크롤 진입로 확보.
+ */
+const regionGroups: { province: string; items: Region[] }[] = (() => {
+  const order: string[] = [];
+  const byProvince = new Map<string, Region[]>();
+  for (const r of regions) {
+    if (!byProvince.has(r.province)) {
+      byProvince.set(r.province, []);
+      order.push(r.province);
+    }
+    byProvince.get(r.province)!.push(r);
+  }
+  return order.map((province) => ({ province, items: byProvince.get(province)! }));
+})();
 
 /*
  * 헤더 카피 — A안 적용. (교체 쉽게 B·C안 보존)
@@ -83,6 +102,40 @@ export default function ByRegionPage() {
               ))}
             </ul>
           </nav>
+        </div>
+      </section>
+
+      {/* 지역별 맞춤 안내 — 122개 시/군/구 랜딩 인바운드(크롤 경로). province 그룹, 전부 정적 <a>. */}
+      <section className="border-t border-line bg-surface px-4 py-12 sm:px-6 sm:py-16">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="text-xl font-bold text-ink sm:text-2xl">
+            지역별 맞춤 과외 안내
+          </h2>
+          <p className="mt-2 break-keep text-sm leading-relaxed text-muted sm:text-base">
+            우리 지역을 선택하면 지역 맞춤 안내 페이지로 이어집니다.
+          </p>
+
+          <div className="mt-8 space-y-8">
+            {regionGroups.map((group) => (
+              <div key={group.province}>
+                <h3 className="break-keep text-sm font-semibold text-accent sm:text-base">
+                  {group.province}
+                </h3>
+                <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+                  {group.items.map((r) => (
+                    <li key={r.id}>
+                      <Link
+                        href={`/${r.id}`}
+                        className="block break-keep rounded-lg border border-line bg-white px-3 py-2.5 text-sm text-ink transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                      >
+                        {r.name} 과외
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
