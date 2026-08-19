@@ -12,3 +12,24 @@
  */
 export const SCHOOL_PUBLISHED = "2026-06-24";
 export const SCHOOL_MODIFIED = "2026-08-07";
+
+/**
+ * sitemap lastmod 단일 소스 — 페이지 유형별 정직한 최종 콘텐츠 변경일(ISO, KST 자정 기준).
+ *
+ * ⚠️ 갱신 기준(공통): 해당 유형 고유의 **본문·카피·메타·구조화데이터·렌더되는 내부링크
+ *    구성**이 실제로 바뀐 배포에서만 손으로 갱신한다. 공유 크롬(Header/Footer/공통 신뢰섹션)·
+ *    폰트 서브셋·이미지 최적화·빌드/성능 변경은 어떤 값도 올리지 않는다(가짜 신선도 금지).
+ *    신규 페이지 유형을 sitemap 에 편입하면 그 유형 상수를 새로 추가해 해당 그룹에만 적용한다.
+ */
+/** 홈·신청(/apply)·개인정보처리방침(/privacy) 본문. */
+export const CORE_MODIFIED = "2026-07-29";
+/** 지역 랜딩 /[region] (템플릿·regions.ts 데이터). */
+export const REGION_MODIFIED = "2026-06-24";
+/** 경기 pSEO(시도×과목·시군구×과목) — PseoLanding·regionContent·경기 데이터·렌더 링크 구성. */
+export const GYEONGGI_PSEO_MODIFIED = "2026-08-13";
+/** 영어 동(洞) pSEO pilot(동×과목) — DongSubjectDetail·DongHub 본문·메타. */
+export const DONG_PSEO_MODIFIED = "2026-08-05";
+/** 과목 단독 상세 /tutoring/by-subject/[과목] — SubjectDetail 카피·데이터. */
+export const SUBJECT_MODIFIED = "2026-07-31";
+/** 어학의참견(/power) 전 유형 — 지역랜딩·언어·schools·regions·performance·by-school·회화·시험 상세. */
+export const POWER_MODIFIED = "2026-07-31";

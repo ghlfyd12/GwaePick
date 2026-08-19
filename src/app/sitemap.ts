@@ -24,6 +24,15 @@ import {
   POWER_EXAM_PAIR_COUNT,
   TOTAL_SITEMAP_COUNT,
 } from "@/lib/powerRegionSitemap";
+import {
+  SCHOOL_MODIFIED,
+  CORE_MODIFIED,
+  REGION_MODIFIED,
+  GYEONGGI_PSEO_MODIFIED,
+  DONG_PSEO_MODIFIED,
+  SUBJECT_MODIFIED,
+  POWER_MODIFIED,
+} from "@/data/contentMeta";
 
 /*
  * 동적 sitemap — 분할 구조(/sitemap/[id].xml). robots.txt 가 각 파일 URL 을 모두 가리킨다.
@@ -47,21 +56,24 @@ export async function generateSitemaps() {
   return Array.from({ length: TOTAL_SITEMAP_COUNT }, (_, i) => ({ id: i }));
 }
 
-/** id 0 — 학교 외 기존 페이지 전부. */
-function coreSitemap(lastModified: Date): MetadataRoute.Sitemap {
+/**
+ * id 0 — 학교 외 기존 페이지 전부.
+ * lastModified 는 유형별 정직한 콘텐츠 변경일 상수(contentMeta.ts). 빌드 시각(new Date) 미사용.
+ */
+function coreSitemap(): MetadataRoute.Sitemap {
   const home: MetadataRoute.Sitemap = [
-    { url: `${base}/`, lastModified, changeFrequency: "weekly", priority: 1 },
+    { url: `${base}/`, lastModified: CORE_MODIFIED, changeFrequency: "weekly", priority: 1 },
   ];
 
   // 신청폼·개인정보처리방침(2-B 공개 전환) — 코어 사이트맵에 포함.
   const consultPages: MetadataRoute.Sitemap = [
-    { url: `${base}/apply`, lastModified, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${base}/privacy`, lastModified, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${base}/apply`, lastModified: CORE_MODIFIED, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${base}/privacy`, lastModified: CORE_MODIFIED, changeFrequency: "yearly", priority: 0.3 },
   ];
 
   const regionPages: MetadataRoute.Sitemap = regions.map((r) => ({
     url: `${base}/${enc(r.id)}`,
-    lastModified,
+    lastModified: REGION_MODIFIED,
     changeFrequency: "weekly",
     priority: 0.8,
   }));
@@ -72,14 +84,14 @@ function coreSitemap(lastModified: Date): MetadataRoute.Sitemap {
   for (const subj of subjects) {
     pseoPages.push({
       url: `${base}/tutoring/by-region/${enc(sido)}/${enc(subj.slug)}`,
-      lastModified,
+      lastModified: GYEONGGI_PSEO_MODIFIED,
       changeFrequency: "weekly",
       priority: 0.7,
     });
     for (const sg of gyeonggi.sigungu) {
       pseoPages.push({
         url: `${base}/tutoring/by-region/${enc(sido)}/${enc(sg.slug)}/${enc(subj.slug)}`,
-        lastModified,
+        lastModified: GYEONGGI_PSEO_MODIFIED,
         changeFrequency: "weekly",
         priority: 0.6,
       });
@@ -89,7 +101,7 @@ function coreSitemap(lastModified: Date): MetadataRoute.Sitemap {
   // 과목 단독 상세 — /tutoring/by-subject/[과목] 8개(영문 slug)
   const subjectDetailPages: MetadataRoute.Sitemap = detailSubjects.map((subj) => ({
     url: `${base}/tutoring/by-subject/${subj.slug}`,
-    lastModified,
+    lastModified: SUBJECT_MODIFIED,
     changeFrequency: "weekly",
     priority: 0.7,
   }));
@@ -106,7 +118,7 @@ function coreSitemap(lastModified: Date): MetadataRoute.Sitemap {
         for (const subj of detailSubjects)
           pilotDetail.push({
             url: `${base}/tutoring/by-region/${p.sido}/${sg.slug}/${dong.slug}/${subj.slug}`,
-            lastModified,
+            lastModified: DONG_PSEO_MODIFIED,
             changeFrequency: "weekly",
             priority: 0.5,
           });
@@ -116,7 +128,7 @@ function coreSitemap(lastModified: Date): MetadataRoute.Sitemap {
   // 파워 홈페이지 지역별 영어회화 — /power/[지역명]
   const powerRegionPages: MetadataRoute.Sitemap = powerRegionSlugs.map((slug) => ({
     url: `${base}/power/${enc(slug)}`,
-    lastModified,
+    lastModified: POWER_MODIFIED,
     changeFrequency: "weekly",
     priority: 0.6,
   }));
@@ -124,26 +136,26 @@ function coreSitemap(lastModified: Date): MetadataRoute.Sitemap {
   // 어학의참견 언어 상세 — /power/english·japanese·chinese
   const powerLanguagePages: MetadataRoute.Sitemap = LANGUAGE_SLUGS.map((slug) => ({
     url: `${base}/power/${slug}`,
-    lastModified,
+    lastModified: POWER_MODIFIED,
     changeFrequency: "weekly",
     priority: 0.7,
   }));
 
   // 어학의참견 학교별 안내 인덱스 — /power/schools (내부 링크 허브 1개)
   const powerSchoolsIndex: MetadataRoute.Sitemap = [
-    { url: `${base}/power/schools`, lastModified, changeFrequency: "weekly", priority: 0.6 },
+    { url: `${base}/power/schools`, lastModified: POWER_MODIFIED, changeFrequency: "weekly", priority: 0.6 },
   ];
 
   // 어학의참견 지역별 안내 인덱스 — /power/regions (내부 링크 허브 1개)
   const powerRegionsIndex: MetadataRoute.Sitemap = [
-    { url: `${base}/power/regions`, lastModified, changeFrequency: "weekly", priority: 0.6 },
+    { url: `${base}/power/regions`, lastModified: POWER_MODIFIED, changeFrequency: "weekly", priority: 0.6 },
   ];
 
   // 어학의참견 유형 B — 학교×언어 수행평가 /power/performance/[school]/[lang] (95개, 40k 한도 내라 코어에 포함)
   const powerPerformancePages: MetadataRoute.Sitemap = allPowerPerformancePairs().map(
     ({ school, lang }) => ({
       url: `${base}/power/performance/${school}/${lang}`,
-      lastModified,
+      lastModified: POWER_MODIFIED,
       changeFrequency: "weekly",
       priority: 0.6,
     }),
@@ -153,7 +165,7 @@ function coreSitemap(lastModified: Date): MetadataRoute.Sitemap {
   const powerBySchoolPages: MetadataRoute.Sitemap = allBySchoolPairs().map(
     ({ school, subject }) => ({
       url: `${base}/power/by-school/${school}/${subject}`,
-      lastModified,
+      lastModified: POWER_MODIFIED,
       changeFrequency: "weekly",
       priority: 0.6,
     }),
@@ -177,8 +189,8 @@ function coreSitemap(lastModified: Date): MetadataRoute.Sitemap {
   ];
 }
 
-/** 파워 지역 청크 — /power/by-region/{지역}/{과목} 한 청크(슬라이스). */
-function powerRegionSitemap(chunk: number, lastModified: Date): MetadataRoute.Sitemap {
+/** 파워 지역 청크 — /power/by-region/{지역}/{과목} 한 청크(슬라이스). lastmod=POWER_MODIFIED. */
+function powerRegionSitemap(chunk: number): MetadataRoute.Sitemap {
   const start = chunk * SITEMAP_URLS_PER_FILE;
   const end = Math.min(start + SITEMAP_URLS_PER_FILE, POWER_REGION_PAIR_COUNT);
   const out: MetadataRoute.Sitemap = [];
@@ -186,7 +198,7 @@ function powerRegionSitemap(chunk: number, lastModified: Date): MetadataRoute.Si
     const { region, subject } = POWER_REGION_PAIRS[p];
     out.push({
       url: `${base}/power/by-region/${enc(region)}/${subject}`,
-      lastModified,
+      lastModified: POWER_MODIFIED,
       changeFrequency: "weekly",
       priority: 0.5,
     });
@@ -194,8 +206,8 @@ function powerRegionSitemap(chunk: number, lastModified: Date): MetadataRoute.Si
   return out;
 }
 
-/** 어학시험 청크 — /power/by-region/{지역}/{시험} 한 청크(슬라이스). 회화 청크와 동일 인코딩. */
-function powerExamSitemap(chunk: number, lastModified: Date): MetadataRoute.Sitemap {
+/** 어학시험 청크 — /power/by-region/{지역}/{시험} 한 청크(슬라이스). 회화 청크와 동일 인코딩. lastmod=POWER_MODIFIED. */
+function powerExamSitemap(chunk: number): MetadataRoute.Sitemap {
   const start = chunk * SITEMAP_URLS_PER_FILE;
   const end = Math.min(start + SITEMAP_URLS_PER_FILE, POWER_EXAM_PAIR_COUNT);
   const out: MetadataRoute.Sitemap = [];
@@ -203,7 +215,7 @@ function powerExamSitemap(chunk: number, lastModified: Date): MetadataRoute.Site
     const { region, subject } = POWER_EXAM_PAIRS[p];
     out.push({
       url: `${base}/power/by-region/${enc(region)}/${subject}`,
-      lastModified,
+      lastModified: POWER_MODIFIED,
       changeFrequency: "weekly",
       priority: 0.5,
     });
@@ -211,8 +223,8 @@ function powerExamSitemap(chunk: number, lastModified: Date): MetadataRoute.Site
   return out;
 }
 
-/** id 1..N — 학교×과목 상세 한 청크. 평탄화된 (학교,과목) 쌍을 슬라이스로만 생성(메모리 안전). */
-function schoolSitemap(chunk: number, lastModified: Date): MetadataRoute.Sitemap {
+/** id 1..N — 학교×과목 상세 한 청크. 평탄화된 (학교,과목) 쌍을 슬라이스로만 생성(메모리 안전). lastmod=SCHOOL_MODIFIED. */
+function schoolSitemap(chunk: number): MetadataRoute.Sitemap {
   const start = chunk * SITEMAP_URLS_PER_FILE;
   const end = Math.min(start + SITEMAP_URLS_PER_FILE, SCHOOL_PAIR_COUNT);
   const out: MetadataRoute.Sitemap = [];
@@ -220,7 +232,7 @@ function schoolSitemap(chunk: number, lastModified: Date): MetadataRoute.Sitemap
     const { school, subject } = schoolPairAt(p);
     out.push({
       url: `${base}/tutoring/by-school/${enc(school.slug)}/${subject.slug}`,
-      lastModified,
+      lastModified: SCHOOL_MODIFIED,
       changeFrequency: "monthly",
       priority: 0.6,
     });
@@ -234,13 +246,13 @@ export default async function sitemap({
   // Next.js 16: 사이트맵 id 는 Promise 로 전달되므로 await 해서 쓴다.
   id: Promise<number> | number;
 }): Promise<MetadataRoute.Sitemap> {
-  const lastModified = new Date();
+  // lastModified 는 빌드 시각(new Date)이 아니라 유형별 정직한 상수를 각 함수가 직접 사용한다.
   const n = Number(await id);
   // id 0 = 코어 / 1..S = 학교 청크 / S+1..S+P = 파워 지역 청크 / 그 뒤 = 어학시험 청크(append).
-  if (n <= 0) return coreSitemap(lastModified);
-  if (n <= SCHOOL_SITEMAP_CHUNKS) return schoolSitemap(n - 1, lastModified);
+  if (n <= 0) return coreSitemap();
+  if (n <= SCHOOL_SITEMAP_CHUNKS) return schoolSitemap(n - 1);
   const afterSchool = n - 1 - SCHOOL_SITEMAP_CHUNKS; // 0-based: 회화 청크 + 시험 청크
   if (afterSchool < POWER_REGION_SITEMAP_CHUNKS)
-    return powerRegionSitemap(afterSchool, lastModified);
-  return powerExamSitemap(afterSchool - POWER_REGION_SITEMAP_CHUNKS, lastModified);
+    return powerRegionSitemap(afterSchool);
+  return powerExamSitemap(afterSchool - POWER_REGION_SITEMAP_CHUNKS);
 }
