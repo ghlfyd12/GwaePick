@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "sync:neis": "node scripts/sync-neis.mjs"
+    "sync:neis": "node scripts/sync-neis.mjs",
+    "indexnow:build-urls": "node scripts/indexnow-build-urllist.mjs",
+    "indexnow:submit": "node scripts/indexnow-submit.mjs"
   },
   "dependencies": {
     "@notionhq/client": "^2.3.0",
