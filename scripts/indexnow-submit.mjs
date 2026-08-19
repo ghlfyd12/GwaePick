@@ -29,7 +29,7 @@ import { dirname, join } from "node:path";
 const HOST = "xn--l89av43blfdm0cm7d.com"; // 호스트명(스킴 없이, 퓨니코드)
 const KEY = "75b4059cc381321cf85b1e2e1a8532a9"; // 공개 검증 키(시크릿 아님)
 const KEY_LOCATION = `https://${HOST}/${KEY}.txt`;
-const ENDPOINT = "https://api.searchadvisor.naver.com/indexnow";
+const ENDPOINT = "https://searchadvisor.naver.com/indexnow";
 const CHUNK_SIZE = 500;
 const DELAY_MS = 5000; // chunk 간 대기(5초)
 const STOP_CODES = new Set([429, 403, 422]); // 즉시 중단 코드(그 외 비-2xx 도 중단)
@@ -43,13 +43,19 @@ const listPath = args.find((a) => !a.startsWith("--"));
 const dryRun = args.includes("--dry-run");
 const startIdx = args.indexOf("--start-chunk");
 const startChunk = startIdx >= 0 ? parseInt(args[startIdx + 1], 10) : 1;
+const endIdx = args.indexOf("--end-chunk");
+const endChunkArg = endIdx >= 0 ? parseInt(args[endIdx + 1], 10) : null;
 
 if (!listPath) {
-  console.error("사용법: node scripts/indexnow-submit.mjs <urlListFile> [--start-chunk N] [--dry-run]");
+  console.error("사용법: node scripts/indexnow-submit.mjs <urlListFile> [--start-chunk N] [--end-chunk M] [--dry-run]");
   process.exit(1);
 }
 if (!Number.isInteger(startChunk) || startChunk < 1) {
   console.error(`--start-chunk 값이 올바르지 않음: ${args[startIdx + 1]}`);
+  process.exit(1);
+}
+if (endChunkArg !== null && (!Number.isInteger(endChunkArg) || endChunkArg < startChunk)) {
+  console.error(`--end-chunk 값이 올바르지 않음: ${args[endIdx + 1]} (>= start-chunk 여야 함)`);
   process.exit(1);
 }
 
@@ -66,7 +72,8 @@ console.log(`URL 총수: ${urls.length}`);
 console.log(`chunk 크기: ${CHUNK_SIZE} → 총 chunk: ${chunks.length}`);
 console.log(`엔드포인트: ${ENDPOINT}`);
 console.log(`host=${HOST}  keyLocation=${KEY_LOCATION}`);
-console.log(`시작 chunk: ${startChunk}${dryRun ? "  (DRY-RUN — 전송 안 함)" : ""}`);
+const endChunk = endChunkArg !== null ? Math.min(endChunkArg, chunks.length) : chunks.length;
+console.log(`전송 구간: chunk ${startChunk}..${endChunk} (전체 1..${chunks.length})${dryRun ? "  (DRY-RUN — 전송 안 함)" : ""}`);
 console.log("");
 
 if (dryRun) {
@@ -78,7 +85,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // ── 전송 루프(포그라운드, 1회) ─────────────────────────────────────────────
 let lastSuccess = startChunk - 1;
-for (let c = startChunk; c <= chunks.length; c++) {
+for (let c = startChunk; c <= endChunk; c++) {
   const urlList = chunks[c - 1];
   const body = JSON.stringify({ host: HOST, key: KEY, keyLocation: KEY_LOCATION, urlList });
 
@@ -115,8 +122,13 @@ for (let c = startChunk; c <= chunks.length; c++) {
   lastSuccess = c;
   writeFileSync(PROGRESS_FILE, String(lastSuccess) + "\n", "utf8");
 
-  if (c < chunks.length) await sleep(DELAY_MS);
+  if (c < endChunk) await sleep(DELAY_MS);
 }
 
-console.log(`\n완료 — 전 chunk 성공(1..${chunks.length}). 전송 URL 총수: ${urls.length}`);
-console.log(`진행 기록: ${PROGRESS_FILE}`);
+const sentUrls = chunks.slice(startChunk - 1, endChunk).reduce((n, ch) => n + ch.length, 0);
+if (endChunk < chunks.length) {
+  console.log(`\n구간 완료 — chunk ${startChunk}..${endChunk} 성공(URL ${sentUrls}개). 다음 재개: node scripts/indexnow-submit.mjs ${listPath} --start-chunk ${endChunk + 1}`);
+} else {
+  console.log(`\n완료 — chunk ${startChunk}..${chunks.length} 성공. 전송 URL 총수(이번 실행): ${sentUrls}`);
+}
+console.log(`진행 기록(마지막 성공 chunk): ${PROGRESS_FILE}`);
