@@ -60,11 +60,12 @@ export const powerFooterGu: RegionRow[] = [
 
 /* ── 하단 3열 ─────────────────────────────────────────────────────── */
 
-/** 어학 수업: 언어 상세 3종 + 교사진. */
+/** 어학 수업: 언어 상세 3종 + 어학시험 허브 + 교사진. */
 const lessonLinks: FooterLink[] = [
   { label: "영어 회화 과외", href: "/power/english" },
   { label: "중국어 과외", href: "/power/chinese" },
   { label: "일본어 과외", href: "/power/japanese" },
+  { label: "어학시험 지역별 안내", href: "/power/exams" },
   { label: "선생님 소개", href: "/power/teachers" },
 ];
 
