@@ -10,6 +10,7 @@ import { powerRegionSlugs } from "@/data/powerRegions";
 import { LANGUAGE_SLUGS } from "@/data/languageDetail";
 import { allPowerPerformancePairs } from "@/data/powerSchoolDepts";
 import { allBySchoolPairs } from "@/data/bySchoolSubject";
+import { seoulExpansionDongPairs } from "@/data/seoulDong";
 import {
   SITEMAP_URLS_PER_FILE,
   SCHOOL_PAIR_COUNT,
@@ -125,6 +126,20 @@ function coreSitemap(): MetadataRoute.Sitemap {
     }
   }
 
+  // 서울 동×과목 1차 확장 — 비파일럿 21구 기초 동(+명소 복구) × 8과목.
+  // 렌더는 기존 resolveNew(온디맨드 ISR)가 담당, 여기선 사이트맵 등재만. lastmod=동 템플릿 변경일.
+  const seoulDongPages: MetadataRoute.Sitemap = [];
+  for (const { sigungu, dong } of seoulExpansionDongPairs) {
+    for (const subj of detailSubjects) {
+      seoulDongPages.push({
+        url: `${base}/tutoring/by-region/seoul/${sigungu}/${dong}/${subj.slug}`,
+        lastModified: DONG_PSEO_MODIFIED,
+        changeFrequency: "weekly",
+        priority: 0.5,
+      });
+    }
+  }
+
   // 파워 홈페이지 지역별 영어회화 — /power/[지역명]
   const powerRegionPages: MetadataRoute.Sitemap = powerRegionSlugs.map((slug) => ({
     url: `${base}/power/${enc(slug)}`,
@@ -180,6 +195,7 @@ function coreSitemap(): MetadataRoute.Sitemap {
     ...subjectDetailPages,
     ...pseoPages,
     ...pilotDetail,
+    ...seoulDongPages,
     ...powerRegionPages,
     ...powerLanguagePages,
     ...powerSchoolsIndex,
