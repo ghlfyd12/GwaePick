@@ -11,6 +11,7 @@ import { LANGUAGE_SLUGS } from "@/data/languageDetail";
 import { allPowerPerformancePairs } from "@/data/powerSchoolDepts";
 import { allBySchoolPairs } from "@/data/bySchoolSubject";
 import { seoulExpansionDongPairs } from "@/data/seoulDong";
+import { metroExpansionDongPairs } from "@/data/cityDong";
 import {
   SITEMAP_URLS_PER_FILE,
   SCHOOL_PAIR_COUNT,
@@ -140,6 +141,20 @@ function coreSitemap(): MetadataRoute.Sitemap {
     }
   }
 
+  // 6대 광역시 동×과목 2차 확장 — 기초 동(+부산 명소 복구) × 8과목.
+  // 렌더는 기존 resolveNew(온디맨드 ISR)가 담당, 여기선 사이트맵 등재만. lastmod=동 템플릿 변경일.
+  const metroDongPages: MetadataRoute.Sitemap = [];
+  for (const { sido, sigungu, dong } of metroExpansionDongPairs) {
+    for (const subj of detailSubjects) {
+      metroDongPages.push({
+        url: `${base}/tutoring/by-region/${sido}/${sigungu}/${dong}/${subj.slug}`,
+        lastModified: DONG_PSEO_MODIFIED,
+        changeFrequency: "weekly",
+        priority: 0.5,
+      });
+    }
+  }
+
   // 파워 홈페이지 지역별 영어회화 — /power/[지역명]
   const powerRegionPages: MetadataRoute.Sitemap = powerRegionSlugs.map((slug) => ({
     url: `${base}/power/${enc(slug)}`,
@@ -196,6 +211,7 @@ function coreSitemap(): MetadataRoute.Sitemap {
     ...pseoPages,
     ...pilotDetail,
     ...seoulDongPages,
+    ...metroDongPages,
     ...powerRegionPages,
     ...powerLanguagePages,
     ...powerSchoolsIndex,
