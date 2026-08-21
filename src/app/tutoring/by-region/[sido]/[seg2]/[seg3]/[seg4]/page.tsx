@@ -14,6 +14,7 @@ import {
   pseoHref,
 } from "@/data/pseo";
 import { gyeonggi, sigunguBySlug, findDong } from "@/data/gyeonggi";
+import { gyeonggiEnglishCanonicalPath } from "@/data/gyeonggiCanonicalBridge";
 import { getSido } from "@/data/sidoRegions";
 import {
   subjects as subjectsEn,
@@ -92,13 +93,20 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { sido, seg2, seg3, seg4 } = await params;
 
-  // 기존 경기 Korean pSEO
+  // 기존 경기 Korean pSEO — canonical 은 대응 영문 URL(이중 URL 통합, 1단계 권고 b).
+  // 브리지 매핑 실패 시 자기참조 유지(잘못된 canonical 방지).
   const r = resolve(sido, seg2, seg3, seg4);
   if (r) {
+    const selfPath = pseoHref.dongSubject(r.sg.slug, r.dong.slug, r.subj.slug);
+    const enCanonical = gyeonggiEnglishCanonicalPath(
+      r.sg.slug,
+      r.dong.slug,
+      r.subj.slug,
+    );
     return buildRegionMeta({
       regionName: r.dong.name,
       subjectLabel: r.subj.label,
-      canonicalPath: pseoHref.dongSubject(r.sg.slug, r.dong.slug, r.subj.slug),
+      canonicalPath: enCanonical ?? selfPath,
     });
   }
 
