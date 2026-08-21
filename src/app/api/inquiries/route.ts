@@ -9,6 +9,7 @@ import {
   normalizePhone,
 } from "@/data/applyFormOptions";
 import { recordInquiryToNotion } from "@/lib/notionInquiry";
+import { sendInquiryNotification } from "@/lib/mail";
 
 /*
  * 신청폼 제출 — POST /api/inquiries
@@ -335,6 +336,25 @@ export async function POST(request: Request) {
       });
     }
   }
+
+  /* ── 6) 운영자 메일 알림 — Supabase·Notion 뒤. 실패는 완전 격리(200 무영향).
+   *   sendInquiryNotification 은 throw 하지 않으며, 미설정 시 skip·실패 시 inquiry_id·상태만 로깅한다.
+   *   ⚠️ perf 브랜치 1d7aee7(Google Sheets append)이 같은 구간(Notion 뒤·return 앞)에 단계를 추가하므로
+   *      rebase 시 이 블록과 병행 유지(순서: Notion → Sheets → 메일). */
+  await sendInquiryNotification({
+    inquiryId,
+    name,
+    phone: phone!, // 위 검증에서 형식 확인됨.
+    regionName,
+    schoolLabel: schoolName ?? (schoolFallback || "(미입력)"),
+    grades,
+    subjectNames,
+    lessonType,
+    memo: memoBody,
+    address: addressText,
+    inflow: utm.utm_source ?? utm.referrer ?? "",
+    submittedAt: new Date(),
+  });
 
   // 내부 식별자는 응답에 담지 않는다. (Notion 성공/실패와 무관하게 리드는 확보됨)
   return NextResponse.json({ ok: true });
