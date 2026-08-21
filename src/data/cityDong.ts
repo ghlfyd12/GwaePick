@@ -58,3 +58,26 @@ const METRO_CITIES: { slug: string; recover: readonly string[] }[] = [
 export const metroExpansionDongPairs: CityDongPair[] = METRO_CITIES.flatMap((c) =>
   buildCityDongPairs(c.slug, c.recover),
 );
+
+/**
+ * 8도 + 세종 config(3차). 유형 A(동+가 법정동) 명소 복구 — 전북(전주)·경남(진해) 발견분.
+ * 유형 B(번호 행정동만: 온양·첨단·계양 등)는 CSV 보강(4차)으로 이연(미복구).
+ * 세종은 sigungu 명이 "세종"(구/군 아님)이나 buildCityDongPairs 가 sigungu 를 이름과
+ * 무관하게 순회하므로 33동이 누락 없이 편입된다. 경기는 한글 엔진 자산 보호 위해 미포함.
+ */
+const PROVINCE_CITIES: { slug: string; recover: readonly string[] }[] = [
+  { slug: "gangwon", recover: [] },
+  { slug: "chungbuk", recover: [] },
+  { slug: "chungnam", recover: [] },
+  { slug: "jeonbuk", recover: ["송천동", "우아동", "인후동", "전미동", "경원동", "다가동", "삼천동", "서완산동", "중화산동", "평화동", "효자동"] },
+  { slug: "jeonnam", recover: [] },
+  { slug: "gyeongbuk", recover: [] },
+  { slug: "gyeongnam", recover: ["대성동", "두월동", "신포동", "월남동", "장군동", "중앙동", "창포동"] },
+  { slug: "jeju", recover: [] },
+  { slug: "sejong", recover: [] },
+];
+
+/** 8도 + 세종 기초 동(+전북·경남 명소 복구) — 사이트맵 전용 dong 청크용. */
+export const provinceExpansionDongPairs: CityDongPair[] = PROVINCE_CITIES.flatMap((c) =>
+  buildCityDongPairs(c.slug, c.recover),
+);

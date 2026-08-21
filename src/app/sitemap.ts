@@ -11,7 +11,10 @@ import { LANGUAGE_SLUGS } from "@/data/languageDetail";
 import { allPowerPerformancePairs } from "@/data/powerSchoolDepts";
 import { allBySchoolPairs } from "@/data/bySchoolSubject";
 import { seoulExpansionDongPairs } from "@/data/seoulDong";
-import { metroExpansionDongPairs } from "@/data/cityDong";
+import {
+  metroExpansionDongPairs,
+  provinceExpansionDongPairs,
+} from "@/data/cityDong";
 import {
   SITEMAP_URLS_PER_FILE,
   SCHOOL_PAIR_COUNT,
@@ -24,6 +27,8 @@ import {
   POWER_REGION_SITEMAP_CHUNKS,
   POWER_EXAM_PAIRS,
   POWER_EXAM_PAIR_COUNT,
+  POWER_EXAM_SITEMAP_CHUNKS,
+  PROVINCE_DONG_URL_COUNT,
   TOTAL_SITEMAP_COUNT,
 } from "@/lib/powerRegionSitemap";
 import {
@@ -255,6 +260,29 @@ function powerExamSitemap(chunk: number): MetadataRoute.Sitemap {
   return out;
 }
 
+/**
+ * 도 지역 dong 청크(3차) — /tutoring/by-region/{도}/{시군구}/{동}/{과목} 한 청크(슬라이스).
+ * 코어 40k 근접 회피 위해 전용 청크로 분리(맨 뒤 id, 기존 shard 불변). lastmod=DONG_PSEO_MODIFIED.
+ * 렌더는 기존 resolveNew(온디맨드 ISR)가 담당, 여기선 사이트맵 등재만.
+ */
+function provinceDongSitemap(chunk: number): MetadataRoute.Sitemap {
+  const start = chunk * SITEMAP_URLS_PER_FILE;
+  const end = Math.min(start + SITEMAP_URLS_PER_FILE, PROVINCE_DONG_URL_COUNT);
+  const subjectCount = detailSubjects.length;
+  const out: MetadataRoute.Sitemap = [];
+  for (let p = start; p < end; p++) {
+    const pair = provinceExpansionDongPairs[Math.floor(p / subjectCount)];
+    const subject = detailSubjects[p % subjectCount];
+    out.push({
+      url: `${base}/tutoring/by-region/${pair.sido}/${pair.sigungu}/${pair.dong}/${subject.slug}`,
+      lastModified: DONG_PSEO_MODIFIED,
+      changeFrequency: "weekly",
+      priority: 0.5,
+    });
+  }
+  return out;
+}
+
 /** id 1..N — 학교×과목 상세 한 청크. 평탄화된 (학교,과목) 쌍을 슬라이스로만 생성(메모리 안전). lastmod=SCHOOL_MODIFIED. */
 function schoolSitemap(chunk: number): MetadataRoute.Sitemap {
   const start = chunk * SITEMAP_URLS_PER_FILE;
@@ -280,11 +308,14 @@ export default async function sitemap({
 }): Promise<MetadataRoute.Sitemap> {
   // lastModified 는 빌드 시각(new Date)이 아니라 유형별 정직한 상수를 각 함수가 직접 사용한다.
   const n = Number(await id);
-  // id 0 = 코어 / 1..S = 학교 청크 / S+1..S+P = 파워 지역 청크 / 그 뒤 = 어학시험 청크(append).
+  // id 0 = 코어 / 1..S = 학교 / 파워 지역 / 어학시험 / 그 뒤 = 도 지역 dong 청크(append, 맨 뒤).
   if (n <= 0) return coreSitemap();
   if (n <= SCHOOL_SITEMAP_CHUNKS) return schoolSitemap(n - 1);
-  const afterSchool = n - 1 - SCHOOL_SITEMAP_CHUNKS; // 0-based: 회화 청크 + 시험 청크
+  const afterSchool = n - 1 - SCHOOL_SITEMAP_CHUNKS; // 0-based: 회화 + 시험 + 도 dong
   if (afterSchool < POWER_REGION_SITEMAP_CHUNKS)
     return powerRegionSitemap(afterSchool);
-  return powerExamSitemap(afterSchool - POWER_REGION_SITEMAP_CHUNKS);
+  const afterPowerRegion = afterSchool - POWER_REGION_SITEMAP_CHUNKS;
+  if (afterPowerRegion < POWER_EXAM_SITEMAP_CHUNKS)
+    return powerExamSitemap(afterPowerRegion);
+  return provinceDongSitemap(afterPowerRegion - POWER_EXAM_SITEMAP_CHUNKS);
 }

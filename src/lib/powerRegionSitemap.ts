@@ -7,6 +7,8 @@
 import { SITEMAP_URLS_PER_FILE, SCHOOL_SITEMAP_CHUNKS } from "@/lib/schoolSitemap";
 import { allByRegionPairs } from "@/data/byRegionSubject";
 import { allByExamPairs } from "@/data/byRegionExam";
+import { provinceExpansionDongPairs } from "@/data/cityDong";
+import { subjects as detailSubjects } from "@/data/subjects";
 
 /** 지역 축 전체 (지역×과목) 조합 — 모듈 1회 계산. */
 export const POWER_REGION_PAIRS = allByRegionPairs();
@@ -28,12 +30,23 @@ export const POWER_EXAM_SITEMAP_CHUNKS = Math.max(
   Math.ceil(POWER_EXAM_PAIR_COUNT / SITEMAP_URLS_PER_FILE),
 );
 
+/** 도 지역 동×과목 축(3차) URL 수 — 기초 동(+명소 복구) × 8과목. 모듈 1회 계산. */
+export const PROVINCE_DONG_URL_COUNT =
+  provinceExpansionDongPairs.length * detailSubjects.length;
+
+/** 도 지역 dong 청크 수(최소 1) — 항상 맨 뒤 id 라 기존 shard id 불변. */
+export const PROVINCE_DONG_SITEMAP_CHUNKS = Math.max(
+  1,
+  Math.ceil(PROVINCE_DONG_URL_COUNT / SITEMAP_URLS_PER_FILE),
+);
+
 /**
- * 전체 사이트맵 파일 수(단일 소스) = 코어 1 + 학교 청크 + 파워 지역 청크 + 어학시험 청크.
- * robots·index·sitemap 공유. 시험 청크는 항상 맨 뒤 id 라 기존 shard id(0..회화)가 바뀌지 않는다.
+ * 전체 사이트맵 파일 수(단일 소스) = 코어 1 + 학교 청크 + 파워 지역 청크 + 어학시험 청크
+ * + 도 지역 dong 청크. robots·index·sitemap 공유. 새 청크는 항상 맨 뒤 id 라 기존 shard id 불변.
  */
 export const TOTAL_SITEMAP_COUNT =
   1 +
   SCHOOL_SITEMAP_CHUNKS +
   POWER_REGION_SITEMAP_CHUNKS +
-  POWER_EXAM_SITEMAP_CHUNKS;
+  POWER_EXAM_SITEMAP_CHUNKS +
+  PROVINCE_DONG_SITEMAP_CHUNKS;
