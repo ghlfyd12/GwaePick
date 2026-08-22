@@ -25,6 +25,8 @@ export const SCHOOL_MODIFIED = "2026-08-07";
 export const CORE_MODIFIED = "2026-07-29";
 /** 지역 랜딩 /[region] (템플릿·regions.ts 데이터). */
 export const REGION_MODIFIED = "2026-06-24";
+/** 신도시 키워드 보강된 시군구 랜딩(regionLandmarks 대상)만 — description 실변경일. 나머지 랜딩은 REGION_MODIFIED 유지. */
+export const REGION_LANDMARK_MODIFIED = "2026-08-22";
 /** 경기 pSEO(시도×과목·시군구×과목) — PseoLanding·regionContent·경기 데이터·렌더 링크 구성. */
 export const GYEONGGI_PSEO_MODIFIED = "2026-08-13";
 /** 영어 동(洞) pSEO pilot(동×과목) — DongSubjectDetail·DongHub 본문·메타. */

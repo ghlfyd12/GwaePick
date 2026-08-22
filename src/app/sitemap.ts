@@ -35,11 +35,13 @@ import {
   SCHOOL_MODIFIED,
   CORE_MODIFIED,
   REGION_MODIFIED,
+  REGION_LANDMARK_MODIFIED,
   GYEONGGI_PSEO_MODIFIED,
   DONG_PSEO_MODIFIED,
   SUBJECT_MODIFIED,
   POWER_MODIFIED,
 } from "@/data/contentMeta";
+import { REGION_LANDMARKS } from "@/data/regionLandmarks";
 
 /*
  * 동적 sitemap — 분할 구조(/sitemap/[id].xml). robots.txt 가 각 파일 URL 을 모두 가리킨다.
@@ -80,7 +82,8 @@ function coreSitemap(): MetadataRoute.Sitemap {
 
   const regionPages: MetadataRoute.Sitemap = regions.map((r) => ({
     url: `${base}/${enc(r.id)}`,
-    lastModified: REGION_MODIFIED,
+    // 신도시 키워드 보강된 랜딩만 실변경일, 나머지는 기존 REGION_MODIFIED(가짜 갱신 방지).
+    lastModified: REGION_LANDMARKS[r.id] ? REGION_LANDMARK_MODIFIED : REGION_MODIFIED,
     changeFrequency: "weekly",
     priority: 0.8,
   }));

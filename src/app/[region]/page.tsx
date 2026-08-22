@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { regions, getRegionById, type Region } from "@/data/regions";
+import { REGION_LANDMARKS } from "@/data/regionLandmarks";
 import { site } from "@/data/site";
 import CTAButton from "@/components/ui/CTAButton";
 import Curriculum from "@/components/sections/Curriculum";
@@ -50,7 +51,11 @@ export async function generateMetadata({
   if (!r) return {};
 
   const title = `${r.name} 수학·영어 과외 추천 - 직접 가르쳐 본 ${r.name} 선생님 1:1 매칭`;
-  const description = `학원에 다녀도 성적이 그대로라면 문제는 맞는 선생님을 만나지 못한 것입니다. 2028 대입 개편 및 내신 5등급제 대비, ${r.name} 학생들의 성향과 호흡까지 맞춰줄 전담 선생님 무료 상담 신청해보세요.`;
+  // 신도시 키워드 보강 대상(regionLandmarks)만 지명 포함 description, 나머지는 기존 템플릿 유지.
+  const landmarks = REGION_LANDMARKS[r.id];
+  const description = landmarks
+    ? `${r.province} ${r.name} ${landmarks.join("·")}에서 과외 선생님을 찾고 계신가요? 2028 대입 개편·내신 5등급제 대비, 아이의 성향과 호흡까지 맞춰 줄 전담 선생님을 직접 상담으로 연결해 드립니다.`
+    : `학원에 다녀도 성적이 그대로라면 문제는 맞는 선생님을 만나지 못한 것입니다. 2028 대입 개편 및 내신 5등급제 대비, ${r.name} 학생들의 성향과 호흡까지 맞춰줄 전담 선생님 무료 상담 신청해보세요.`;
   const url = `/${r.id}`;
 
   return {
