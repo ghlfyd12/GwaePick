@@ -11,7 +11,7 @@
  * 날짜는 ISO(YYYY-MM-DD, KST 자정 기준). article:*_time · JSON-LD dateModified 등에 사용.
  */
 export const SCHOOL_PUBLISHED = "2026-06-24";
-export const SCHOOL_MODIFIED = "2026-08-07";
+export const SCHOOL_MODIFIED = "2026-08-23";
 
 /**
  * sitemap lastmod 단일 소스 — 페이지 유형별 정직한 최종 콘텐츠 변경일(ISO, KST 자정 기준).

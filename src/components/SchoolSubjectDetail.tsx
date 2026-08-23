@@ -16,6 +16,8 @@ import { schoolDetailHref } from "@/lib/schoolHref";
 import { selectSchoolContent } from "@/lib/contentVariant";
 import SchoolStruggles from "@/components/school/SchoolStruggles";
 import SchoolExamPrep from "@/components/school/SchoolExamPrep";
+import SchoolExamGuide from "@/components/school/SchoolExamGuide";
+import { buildSchoolExamGuide } from "@/data/schoolExamGuide";
 import SchoolRegionLinks from "@/components/SchoolRegionLinks";
 import type { SchoolArticle } from "@/data/schoolArticleSections";
 import PageBanner from "@/components/PageBanner";
@@ -86,6 +88,18 @@ export default function SchoolSubjectDetail({
 
   // 학교급×과목 고유 콘텐츠(자주 겪는 어려움 · 시험 대비 관리) — 학교 slug 해시로 결정론적 변형 선택.
   const schoolContentVariant = selectSchoolContent(schoolSlug, levelLabel, subject.slug);
+
+  // 내신·기출 정보 섹션 — 고교 × 핵심5과목만. 밑판 + 학교명·인근학교·계열 주입. 그 외는 null(미렌더).
+  const examGuide = buildSchoolExamGuide({
+    schoolSlug,
+    schoolName,
+    displayName,
+    levelLabel,
+    sigunguName,
+    subjectSlug: subject.slug,
+    subjectLabel: subject.label,
+    nearby: otherSchools,
+  });
 
   // 내부 링크
   const otherSchoolLinks = otherSchools
@@ -269,6 +283,9 @@ export default function SchoolSubjectDetail({
             <SchoolExamPrep schoolName={schoolName} examPrep={schoolContentVariant.examPrep} />
           </>
         )}
+
+        {/* 4-2. 내신·기출 정보 섹션 — 고교 × 핵심5과목만(커리큘럼 뒤·CTA 앞). 없으면 미렌더. */}
+        {examGuide && <SchoolExamGuide guide={examGuide} />}
 
         {/* 5. 진행 순서 STEP */}
         <section>
