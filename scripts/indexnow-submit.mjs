@@ -22,6 +22,7 @@
 //   `--start-chunk (N+1)` 로 재개할 수 있게 한다. 당일 재전송 금지.
 
 import { readFileSync, writeFileSync } from "node:fs";
+import { execSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
@@ -41,6 +42,7 @@ const PROGRESS_FILE = join(ROOT, "scripts/indexnow/last-success-chunk.txt");
 const args = process.argv.slice(2);
 const listPath = args.find((a) => !a.startsWith("--"));
 const dryRun = args.includes("--dry-run");
+const confirmLarge = args.includes("--confirm-large");
 const startIdx = args.indexOf("--start-chunk");
 const startChunk = startIdx >= 0 ? parseInt(args[startIdx + 1], 10) : 1;
 const endIdx = args.indexOf("--end-chunk");
@@ -64,6 +66,16 @@ const urls = readFileSync(join(ROOT, listPath.replace(/^\.\//, "")), "utf8")
   .split(/\r?\n/)
   .map((l) => l.trim())
   .filter(Boolean);
+
+// ── 대량 전송 가드 — 1,000건 초과는 --confirm-large 없이는 거부(과도 전송 방지) ──────
+const LARGE_THRESHOLD = 1000;
+if (urls.length > LARGE_THRESHOLD && !confirmLarge) {
+  console.error(
+    `거부 — URL ${urls.length}건은 ${LARGE_THRESHOLD}건 초과(대량). 검수자 승인 후 --confirm-large 를 붙여 실행하세요.`,
+  );
+  console.error(`예: node scripts/indexnow-submit.mjs ${listPath} --confirm-large`);
+  process.exit(1);
+}
 
 const chunks = [];
 for (let i = 0; i < urls.length; i += CHUNK_SIZE) chunks.push(urls.slice(i, i + CHUNK_SIZE));
@@ -130,5 +142,14 @@ if (endChunk < chunks.length) {
   console.log(`\n구간 완료 — chunk ${startChunk}..${endChunk} 성공(URL ${sentUrls}개). 다음 재개: node scripts/indexnow-submit.mjs ${listPath} --start-chunk ${endChunk + 1}`);
 } else {
   console.log(`\n완료 — chunk ${startChunk}..${chunks.length} 성공. 전송 URL 총수(이번 실행): ${sentUrls}`);
+  // 전체 목록 전송 완료 시에만 배포 커밋 marker 를 남겨 같은 커밋 재전송을 막는다(런타임 산출물).
+  try {
+    const sha = execSync("git rev-parse --short HEAD", { cwd: ROOT, encoding: "utf8" }).trim();
+    const markerPath = join(ROOT, `.indexnow-sent-${sha}`);
+    writeFileSync(markerPath, `${listPath} ${urls.length} urls\n`, "utf8");
+    console.log(`전송 marker 기록: .indexnow-sent-${sha}`);
+  } catch (err) {
+    console.error(`(marker 기록 실패 — git sha 조회 불가: ${err?.message ?? err})`);
+  }
 }
 console.log(`진행 기록(마지막 성공 chunk): ${PROGRESS_FILE}`);

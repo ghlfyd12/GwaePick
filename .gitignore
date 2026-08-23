@@ -47,3 +47,7 @@ next-env.d.ts
 
 # 내부 감사 보고서(로컬 참고용, Git 추적 제외)
 docs/internal-link-audit.md
+
+# IndexNow 반자동 런타임 산출물 — 전송 marker(커밋별 재전송 방지) + detect 생성 목록
+.indexnow-sent-*
+scripts/indexnow/detected-*.txt
