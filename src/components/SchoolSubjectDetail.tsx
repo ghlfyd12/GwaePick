@@ -118,7 +118,14 @@ export default function SchoolSubjectDetail({
           <li aria-hidden className="text-line">›</li>
           <li><Link href={`/tutoring/by-school/${sidoSlug}`} className="hover:text-accent">{region}</Link></li>
           <li aria-hidden className="text-line">›</li>
-          <li className="break-keep font-medium text-ink">{schoolName}</li>
+          {/* 고교만 학교 단위 허브로 링크(파일럿). 중·초는 허브가 없어 텍스트 유지. */}
+          <li className="break-keep font-medium text-ink">
+            {levelLabel === "고등학교" ? (
+              <Link href={`/tutoring/by-school/${schoolSlug}`} className="hover:text-accent">{schoolName}</Link>
+            ) : (
+              schoolName
+            )}
+          </li>
           <li aria-hidden className="text-line">›</li>
           <li aria-current="page" className="font-semibold text-ink">{subject.label}</li>
         </ol>

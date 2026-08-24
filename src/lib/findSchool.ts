@@ -72,3 +72,25 @@ export function sameRegionSchools(
     .slice(0, limit)
     .map((s) => ({ name: s.name, slug: s.slug }));
 }
+
+/**
+ * 같은 시군구의 같은 학교급 학교만(현재 제외). 가나다순, limit 개까지.
+ * 학교 허브(고교만 존재)에서 인접 링크가 허브 없는 학교급으로 404 나지 않게 쓴다.
+ */
+export function sameRegionSchoolsByLevel(
+  ctx: SchoolContext,
+  level: SchoolContext["school"]["level"],
+  limit = 12,
+): { name: string; slug: string }[] {
+  const sido = SCHOOLS.find((s) => s.slug === ctx.sidoSlug);
+  const sg = sido?.sigungu.find((s) => s.slug === ctx.sigunguSlug);
+  if (!sg) return [];
+  return sg.schools
+    .filter(
+      (s) =>
+        s.slug !== ctx.school.slug &&
+        (overrideSchoolLevel(s.slug) ?? s.level) === level,
+    )
+    .slice(0, limit)
+    .map((s) => ({ name: s.name, slug: s.slug }));
+}

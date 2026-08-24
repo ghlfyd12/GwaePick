@@ -3,20 +3,41 @@ import { notFound } from "next/navigation";
 import HeroSearch from "@/components/HeroSearch";
 import SchoolBrowser from "@/components/SchoolBrowser";
 import Pagination from "@/components/Pagination";
-import { SCHOOLS, getSchoolSido } from "@/data/schools";
+import SchoolHub from "@/components/school/SchoolHub";
+import JsonLd from "@/components/JsonLd";
+import { SCHOOLS, getSchoolSido, LEVEL_LABEL } from "@/data/schools";
 import { flatSchoolsOfSido } from "@/lib/schoolList";
 import { pageCount } from "@/lib/paginate";
+import {
+  findSchoolBySlug,
+  sameRegionSchoolsByLevel,
+  isAmbiguousSchoolName,
+} from "@/lib/findSchool";
+import { expandSchoolName } from "@/lib/schoolName";
+import {
+  buildSchoolHubMeta,
+  shortRegion,
+  serviceJsonLd,
+  breadcrumbJsonLd,
+  webPageJsonLd,
+} from "@/lib/seo";
+import { SCHOOL_HUB_PUBLISHED, SCHOOL_HUB_MODIFIED } from "@/data/contentMeta";
 import { site } from "@/data/site";
 
 const PAGE_SIZE = 48;
 
 /*
- * 학교별 시/도 — /tutoring/by-school/[sido]. 지역별과 동일 구도(지도만 제외).
- * 공통 히어로(school 검색) + 섹션 제목 + SchoolBrowser + 상담 CTA. 17개 시/도 SSG.
- * h1 = 히어로 헤드라인 1개. 데이터는 schools.ts(서버에서 해당 시/도만 추출해 클라에 전달).
+ * /tutoring/by-school/[sido] — 단일 세그먼트 이중 용도:
+ *   (1) 시도 slug(17) → 시도 인덱스(SchoolBrowser). SSG 시드 유지.
+ *   (2) 고교 학교 slug → 학교 단위 허브(SchoolHub, 과목 없음). ISR 온디맨드.
+ *   (3) 그 외(중·초 slug 포함) → 404. 중·초 허브는 확대 시 별도 승인.
+ * 상세(학교×과목)는 하위 [subject] 세그먼트가 담당(이 파일 무관).
  */
-export const dynamicParams = false;
+export const dynamicParams = true;
+// 재배포 전까지 영구 캐시 — 시간 기반 재생성 없음(콘텐츠는 data 파일 기준).
+export const revalidate = false;
 
+// 시도 17개만 미리 생성(시드). 고교 허브는 온디맨드(빌드 시간 무증가).
 export function generateStaticParams() {
   return SCHOOLS.map((s) => ({ sido: s.slug }));
 }
@@ -31,22 +52,47 @@ const HERO = {
     "학교 데이터에서 찾지 못했습니다. 바로 상담받으시면 학교에 맞춰 안내해 드립니다.",
 } as const;
 
+/** 고교 학교 slug 인지 — 시도가 아니고, 해석된 level=고등학교. */
+function resolveHighSchool(param: string) {
+  const ctx = findSchoolBySlug(param);
+  if (!ctx || LEVEL_LABEL[ctx.school.level] !== "고등학교") return null;
+  return ctx;
+}
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ sido: string }>;
 }): Promise<Metadata> {
   const { sido } = await params;
+
+  // (1) 시도 인덱스
   const s = getSchoolSido(sido);
-  if (!s) return {};
-  const title = `${s.label} 학교별 1:1 과외 — 지식의참견`;
-  const description = `${s.label}의 초·중·고 학교별 1:1 맞춤 과외. 시·군·구와 학교급으로 우리 학교를 찾고, 아이에게 맞는 선생님을 상담으로 연결해 드립니다.`;
-  return {
-    title: { absolute: title },
-    description,
-    alternates: { canonical: `/tutoring/by-school/${s.slug}` },
-    openGraph: { title, description, url: `/tutoring/by-school/${s.slug}`, type: "website" },
-  };
+  if (s) {
+    const title = `${s.label} 학교별 1:1 과외 — 지식의참견`;
+    const description = `${s.label}의 초·중·고 학교별 1:1 맞춤 과외. 시·군·구와 학교급으로 우리 학교를 찾고, 아이에게 맞는 선생님을 상담으로 연결해 드립니다.`;
+    return {
+      title: { absolute: title },
+      description,
+      alternates: { canonical: `/tutoring/by-school/${s.slug}` },
+      openGraph: { title, description, url: `/tutoring/by-school/${s.slug}`, type: "website" },
+    };
+  }
+
+  // (2) 고교 허브
+  const ctx = resolveHighSchool(sido);
+  if (ctx) {
+    return buildSchoolHubMeta({
+      schoolName: ctx.school.name,
+      schoolFullName: expandSchoolName(ctx.school.name),
+      regionShort: isAmbiguousSchoolName(ctx.school.name)
+        ? shortRegion(ctx.sigunguName)
+        : undefined,
+      canonicalPath: `/tutoring/by-school/${ctx.school.slug}`,
+    });
+  }
+
+  return {};
 }
 
 export default async function SchoolSidoPage({
@@ -56,8 +102,45 @@ export default async function SchoolSidoPage({
 }) {
   const { sido } = await params;
   const schoolSido = getSchoolSido(sido);
-  if (!schoolSido) notFound();
 
+  // (2) 고교 허브 — 시도가 아니면 고교 학교 slug 로 조회.
+  if (!schoolSido) {
+    const ctx = resolveHighSchool(sido);
+    if (!ctx) notFound(); // 중·초 slug·미존재 slug → 404
+
+    const canonical = `/tutoring/by-school/${ctx.school.slug}`;
+    const jsonLd = [
+      serviceJsonLd({ areaServed: ctx.sigunguName, canonicalPath: canonical }),
+      breadcrumbJsonLd([
+        { name: "홈", path: "/" },
+        { name: "학교별 과외", path: "/tutoring/by-school" },
+        { name: `${ctx.school.name} 과외` },
+      ]),
+      webPageJsonLd({
+        name: `${ctx.school.name} 과외`,
+        canonicalPath: canonical,
+        published: SCHOOL_HUB_PUBLISHED,
+        modified: SCHOOL_HUB_MODIFIED,
+      }),
+    ];
+    return (
+      <>
+        <JsonLd data={jsonLd} />
+        <SchoolHub
+          schoolSlug={ctx.school.slug}
+          schoolName={ctx.school.name}
+          schoolFullName={expandSchoolName(ctx.school.name)}
+          levelLabel={LEVEL_LABEL[ctx.school.level]}
+          sidoLabel={ctx.sidoLabel}
+          sidoSlug={ctx.sidoSlug}
+          sigunguName={ctx.sigunguName}
+          otherSchools={sameRegionSchoolsByLevel(ctx, ctx.school.level, 12)}
+        />
+      </>
+    );
+  }
+
+  // (1) 시도 인덱스 (기존)
   const totalPages = pageCount(flatSchoolsOfSido(schoolSido).length, PAGE_SIZE);
 
   return (

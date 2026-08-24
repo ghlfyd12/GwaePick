@@ -4,7 +4,11 @@
  * by-region 과목 페이지가 코어(id 0) 40,000 한도를 넘기므로 별도 shard 로 분리한다.
  * (sitemap.ts: id 0 코어 → 1..S 학교 청크 → S+1..S+P 파워 지역 청크.)
  */
-import { SITEMAP_URLS_PER_FILE, SCHOOL_SITEMAP_CHUNKS } from "@/lib/schoolSitemap";
+import {
+  SITEMAP_URLS_PER_FILE,
+  SCHOOL_SITEMAP_CHUNKS,
+  SCHOOL_HUB_SITEMAP_CHUNKS,
+} from "@/lib/schoolSitemap";
 import { allByRegionPairs } from "@/data/byRegionSubject";
 import { allByExamPairs } from "@/data/byRegionExam";
 import { provinceExpansionDongPairs } from "@/data/cityDong";
@@ -42,11 +46,13 @@ export const PROVINCE_DONG_SITEMAP_CHUNKS = Math.max(
 
 /**
  * 전체 사이트맵 파일 수(단일 소스) = 코어 1 + 학교 청크 + 파워 지역 청크 + 어학시험 청크
- * + 도 지역 dong 청크. robots·index·sitemap 공유. 새 청크는 항상 맨 뒤 id 라 기존 shard id 불변.
+ * + 도 지역 dong 청크 + 고교 허브 청크. robots·index·sitemap 공유.
+ * 새 청크는 항상 맨 뒤 id 라 기존 shard id 불변.
  */
 export const TOTAL_SITEMAP_COUNT =
   1 +
   SCHOOL_SITEMAP_CHUNKS +
   POWER_REGION_SITEMAP_CHUNKS +
   POWER_EXAM_SITEMAP_CHUNKS +
-  PROVINCE_DONG_SITEMAP_CHUNKS;
+  PROVINCE_DONG_SITEMAP_CHUNKS +
+  SCHOOL_HUB_SITEMAP_CHUNKS;

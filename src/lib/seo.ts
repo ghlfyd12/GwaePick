@@ -25,7 +25,12 @@ import { buildRegionDongTitle } from "@/lib/regionSchoolPick";
 import { getSubjectUnits } from "@/data/subjectUnits";
 import { isThumbEligible, thumbPath, thumbAlt, THUMB_SIZE } from "@/lib/thumb";
 import { SCHOOL_GRADE_PHRASE } from "@/data/schoolGradeKeywords";
-import { SCHOOL_PUBLISHED, SCHOOL_MODIFIED } from "@/data/contentMeta";
+import {
+  SCHOOL_PUBLISHED,
+  SCHOOL_MODIFIED,
+  SCHOOL_HUB_PUBLISHED,
+  SCHOOL_HUB_MODIFIED,
+} from "@/data/contentMeta";
 
 /** ISO 날짜(YYYY-MM-DD) → KST 자정 ISO 8601 datetime. article:*_time · JSON-LD dates 용. */
 const isoKST = (d: string) => `${d}T00:00:00+09:00`;
@@ -270,6 +275,37 @@ export function buildSchoolMeta(p: SchoolMetaInput): Metadata {
   };
 }
 
+export interface SchoolHubMetaInput {
+  /** 약칭(예: 가락고). */
+  schoolName: string;
+  /** 정식명(예: 가락고등학교). 없으면 약칭만. */
+  schoolFullName: string | null;
+  /** 동명이교(지역 접미사)만 지정 — title 앞에 짧은 지역명. */
+  regionShort?: string;
+  canonicalPath: string;
+}
+/**
+ * 학교 단위 허브(과목 없음) title/description — "정식명(약칭) 과외".
+ * 과목 중립. 키워드 나열 없이 자연 문장. 날짜는 SCHOOL_HUB 상수.
+ */
+export function buildSchoolHubMeta(p: SchoolHubMetaInput): Metadata {
+  const head = p.schoolFullName
+    ? `${p.schoolFullName}(${p.schoolName})`
+    : p.schoolName;
+  const prefix = p.regionShort ? `${p.regionShort} ` : "";
+  const title = `${prefix}${head} 과외 | ${SITE_NAME}`;
+  const nameForDesc = p.schoolFullName ?? p.schoolName;
+  const description = `${nameForDesc} 1:1 맞춤 과외 안내. 직접 가르쳐 온 선생님이 과목별로 우리 아이에게 맞는 선생님을 상담으로 연결해 드립니다.`;
+  const base = baseMetadata(title, description, p.canonicalPath);
+  return {
+    ...base,
+    other: {
+      "article:published_time": isoKST(SCHOOL_HUB_PUBLISHED),
+      "article:modified_time": isoKST(SCHOOL_HUB_MODIFIED),
+    },
+  };
+}
+
 export interface RegionMetaInput {
   regionName: string;
   /** 과목 라벨. 없으면 과목 없는 지역 허브(구·동 허브) 메타. */
@@ -429,14 +465,20 @@ export function breadcrumbJsonLdFromNav(
  * WebPage — 검색결과 신선도(발행/수정일) 신호. 학교×과목 페이지 전용.
  * 날짜는 contentMeta.ts 상수(콘텐츠 실제 변경 시에만 갱신). 기존 Service/Breadcrumb/FAQ 와 별개 노드.
  */
-export function webPageJsonLd(p: { name: string; canonicalPath: string }): Json {
+export function webPageJsonLd(p: {
+  name: string;
+  canonicalPath: string;
+  /** 유형별 정직한 날짜 override(미지정 시 학교×과목 상세 기준 SCHOOL_* 상수). */
+  published?: string;
+  modified?: string;
+}): Json {
   return {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: p.name,
     url: absUrl(p.canonicalPath),
-    datePublished: isoKST(SCHOOL_PUBLISHED),
-    dateModified: isoKST(SCHOOL_MODIFIED),
+    datePublished: isoKST(p.published ?? SCHOOL_PUBLISHED),
+    dateModified: isoKST(p.modified ?? SCHOOL_MODIFIED),
   };
 }
 

@@ -11,7 +11,14 @@
  * 날짜는 ISO(YYYY-MM-DD, KST 자정 기준). article:*_time · JSON-LD dateModified 등에 사용.
  */
 export const SCHOOL_PUBLISHED = "2026-06-24";
-export const SCHOOL_MODIFIED = "2026-08-23"; // @indexnow-group: school
+export const SCHOOL_MODIFIED = "2026-08-24"; // @indexnow-group: school
+
+/**
+ * 학교 단위 허브 /tutoring/by-school/{학교}(과목 없음) — 고교 파일럿(2,457).
+ * 신규 페이지 유형이라 최초 발행일=수정일(배포일). 콘텐츠 실변경 시에만 손으로 갱신.
+ */
+export const SCHOOL_HUB_PUBLISHED = "2026-08-24";
+export const SCHOOL_HUB_MODIFIED = "2026-08-24"; // @indexnow-group: school-hub
 
 /**
  * sitemap lastmod 단일 소스 — 페이지 유형별 정직한 최종 콘텐츠 변경일(ISO, KST 자정 기준).

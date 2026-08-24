@@ -1,5 +1,6 @@
 import { SCHOOLS } from "@/data/schools";
 import { subjects as detailSubjects } from "@/data/subjects";
+import { overrideSchoolLevel } from "@/data/schoolLevelOverrides";
 
 /*
  * 학교×과목 사이트맵 분할 공용 로직(sitemap.ts·robots.ts 공유 단일 소스).
@@ -36,3 +37,25 @@ export function schoolPairAt(p: number) {
     subject: detailSubjects[p % subjectCount],
   };
 }
+
+/* ── 학교 단위 허브(과목 없음) — 고교 파일럿 ─────────────────────────────────
+ * /tutoring/by-school/{학교} 는 이번 파일럿에서 고교만 렌더한다. level 은 slug 오배정
+ * 교정(overrideSchoolLevel)을 반영한 "해석된 level" 기준으로 판정해 라우트(findSchoolBySlug)와
+ * 동일 집합이 되게 한다. 순서는 ALL_SCHOOLS(사이트맵 학교 순서)를 그대로 보존한다.
+ */
+const resolvedLevel = (s: { slug: string; level: string }) =>
+  overrideSchoolLevel(s.slug) ?? s.level;
+
+/** 고교 허브 대상 학교 slug(해석된 level=high). 모듈 1회 계산. */
+export const HIGH_SCHOOL_HUB_SLUGS: string[] = ALL_SCHOOLS.filter(
+  (s) => resolvedLevel(s) === "high",
+).map((s) => s.slug);
+
+/** 고교 허브 URL 총수. */
+export const SCHOOL_HUB_COUNT = HIGH_SCHOOL_HUB_SLUGS.length;
+
+/** 고교 허브 청크 수(최소 1) — 항상 맨 뒤 id 라 기존 shard id 불변. */
+export const SCHOOL_HUB_SITEMAP_CHUNKS = Math.max(
+  1,
+  Math.ceil(SCHOOL_HUB_COUNT / SITEMAP_URLS_PER_FILE),
+);

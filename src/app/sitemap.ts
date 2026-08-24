@@ -20,6 +20,9 @@ import {
   SCHOOL_PAIR_COUNT,
   SCHOOL_SITEMAP_CHUNKS,
   schoolPairAt,
+  HIGH_SCHOOL_HUB_SLUGS,
+  SCHOOL_HUB_COUNT,
+  SCHOOL_HUB_SITEMAP_CHUNKS,
 } from "@/lib/schoolSitemap";
 import {
   POWER_REGION_PAIRS,
@@ -29,10 +32,12 @@ import {
   POWER_EXAM_PAIR_COUNT,
   POWER_EXAM_SITEMAP_CHUNKS,
   PROVINCE_DONG_URL_COUNT,
+  PROVINCE_DONG_SITEMAP_CHUNKS,
   TOTAL_SITEMAP_COUNT,
 } from "@/lib/powerRegionSitemap";
 import {
   SCHOOL_MODIFIED,
+  SCHOOL_HUB_MODIFIED,
   CORE_MODIFIED,
   REGION_MODIFIED,
   REGION_LANDMARK_MODIFIED,
@@ -303,6 +308,22 @@ function schoolSitemap(chunk: number): MetadataRoute.Sitemap {
   return out;
 }
 
+/** 맨 뒤 id — 학교 단위 허브(과목 없음, 고교 파일럿) 한 청크. lastmod=SCHOOL_HUB_MODIFIED. */
+function schoolHubSitemap(chunk: number): MetadataRoute.Sitemap {
+  const start = chunk * SITEMAP_URLS_PER_FILE;
+  const end = Math.min(start + SITEMAP_URLS_PER_FILE, SCHOOL_HUB_COUNT);
+  const out: MetadataRoute.Sitemap = [];
+  for (let i = start; i < end; i++) {
+    out.push({
+      url: `${base}/tutoring/by-school/${enc(HIGH_SCHOOL_HUB_SLUGS[i])}`,
+      lastModified: SCHOOL_HUB_MODIFIED,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    });
+  }
+  return out;
+}
+
 export default async function sitemap({
   id,
 }: {
@@ -320,5 +341,9 @@ export default async function sitemap({
   const afterPowerRegion = afterSchool - POWER_REGION_SITEMAP_CHUNKS;
   if (afterPowerRegion < POWER_EXAM_SITEMAP_CHUNKS)
     return powerExamSitemap(afterPowerRegion);
-  return provinceDongSitemap(afterPowerRegion - POWER_EXAM_SITEMAP_CHUNKS);
+  const afterExam = afterPowerRegion - POWER_EXAM_SITEMAP_CHUNKS;
+  if (afterExam < PROVINCE_DONG_SITEMAP_CHUNKS)
+    return provinceDongSitemap(afterExam);
+  // 맨 뒤 — 고교 허브 청크(append, 기존 shard id 불변).
+  return schoolHubSitemap(afterExam - PROVINCE_DONG_SITEMAP_CHUNKS);
 }
