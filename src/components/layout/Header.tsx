@@ -74,15 +74,13 @@ export default function Header() {
     };
   }, [open]);
 
-  // 모바일 헤더 로고 옆 빠른 메뉴 — 경로 브랜드에 맞춰 navItems 에서 2개만 뽑는다.
-  //  - 메인: 학교별/지역별(현행 유지), /power: 영어/일본어(어학의참견 내부).
-  // 판별은 데스크톱/드로어와 같은 isPower 재사용, 소스는 navItems(=isPower ? POWER_NAV : site.nav).
-  const mobileQuickHrefs = isPower
-    ? ["/power/english", "/power/japanese"]
-    : ["/tutoring/by-school", "/tutoring/by-region"];
-  const mobileQuick = mobileQuickHrefs
-    .map((href) => navItems.find((n) => n.href === href))
-    .filter((n): n is NavItem => Boolean(n));
+  // 모바일 헤더 로고 옆 빠른 메뉴 — 메인만 학교별/지역별 2개(현행 유지).
+  //  - /power: 미표시(상단 과밀 해소). 언어 접근은 햄버거 드로어, 전환은 하단 플로팅이 담당.
+  const mobileQuick = isPower
+    ? []
+    : ["/tutoring/by-school", "/tutoring/by-region"]
+        .map((href) => site.nav.find((n) => n.href === href))
+        .filter((n): n is NavItem => Boolean(n));
 
   return (
     <>
