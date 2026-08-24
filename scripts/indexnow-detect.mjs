@@ -129,6 +129,28 @@ function urlsForGroup(group) {
           out.push(`${BASE_URL}/tutoring/by-school/${enc(s)}/${subj}`);
       return out;
     }
+    case "school-hub": {
+      // 학교 단위 허브(과목 없음) — 고교 파일럿. schoolSitemap.ts 의 HIGH_SCHOOL_HUB_SLUGS 와
+      // 동일 산출: schools.ts 파일 순서(=ALL_SCHOOLS) × 해석된 level("high") 필터.
+      // level 오배정 교정(schoolLevelOverrides)을 반영해 사이트맵/라우트와 같은 집합·순서가 되게 한다.
+      const pairs = [
+        ...readSrc("src/data/schools.ts").matchAll(
+          /slug:\s*"([^"]+)"\s*,\s*level:\s*"([^"]+)"/g,
+        ),
+      ].map((m) => [m[1], m[2]]);
+      const ov = {};
+      for (const m of readSrc("src/data/schoolLevelOverrides.ts").matchAll(
+        /(?:"([^"]+)"|([A-Za-z0-9_]+)):\s*"(high|middle|elem)"/g,
+      )) {
+        ov[m[1] ?? m[2]] = m[3];
+      }
+      const out = [];
+      for (const [slug, level] of pairs) {
+        if ((ov[slug] ?? level) === "high")
+          out.push(`${BASE_URL}/tutoring/by-school/${enc(slug)}`);
+      }
+      return out;
+    }
     case "subject": {
       const subjectSlugs = [
         ...readSrc("src/data/subjects.ts").matchAll(/slug:\s*"([^"]+)"/g),
