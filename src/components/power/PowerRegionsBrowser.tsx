@@ -35,15 +35,20 @@ export default function PowerRegionsBrowser({
   sigunguGroups,
   districtGroups,
   subjects,
+  examChips,
   totalDistricts,
 }: {
   sidoChips: { label: string; full: string }[];
   sigunguGroups: SigunguGroup[];
   districtGroups: DistrictGroup[];
   subjects: { slug: string; label: string }[];
+  examChips?: { slug: string; label: string }[];
   totalDistricts: number;
 }) {
   const [subject, setSubject] = useState(subjects[0]?.slug ?? "english-conversation");
+  // 시험 축 선택 여부 — 시험 페이지는 시군구에만 있어, 선택 시 신도시(동 단위) 그룹을 숨긴다.
+  const examSlugSet = new Set((examChips ?? []).map((e) => e.slug));
+  const isExamSubject = examSlugSet.has(subject);
   const [sidoFilter, setSidoFilter] = useState<string | null>(null); // null=전체, else 정식명
   const [query, setQuery] = useState("");
   const [index, setIndex] = useState<PowerRegionSearchIndex | null>(null);
@@ -179,7 +184,7 @@ export default function PowerRegionsBrowser({
         ))}
       </div>
 
-      {/* 3. 과목 선택 칩 — 기본 영어회화 */}
+      {/* 3. 과목 선택 칩 — 기본 영어회화 + 시험 축 대표 3종(진입로) */}
       <div className="mt-6 text-center">
         <p className="text-sm font-semibold text-muted">과목 선택</p>
         <ul className="mt-3 flex flex-wrap justify-center gap-2">
@@ -203,6 +208,37 @@ export default function PowerRegionsBrowser({
             );
           })}
         </ul>
+        {examChips && examChips.length > 0 && (
+          <div className="mt-4">
+            <p className="text-sm font-semibold text-muted">어학시험</p>
+            <ul className="mt-3 flex flex-wrap justify-center gap-2">
+              {examChips.map((e) => {
+                const selected = subject === e.slug;
+                return (
+                  <li key={e.slug}>
+                    <button
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() => setSubject(e.slug)}
+                      className={`inline-flex min-h-10 items-center rounded-full px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:text-base ${
+                        selected
+                          ? "bg-accent text-white"
+                          : "border border-accent/30 bg-white text-ink hover:border-accent hover:text-accent"
+                      }`}
+                    >
+                      {e.label}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+            {isExamSubject && (
+              <p className="mx-auto mt-3 max-w-xl break-keep text-[13px] leading-relaxed text-muted sm:text-sm">
+                어학시험은 시·군·구 단위로 준비합니다. 아래 시·군·구를 선택하면 해당 지역의 시험 페이지로 이동합니다.
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* 4. 시군구 그룹(시도별) — 기본 접힘 아코디언(details/summary). 링크는 접혀도 DOM 유지(SEO).
@@ -246,8 +282,9 @@ export default function PowerRegionsBrowser({
         ))}
       </ul>
 
-      {/* 5. 신도시·주요 생활권(권역별) — 시도 필터·과목 선택 연동 */}
-      <section aria-labelledby="districts-heading" className="mt-16">
+      {/* 5. 신도시·주요 생활권(권역별) — 시도 필터·과목 선택 연동.
+             시험 축 선택 시엔 숨김(동 단위는 시험 페이지가 없어 죽은 링크 방지). */}
+      <section aria-labelledby="districts-heading" className="mt-16" hidden={isExamSubject}>
         <h2
           id="districts-heading"
           className="break-keep text-2xl font-bold text-ink sm:text-3xl"

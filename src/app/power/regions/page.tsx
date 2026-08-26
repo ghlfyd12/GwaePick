@@ -14,6 +14,17 @@ const POWER_REGION_SUBJECTS = [
   { slug: "chinese-tutoring", label: "중국어과외" },
 ];
 
+/**
+ * 시험 축 대표 3종(진입로) — 토익·JLPT·HSK. 선택 시 시군구 링크가 해당 시험 페이지로 전환.
+ * 시험 페이지는 시군구에만 존재하므로, 선택 시 신도시(동 단위) 그룹은 숨긴다(죽은 링크 방지).
+ * 상세(언어별 전체 시험)는 각 지역 회화 페이지의 시험 소개 섹션에 위임(절제).
+ */
+const POWER_REGION_EXAMS = [
+  { slug: "toeic", label: "토익" },
+  { slug: "jlpt", label: "JLPT" },
+  { slug: "hsk", label: "HSK" },
+];
+
 /*
  * /power/regions — 어학의참견 지역별 안내 인덱스(내부 링크 허브).
  *
@@ -83,6 +94,7 @@ export default function PowerRegionsIndexPage() {
           sigunguGroups={groups}
           districtGroups={districtGroups}
           subjects={POWER_REGION_SUBJECTS}
+          examChips={POWER_REGION_EXAMS}
           totalDistricts={totalDistricts}
         />
       </div>

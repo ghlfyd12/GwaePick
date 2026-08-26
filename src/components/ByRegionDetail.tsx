@@ -3,7 +3,7 @@ import ConsultForm from "@/components/ConsultForm";
 import JsonLd from "@/components/JsonLd";
 import { site } from "@/data/site";
 import { buildByRegionData } from "@/data/byRegionSubject";
-import { examReverseGroupForConversation } from "@/data/byRegionExam";
+import { examIntroForConversation } from "@/data/byRegionExam";
 import LessonModeSection from "@/components/power/LessonModeSection";
 
 /*
@@ -28,8 +28,9 @@ export default function ByRegionDetail({
   const data = buildByRegionData(regionParam, subjectSlug);
   if (!data) return null;
 
-  // 이 지역에 시험 페이지가 있으면(시군구축), 같은 언어 시험 준비 페이지 링크 그룹을 노출한다.
-  const examGroup = examReverseGroupForConversation(regionParam, subjectSlug);
+  // 이 지역에 시험 페이지가 있으면(시군구축), 같은 언어 시험 소개 카드 섹션을 노출한다.
+  // 동 단위 등 시험 페이지 없는 지역은 null → 섹션 미렌더(죽은 링크 방지).
+  const examIntro = examIntroForConversation(regionParam, subjectSlug);
 
   const canonical = `/power/by-region/${encodeURIComponent(data.regionSlug)}/${subjectSlug}`;
   const jsonLd = [
@@ -125,6 +126,36 @@ export default function ByRegionDetail({
         {/* ── 3-1. 비대면 수업 방식 안내 (전화·화상) ─────────────────── */}
         <LessonModeSection bare />
 
+        {/* ── 3-2. 이 지역에서 준비하는 어학시험 소개(시군구축만) — 카드=exams.ts name+targetLine ── */}
+        {examIntro && (
+          <section aria-labelledby="exam-intro-heading">
+            <h2
+              id="exam-intro-heading"
+              className="break-keep text-center text-2xl font-bold text-ink sm:text-3xl"
+            >
+              {examIntro.heading}
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl break-keep text-center text-sm leading-relaxed text-muted sm:text-base">
+              {examIntro.subtitle}
+            </p>
+            <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {examIntro.cards.map((c) => (
+                <li key={c.href}>
+                  <Link
+                    href={c.href}
+                    className="flex h-full flex-col rounded-3xl border border-accent/30 bg-white p-6 shadow-sm transition-colors hover:border-accent"
+                  >
+                    <p className="break-keep text-lg font-bold text-accent">{c.name}</p>
+                    <p className="mt-2 break-keep text-sm leading-relaxed text-muted sm:text-base">
+                      {c.targetLine}
+                    </p>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         {/* ── 4. 내부 링크: 같은 지역 다른 과목 + 상위 지역 페이지 ──── */}
         <section aria-labelledby="links-heading">
           <h2
@@ -153,27 +184,6 @@ export default function ByRegionDetail({
               </li>
             ))}
           </ul>
-
-          {/* 이 지역의 언어별 어학시험 준비 페이지(역방향 링크) — 시군구축에서만 노출 */}
-          {examGroup && (
-            <div className="mt-8">
-              <h3 className="break-keep text-center text-base font-bold text-ink sm:text-lg">
-                이 지역의 {examGroup.languageLabel} 시험 준비
-              </h3>
-              <ul className="mt-4 flex flex-wrap justify-center gap-2.5">
-                {examGroup.links.map((l) => (
-                  <li key={l.href}>
-                    <Link
-                      href={l.href}
-                      className="inline-flex min-h-11 items-center break-keep rounded-full border border-accent/40 bg-white px-4 py-2 text-sm font-semibold text-accent transition-colors hover:bg-accent/5"
-                    >
-                      {l.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </section>
 
         {/* ── 5. FAQ ──────────────────────────────────────────────── */}

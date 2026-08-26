@@ -344,3 +344,55 @@ export function examReverseGroupForConversation(
     })),
   };
 }
+
+/* ── 회화 페이지 "시험 소개" 카드 섹션 데이터(신규) ─────────────────────────
+ * 확정 카피(제목·부제) + exams.ts 기존 데이터(name·targetLine). 임의 창작 없음.
+ * 시군구축(isExamRegionSlug)에서만 반환 → 동 단위 회화 페이지는 미렌더(죽은 링크 방지).
+ */
+/** 부제 — 확정 카피(전 지역 공통). */
+export const EXAM_INTRO_SUBTITLE =
+  "회화와 함께, 목표 점수가 필요할 때도 1:1로 준비합니다";
+
+export type ExamIntroCard = { name: string; targetLine: string; href: string };
+export type ExamIntroSection = {
+  /** 제목 "{지역명}에서 준비하는 {언어} 시험". */
+  heading: string;
+  subtitle: string;
+  cards: ExamIntroCard[];
+};
+
+/**
+ * 회화 상세의 시험 소개 카드 섹션 데이터. 시험 지역축(시군구)일 때만, 해당 언어 시험을
+ * name+targetLine 카드로 반환. 그 외(동 단위 등)는 null → 섹션 미렌더.
+ */
+export function examIntroForConversation(
+  regionParam: string,
+  subjectSlug: string,
+): ExamIntroSection | null {
+  if (!isExamRegionSlug(regionParam)) return null;
+  const language: PowerExam["language"] | null = subjectSlug.startsWith("english")
+    ? "english"
+    : subjectSlug.startsWith("japanese")
+      ? "japanese"
+      : subjectSlug.startsWith("chinese")
+        ? "chinese"
+        : null;
+  if (!language) return null;
+
+  const region = examRegionBySlug.get(slugKey(regionParam));
+  const regionSlug = region ? region.slug : slugKey(regionParam);
+  const regionName = region ? region.name : resolveExamRegionName(regionParam);
+  const enc = encodeURIComponent(regionSlug);
+
+  const exams = examsOfLanguage(language);
+  if (exams.length === 0) return null;
+  return {
+    heading: `${regionName}에서 준비하는 ${LANGUAGE_LABEL[language]} 시험`,
+    subtitle: EXAM_INTRO_SUBTITLE,
+    cards: exams.map((e) => ({
+      name: e.name,
+      targetLine: e.targetLine,
+      href: `/power/by-region/${enc}/${e.slug}`,
+    })),
+  };
+}
