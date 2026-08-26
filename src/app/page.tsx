@@ -14,7 +14,7 @@ import { SERVICE } from "@/data/service";
  * 홈은 #consult 상담 섹션이 Supabase 선택지를 읽으므로 ISR 로 둔다.
  * 기존 블로그 섹션 revalidate(3시간)와 동일 창을 유지한다(선택지는 자주 바뀌지 않음).
  */
-export const revalidate = 10800;
+export const revalidate = false;
 
 /*
  * 메인 페이지 구조화 데이터(JSON-LD) — 구글이 '지식의참견'을 교육 서비스(Organization)로 인지하도록.

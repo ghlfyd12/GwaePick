@@ -40,5 +40,10 @@ export const GYEONGGI_PSEO_MODIFIED = "2026-08-13"; // @indexnow-group: gyeonggi
 export const DONG_PSEO_MODIFIED = "2026-08-05"; // @indexnow-group: dong
 /** 과목 단독 상세 /tutoring/by-subject/[과목] — SubjectDetail 카피·데이터. */
 export const SUBJECT_MODIFIED = "2026-07-31"; // @indexnow-group: subject
-/** 어학의참견(/power) 전 유형 — 지역랜딩·언어·schools·regions·performance·by-school·회화·시험 상세. */
+/** 어학의참견(/power) 전 유형 — 지역랜딩·언어·schools·regions·performance·by-school. (지역축 회화·시험은 아래 전용 상수로 분리) */
 export const POWER_MODIFIED = "2026-07-31"; // @indexnow-group: power
+/**
+ * /power 지역축(회화 region×subject + 시험 region×exam) 전용 — og:image 를 페이지별 동적 썸네일로
+ * 교체한 배포일. 이 그룹만 실변경(썸네일)이므로 POWER_MODIFIED 와 분리해 나머지 /power 의 가짜 갱신을 막는다.
+ */
+export const POWER_REGION_THUMB_MODIFIED = "2026-08-26"; // @indexnow-group: power-region-thumb

@@ -45,6 +45,7 @@ import {
   DONG_PSEO_MODIFIED,
   SUBJECT_MODIFIED,
   POWER_MODIFIED,
+  POWER_REGION_THUMB_MODIFIED,
 } from "@/data/contentMeta";
 import { REGION_LANDMARKS } from "@/data/regionLandmarks";
 
@@ -234,7 +235,7 @@ function coreSitemap(): MetadataRoute.Sitemap {
   ];
 }
 
-/** 파워 지역 청크 — /power/by-region/{지역}/{과목} 한 청크(슬라이스). lastmod=POWER_MODIFIED. */
+/** 파워 지역 청크 — /power/by-region/{지역}/{과목} 한 청크(슬라이스). lastmod=썸네일 배포일(지역축 전용). */
 function powerRegionSitemap(chunk: number): MetadataRoute.Sitemap {
   const start = chunk * SITEMAP_URLS_PER_FILE;
   const end = Math.min(start + SITEMAP_URLS_PER_FILE, POWER_REGION_PAIR_COUNT);
@@ -243,7 +244,7 @@ function powerRegionSitemap(chunk: number): MetadataRoute.Sitemap {
     const { region, subject } = POWER_REGION_PAIRS[p];
     out.push({
       url: `${base}/power/by-region/${enc(region)}/${subject}`,
-      lastModified: POWER_MODIFIED,
+      lastModified: POWER_REGION_THUMB_MODIFIED,
       changeFrequency: "weekly",
       priority: 0.5,
     });
@@ -251,7 +252,7 @@ function powerRegionSitemap(chunk: number): MetadataRoute.Sitemap {
   return out;
 }
 
-/** 어학시험 청크 — /power/by-region/{지역}/{시험} 한 청크(슬라이스). 회화 청크와 동일 인코딩. lastmod=POWER_MODIFIED. */
+/** 어학시험 청크 — /power/by-region/{지역}/{시험} 한 청크(슬라이스). lastmod=썸네일 배포일(지역축 전용). */
 function powerExamSitemap(chunk: number): MetadataRoute.Sitemap {
   const start = chunk * SITEMAP_URLS_PER_FILE;
   const end = Math.min(start + SITEMAP_URLS_PER_FILE, POWER_EXAM_PAIR_COUNT);
@@ -260,7 +261,7 @@ function powerExamSitemap(chunk: number): MetadataRoute.Sitemap {
     const { region, subject } = POWER_EXAM_PAIRS[p];
     out.push({
       url: `${base}/power/by-region/${enc(region)}/${subject}`,
-      lastModified: POWER_MODIFIED,
+      lastModified: POWER_REGION_THUMB_MODIFIED,
       changeFrequency: "weekly",
       priority: 0.5,
     });

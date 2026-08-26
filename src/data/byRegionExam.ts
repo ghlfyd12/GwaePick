@@ -238,6 +238,9 @@ export function buildByExamMetadata(
   const data = buildByExamData(regionParam, examSlug);
   if (!data) return {};
   const canonical = `/power/by-region/${encodeURIComponent(data.regionSlug)}/${examSlug}`;
+  // 페이지별 동적 썸네일(보라 텍스트). 데이터가 유효(=페이지 존재)하면 썸네일도 동일 빌더로 렌더된다.
+  const thumb = `/api/power-thumb/exam/${encodeURIComponent(data.regionSlug)}/${examSlug}`;
+  const thumbAlt = `${data.regionName} ${data.exam.name} 과외 안내`;
   return {
     title: { absolute: data.metaTitle },
     description: data.metaDescription,
@@ -250,13 +253,13 @@ export function buildByExamMetadata(
       type: "website",
       locale: "ko_KR",
       siteName: site.power.name,
-      images: [site.power.ogImage],
+      images: [{ url: thumb, width: 800, height: 600, alt: thumbAlt }],
     },
     twitter: {
       card: "summary_large_image",
       title: data.metaTitle,
       description: data.metaDescription,
-      images: [site.power.ogImage],
+      images: [thumb],
     },
   };
 }

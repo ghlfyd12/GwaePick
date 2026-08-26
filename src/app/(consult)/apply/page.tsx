@@ -19,7 +19,7 @@ import ApplyForm from "./ApplyForm";
  * 하루 한 번만 다시 만든다(12,000여 행을 매 요청 훑지 않도록).
  */
 
-export const revalidate = 86400;
+export const revalidate = false;
 
 export const metadata: Metadata = {
   title: "과외 신청",

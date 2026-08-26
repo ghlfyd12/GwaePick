@@ -348,6 +348,9 @@ export function buildByRegionMetadata(
   const data = buildByRegionData(regionParam, subjectSlug);
   if (!data) return {};
   const canonical = `/power/by-region/${encodeURIComponent(data.regionSlug)}/${subjectSlug}`;
+  // 페이지별 동적 썸네일(보라 텍스트). data.label = 과목 표시명(영어회화·중국어과외 등).
+  const thumb = `/api/power-thumb/conversation/${encodeURIComponent(data.regionSlug)}/${subjectSlug}`;
+  const thumbAlt = `${data.regionName} ${data.label} 안내`;
   return {
     title: { absolute: data.metaTitle },
     description: data.metaDescription,
@@ -360,13 +363,13 @@ export function buildByRegionMetadata(
       type: "website",
       locale: "ko_KR",
       siteName: site.power.name,
-      images: [site.power.ogImage],
+      images: [{ url: thumb, width: 800, height: 600, alt: thumbAlt }],
     },
     twitter: {
       card: "summary_large_image",
       title: data.metaTitle,
       description: data.metaDescription,
-      images: [site.power.ogImage],
+      images: [thumb],
     },
   };
 }

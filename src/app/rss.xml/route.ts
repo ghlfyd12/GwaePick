@@ -18,7 +18,7 @@ import {
  */
 
 // 정적 재생성(ISR) — 1시간마다 갱신. 같은 캐시 창에서는 동일 XML 을 반환한다.
-export const revalidate = 3600;
+export const revalidate = false;
 
 /** XML 텍스트 노드용 최소 이스케이프. */
 function esc(s: string): string {

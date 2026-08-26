@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
       "./src/fonts/Pretendard-Bold-subset.ttf",
       "./public/images/school-students.png",
     ],
+    // /power 동적 썸네일 라우트 — 폰트 + /power 배너 배경을 함수 번들에 포함(ENOENT 방지).
+    "/api/power-thumb/[kind]/[region]/[item]": [
+      "./src/fonts/Pretendard-Bold-subset.ttf",
+      "./public/images/power-school-banner.png",
+    ],
   },
   // 네이버 블로그 RSS 썸네일 호스트 허용(next/image). 썸네일은 unoptimized 로도 렌더하지만
   // 호스트 허용을 함께 두어 안전하게 처리한다. (blogthumb.pstatic.net, *.phinf.naver.net 등)
