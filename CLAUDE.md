@@ -112,3 +112,19 @@ Vercel Pro의 최대 지출 항목은 CPU 빌드 시간이다. 로컬 빌드(npm
 4. 배포 전 로컬 검증 완료 원칙
    - push 전에 로컬 빌드를 반드시 통과시킨다. Vercel에서 빌드 실패 후
      수정 재push하면 실패한 빌드까지 과금되므로, 실패 빌드를 만들지 않는다.
+
+## 후기 연동 운영 규칙 (reviewItems 추가 시)
+
+reviewItems(src/data/reviewItems.ts)는 /reviews 목록뿐 아니라 학교·과목·지역·
+학교×과목 상세의 매칭 후기 섹션(ReviewSection)에도 노출된다. 매칭은
+src/data/reviewMatch.ts 가 담당한다.
+
+- 신규 후기를 추가할 때, 후기의 region 값이 **학교 약칭이거나 시군구명**이면
+  대개 자동 매칭된다(학교=schools.ts name 약칭 일치, 지역=REGION_TO_AREA 해석).
+- 그러나 region 이 **새 지역명(동·읍·면·구·시)이거나 새 학교 약칭**이라
+  REGION_TO_AREA 에 해석 항목이 없으면, 그 후기는 지역 상세에 매칭되지 않는다.
+  → 이럴 때 reviewMatch.ts 의 REGION_TO_AREA 에 `region: { cityQuery, province }`
+  **1줄을 추가**한다(동은 소속 시군구로, 학교는 소재 시군구로, province 는
+  짧은 표기). 매칭 누락을 막기 위한 필수 절차다.
+- reviewItems.ts 자체는 매칭 로직이 없으니, 새 region 표기가 들어올 때마다
+  reviewMatch.ts 맵 갱신을 함께 검토한다.
