@@ -4,7 +4,10 @@ import JsonLd from "@/components/JsonLd";
 import { site } from "@/data/site";
 import { buildByRegionData } from "@/data/byRegionSubject";
 import { examIntroForConversation } from "@/data/byRegionExam";
+import { POWER_SUBJECTS } from "@/data/bySchoolSubject";
+import { buildCompareSection } from "@/data/power/studyModeCompare";
 import LessonModeSection from "@/components/power/LessonModeSection";
+import CompareStudySection from "@/components/power/CompareStudySection";
 
 /*
  * ByRegionDetail — /power/by-region/[region]/[subject] 공용 상세 템플릿(서버 컴포넌트).
@@ -31,6 +34,10 @@ export default function ByRegionDetail({
   // 이 지역에 시험 페이지가 있으면(시군구축), 같은 언어 시험 소개 카드 섹션을 노출한다.
   // 동 단위 등 시험 페이지 없는 지역은 null → 섹션 미렌더(죽은 링크 방지).
   const examIntro = examIntroForConversation(regionParam, subjectSlug);
+
+  // 학원 vs 1:1 과외 비교 섹션(본문만, title/og 미유입). 과목 언어로 "{언어} 학원" 조합 커버.
+  const compareLang = POWER_SUBJECTS.find((s) => s.slug === subjectSlug)?.lang;
+  const compareSection = compareLang ? buildCompareSection(compareLang, data.regionName) : null;
 
   const canonical = `/power/by-region/${encodeURIComponent(data.regionSlug)}/${subjectSlug}`;
   const jsonLd = [
@@ -103,6 +110,9 @@ export default function ByRegionDetail({
             ))}
           </ul>
         </section>
+
+        {/* ── 2.5 학원 vs 1:1 과외 비교(본문만, 상표는 title/og 미유입) ── */}
+        {compareSection && <CompareStudySection section={compareSection} />}
 
         {/* ── 3. 상담 선생님 연결 안내(원어민·교포 1:1) ────────────── */}
         <section

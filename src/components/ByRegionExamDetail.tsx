@@ -4,7 +4,9 @@ import JsonLd from "@/components/JsonLd";
 import { site } from "@/data/site";
 import { buildByExamData } from "@/data/byRegionExam";
 import { buildExamBookSection } from "@/data/power/examBooks";
+import { buildCompareSection } from "@/data/power/studyModeCompare";
 import LessonModeSection from "@/components/power/LessonModeSection";
+import CompareStudySection from "@/components/power/CompareStudySection";
 
 /*
  * ByRegionExamDetail — /power/by-region/[region]/[exam] 공용 상세 템플릿(서버 컴포넌트).
@@ -30,6 +32,8 @@ export default function ByRegionExamDetail({
 
   // 교재 활용 섹션(시험별 인기 교재 롱테일 — 본문만, title/og 미유입).
   const bookSection = buildExamBookSection(examSlug, data.exam.name);
+  // 학원 vs 1:1 과외 비교 섹션(본문만). 시험 언어로 "{언어} 학원" 조합 커버.
+  const compareSection = buildCompareSection(data.exam.language, data.regionName);
 
   const canonical = `/power/by-region/${encodeURIComponent(data.regionSlug)}/${examSlug}`;
   const jsonLd = [
@@ -134,6 +138,9 @@ export default function ByRegionExamDetail({
             </p>
           </section>
         )}
+
+        {/* ── 2.7 학원 vs 1:1 과외 비교(본문만, 상표는 title/og 미유입) ── */}
+        {compareSection && <CompareStudySection section={compareSection} />}
 
         {/* ── 3. 연결 안내 ─────────────────────────────────────────── */}
         <section
