@@ -6,13 +6,31 @@ import DetailTrustBlock from "@/components/DetailTrustBlock";
 import koreaSido from "@/data/korea-sido.json";
 import { sidoList } from "@/data/sido";
 import { regions, type Region } from "@/data/regions";
+import { mainDistricts } from "@/data/mainDistricts";
 
 /*
- * 지역 랜딩(122개 /[id]) 인바운드 링크용 — province 별로 묶는다(regions 등장 순서 보존).
- * regions.ts 는 자동 생성 파일이라 건드리지 않고 여기서 파생만 한다.
- * 서버 컴포넌트가 아래 섹션에서 전부 정적 <a> 로 렌더 → 122개 전 페이지 크롤 진입로 확보.
+ * 지역 랜딩(122 시군구 + 94 생활권 = 216개 /[id]) 인바운드 링크용 크롤 진입로.
+ * regions.ts·mainDistricts.ts 는 건드리지 않고 여기서 파생만 한다(자동 생성/축 독립).
+ * province 등장 순서를 보존하되, 시도 안에서:
+ *   - 다구(多區) 시는 "수원" 소제목 아래 구를 묶고(2개 이상),
+ *   - 구가 없는 시/군/구는 시도 바로 아래 단독 항목으로 두며,
+ *   - 소그룹 제목·단독 항목을 가나다로 섞어 정렬,
+ *   - 생활권 94개는 행정구와 섞지 않고 각 시도 하단 "신도시·생활권" 소그룹으로 배치.
+ * 전부 정적 <a> + <details open>(기본 펼침) → 링크는 항상 DOM 상주(크롤 경로 보존).
  */
-const regionGroups: { province: string; items: Region[] }[] = (() => {
+type RegionCard = { id: string; label: string };
+type SubGroup = { title: string; cards: RegionCard[] };
+type RegionRow = { kind: "sub"; sub: SubGroup } | { kind: "solos"; cards: RegionCard[] };
+type ProvinceBlock = { province: string; rows: RegionRow[] };
+
+const byKo = (a: string, b: string) => a.localeCompare(b, "ko");
+/** 시 소제목: cityQuery 첫 토큰에서 말미 '시' 제거(수원시→수원). */
+const cityLabel = (cityQuery: string) => {
+  const first = cityQuery.split(" ")[0];
+  return first.endsWith("시") ? first.slice(0, -1) : first;
+};
+
+const provinceBlocks: ProvinceBlock[] = (() => {
   const order: string[] = [];
   const byProvince = new Map<string, Region[]>();
   for (const r of regions) {
@@ -22,7 +40,91 @@ const regionGroups: { province: string; items: Region[] }[] = (() => {
     }
     byProvince.get(r.province)!.push(r);
   }
-  return order.map((province) => ({ province, items: byProvince.get(province)! }));
+  const districtsByProvince = new Map<string, Region[]>();
+  for (const d of mainDistricts) {
+    if (!districtsByProvince.has(d.province)) districtsByProvince.set(d.province, []);
+    districtsByProvince.get(d.province)!.push(d);
+  }
+  // regions 에 없고 생활권에만 있는 province 도 누락 없이 뒤에 편입.
+  for (const p of districtsByProvince.keys()) if (!byProvince.has(p)) order.push(p);
+
+  return order.map((province) => {
+    const items = byProvince.get(province) ?? [];
+    // 다구 시 그룹핑(cityQuery 에 공백 → 첫 토큰이 시).
+    const cityMap = new Map<string, Region[]>();
+    const solos: Region[] = [];
+    for (const r of items) {
+      if (r.cityQuery.includes(" ")) {
+        const city = r.cityQuery.split(" ")[0];
+        if (!cityMap.has(city)) cityMap.set(city, []);
+        cityMap.get(city)!.push(r);
+      } else {
+        solos.push(r);
+      }
+    }
+    type Entry =
+      | { sortKey: string; kind: "sub"; sub: SubGroup }
+      | { sortKey: string; kind: "solo"; card: RegionCard };
+    const entries: Entry[] = [];
+    for (const [city, gus] of cityMap) {
+      if (gus.length >= 2) {
+        const title = cityLabel(city);
+        entries.push({
+          sortKey: title,
+          kind: "sub",
+          sub: {
+            title,
+            cards: gus
+              .slice()
+              .sort((a, b) => byKo(a.name, b.name))
+              .map((r) => ({ id: r.id, label: r.name })),
+          },
+        });
+      } else {
+        solos.push(gus[0]); // 단일 구 시는 단독 항목으로 강등
+      }
+    }
+    for (const r of solos) {
+      entries.push({ sortKey: r.name, kind: "solo", card: { id: r.id, label: r.name } });
+    }
+    entries.sort((a, b) => byKo(a.sortKey, b.sortKey));
+
+    // 연속 단독 항목은 한 그리드로 묶는다.
+    const rows: RegionRow[] = [];
+    let buf: RegionCard[] = [];
+    const flush = () => {
+      if (buf.length) {
+        rows.push({ kind: "solos", cards: buf });
+        buf = [];
+      }
+    };
+    for (const e of entries) {
+      if (e.kind === "sub") {
+        flush();
+        rows.push({ kind: "sub", sub: e.sub });
+      } else {
+        buf.push(e.card);
+      }
+    }
+    flush();
+
+    // 생활권은 항상 시도 하단.
+    const dItems = districtsByProvince.get(province);
+    if (dItems && dItems.length) {
+      rows.push({
+        kind: "sub",
+        sub: {
+          title: "신도시·생활권",
+          cards: dItems
+            .slice()
+            .sort((a, b) => byKo(a.name, b.name))
+            .map((r) => ({ id: r.id, label: r.name })),
+        },
+      });
+    }
+
+    return { province, rows };
+  });
 })();
 
 /*
@@ -105,35 +207,73 @@ export default function ByRegionPage() {
         </div>
       </section>
 
-      {/* 지역별 맞춤 안내 — 122개 시/군/구 랜딩 인바운드(크롤 경로). province 그룹, 전부 정적 <a>. */}
+      {/* 지역별 맞춤 안내 — 216개(시군구 122 + 생활권 94) 랜딩 인바운드(크롤 경로).
+          시도별 <details open>(기본 펼침, 링크 전부 DOM 상주), 시 소그룹·생활권 소그룹. */}
       <section className="border-t border-line bg-surface px-4 py-12 sm:px-6 sm:py-16">
         <div className="mx-auto max-w-6xl">
           <h2 className="text-xl font-bold text-ink sm:text-2xl">
             지역별 맞춤 과외 안내
           </h2>
           <p className="mt-2 break-keep text-sm leading-relaxed text-muted sm:text-base">
-            우리 지역을 선택하면 지역 맞춤 안내 페이지로 이어집니다.
+            우리 지역을 선택하면 지역 맞춤 안내 페이지로 이어집니다. 시·도 제목을
+            눌러 접거나 펼칠 수 있습니다.
           </p>
 
-          <div className="mt-8 space-y-8">
-            {regionGroups.map((group) => (
-              <div key={group.province}>
-                <h3 className="break-keep text-sm font-semibold text-accent sm:text-base">
-                  {group.province}
-                </h3>
-                <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-                  {group.items.map((r) => (
-                    <li key={r.id}>
-                      <Link
-                        href={`/${r.id}`}
-                        className="block break-keep rounded-lg border border-line bg-white px-3 py-2.5 text-sm text-ink transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          <div className="mt-8 divide-y divide-line">
+            {provinceBlocks.map((block) => (
+              <details key={block.province} open className="py-5 first:pt-0">
+                <summary className="flex cursor-pointer list-none items-center justify-between [&::-webkit-details-marker]:hidden">
+                  <h3 className="break-keep text-sm font-semibold text-accent sm:text-base">
+                    {block.province}
+                  </h3>
+                  <span
+                    aria-hidden
+                    className="ml-2 text-muted transition-transform [[open]_&]:rotate-180"
+                  >
+                    ⌄
+                  </span>
+                </summary>
+
+                <div className="mt-4 space-y-5">
+                  {block.rows.map((row, i) =>
+                    row.kind === "sub" ? (
+                      <div key={`sub-${i}`}>
+                        <h4 className="mb-2 break-keep text-xs font-semibold text-muted sm:text-sm">
+                          {row.sub.title}
+                        </h4>
+                        <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+                          {row.sub.cards.map((c) => (
+                            <li key={c.id}>
+                              <Link
+                                href={`/${c.id}`}
+                                className="block break-keep rounded-lg border border-line bg-white px-3 py-2.5 text-sm text-ink transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                              >
+                                {c.label} 과외
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : (
+                      <ul
+                        key={`solos-${i}`}
+                        className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4"
                       >
-                        {r.name} 과외
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                        {row.cards.map((c) => (
+                          <li key={c.id}>
+                            <Link
+                              href={`/${c.id}`}
+                              className="block break-keep rounded-lg border border-line bg-white px-3 py-2.5 text-sm text-ink transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                            >
+                              {c.label} 과외
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    ),
+                  )}
+                </div>
+              </details>
             ))}
           </div>
         </div>
