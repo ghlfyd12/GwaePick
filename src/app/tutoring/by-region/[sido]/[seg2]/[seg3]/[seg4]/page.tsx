@@ -103,10 +103,20 @@ export async function generateMetadata({
       r.dong.slug,
       r.subj.slug,
     );
+    // 동×과목 썸네일 — 경기 레거시는 과목 slug 가 한글이라 영문 slug 로 매핑(라벨 일치).
+    const enSubjectSlug = subjectsEn.find((s) => s.label === r.subj.label)?.slug;
     return buildRegionMeta({
       regionName: r.dong.name,
       subjectLabel: r.subj.label,
       canonicalPath: enCanonical ?? selfPath,
+      regionThumb: enSubjectSlug
+        ? {
+            sidoSlug: PSEO_SIDO,
+            sigunguSlug: r.sg.slug,
+            dongSlug: r.dong.slug,
+            subjectSlug: enSubjectSlug,
+          }
+        : undefined,
     });
   }
 
@@ -125,6 +135,12 @@ export async function generateMetadata({
         highSchools: pick.highSchools.map((s) => s.name),
       },
       canonicalPath: `/tutoring/by-region/${sidoSlug}/${sg.slug}/${dong.slug}/${subj.slug}`,
+      regionThumb: {
+        sidoSlug,
+        sigunguSlug: sg.slug,
+        dongSlug: dong.slug,
+        subjectSlug: subj.slug,
+      },
     });
   }
   return {};

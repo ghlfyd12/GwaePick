@@ -24,11 +24,22 @@ import { resolveTitleKeyword, type TitlePageType } from "@/data/titleKeywords";
 import { getDetailSubjectCopy } from "@/data/detailSubjectCopy";
 import { buildRegionDongTitle } from "@/lib/regionSchoolPick";
 import { getSubjectUnits } from "@/data/subjectUnits";
-import { isThumbEligible, thumbPath, thumbAlt, THUMB_SIZE } from "@/lib/thumb";
+import {
+  isThumbEligible,
+  thumbPath,
+  thumbAlt,
+  THUMB_SIZE,
+  THUMB_SUBJECTS,
+  regionThumbPath,
+  regionThumbAlt,
+  subjectThumbPath,
+  subjectThumbAlt,
+} from "@/lib/thumb";
 import { SCHOOL_GRADE_PHRASE } from "@/data/schoolGradeKeywords";
 import {
   SCHOOL_PUBLISHED,
   SCHOOL_MODIFIED,
+  SCHOOL_THUMB_MODIFIED,
   SCHOOL_HUB_PUBLISHED,
   SCHOOL_HUB_MODIFIED,
 } from "@/data/contentMeta";
@@ -271,13 +282,18 @@ export function buildSchoolMeta(p: SchoolMetaInput): Metadata {
         }
       : undefined;
   // 검색결과 신선도 신호 — og:type("website")은 유지하고 article:*_time 을 raw meta 로 병기.
-  // 값은 contentMeta.ts 상수(콘텐츠 실제 변경 시에만 갱신). 지역·과목 페이지는 미포함.
+  // 고교×핵심5는 og 무변경이라 SCHOOL_MODIFIED 유지(정직·diff 0), 그 외(중·초·고교 역사논술코딩)는
+  // 이번 배포에서 og:image 가 신규 연결되어 SCHOOL_THUMB_MODIFIED(배포일)로 갱신.
+  const isCore5High =
+    p.level === "high" &&
+    !!p.subjectSlug &&
+    ["korean", "english", "math", "social", "science"].includes(p.subjectSlug);
   const base = baseMetadata(title, description, p.canonicalPath, og);
   return {
     ...base,
     other: {
       "article:published_time": isoKST(SCHOOL_PUBLISHED),
-      "article:modified_time": isoKST(SCHOOL_MODIFIED),
+      "article:modified_time": isoKST(isCore5High ? SCHOOL_MODIFIED : SCHOOL_THUMB_MODIFIED),
     },
   };
 }
@@ -333,6 +349,16 @@ export interface RegionMetaInput {
     middleSchools: string[];
     highSchools: string[];
   };
+  /**
+   * 동×과목 썸네일 og:image 생성용 slug 묶음(동 경로에서만 지정).
+   * subjectSlug 는 영문(THUMB_SUBJECTS) — 경기 레거시는 호출부에서 영문으로 매핑해 전달.
+   */
+  regionThumb?: {
+    sidoSlug: string;
+    sigunguSlug: string;
+    dongSlug: string;
+    subjectSlug: string;
+  };
   canonicalPath: string;
 }
 
@@ -357,6 +383,22 @@ function regionDongDescription(p: {
 }
 
 export function buildRegionMeta(p: RegionMetaInput): Metadata {
+  // 동×과목 썸네일 og:image(있으면). subjectSlug 는 영문(THUMB_SUBJECTS)만 허용.
+  const regionOg: OgImage | undefined =
+    p.regionThumb && THUMB_SUBJECTS.has(p.regionThumb.subjectSlug)
+      ? {
+          url: regionThumbPath(
+            p.regionThumb.sidoSlug,
+            p.regionThumb.sigunguSlug,
+            p.regionThumb.dongSlug,
+            p.regionThumb.subjectSlug,
+          ),
+          width: THUMB_SIZE.width,
+          height: THUMB_SIZE.height,
+          alt: regionThumbAlt(p.regionName, p.subjectLabel ?? ""),
+        }
+      : undefined;
+
   // 동×과목 상세(학교 주입) — 중·고 통합형 title/description.
   if (p.subjectLabel && p.dongSchools && !p.gradeLabel) {
     const title = buildRegionDongTitle({
@@ -373,7 +415,7 @@ export function buildRegionMeta(p: RegionMetaInput): Metadata {
       middleSchools: p.dongSchools.middleSchools,
       highSchools: p.dongSchools.highSchools,
     });
-    return baseMetadata(title, description, p.canonicalPath);
+    return baseMetadata(title, description, p.canonicalPath, regionOg);
   }
   if (p.subjectLabel) {
     // description 은 기존과 동일하게 "학년 과목" 결합 문구를 쓴다.
@@ -401,7 +443,7 @@ export function buildRegionMeta(p: RegionMetaInput): Metadata {
         regionName: p.regionName,
         subjectPhrase,
       }) + (detailDesc ? ` ${detailDesc.descTail}` : "");
-    return baseMetadata(title, description, p.canonicalPath);
+    return baseMetadata(title, description, p.canonicalPath, regionOg);
   }
   const title = `${p.regionName} ${REGION_HUB_TITLE_PHRASE} | ${SITE_NAME}`;
   const description = pick(REGION_HUB_DESC, p.canonicalPath)({ regionName: p.regionName });
@@ -431,7 +473,17 @@ export function buildSubjectMeta(p: SubjectMetaInput): Metadata {
     : `${p.subjectLabel}과외 ${SUBJECT_TITLE_TAIL[p.subjectSlug ?? ""] ?? DEFAULT_SUBJECT_TITLE_TAIL} | ${SITE_NAME}`;
   const description =
     pick(SUBJECT_DESC, p.canonicalPath)(p) + (detail ? ` ${detail.descTail}` : "");
-  return baseMetadata(title, description, p.canonicalPath);
+  // 과목 상세 썸네일 og:image(8과목).
+  const subjectOg: OgImage | undefined =
+    p.subjectSlug && THUMB_SUBJECTS.has(p.subjectSlug)
+      ? {
+          url: subjectThumbPath(p.subjectSlug),
+          width: THUMB_SIZE.width,
+          height: THUMB_SIZE.height,
+          alt: subjectThumbAlt(p.subjectLabel),
+        }
+      : undefined;
+  return baseMetadata(title, description, p.canonicalPath, subjectOg);
 }
 
 /* ── JSON-LD 빌더 ────────────────────────────────────────────────────── */

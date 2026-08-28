@@ -18,6 +18,9 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { findSchoolBySlug } from "@/lib/findSchool";
 import { subjectBySlug } from "@/data/subjects";
+import { getSido } from "@/data/sidoRegions";
+import { findDong } from "@/data/gyeonggi";
+import { getLandingRegion } from "@/data/mainDistricts";
 import { THUMB_SUBJECTS, THUMB_SIZE } from "@/lib/thumb";
 
 export const runtime = "nodejs";
@@ -81,20 +84,44 @@ function fitFontSize(lines: string[]): number {
   return Math.max(MIN_FS, Math.min(MAX_FS, Math.floor(TARGET_W / widest)));
 }
 
-function layout(name: string, subjectLabel: string): {
-  lines: string[];
-  fontSize: number;
-} {
+type Layout = { lines: string[]; fontSize: number };
+const withFit = (lines: string[]): Layout => ({ lines, fontSize: fitFontSize(lines) });
+
+/** 중·고 학교(기존 규칙 불변): 4자 이하 학교명 표기, 5자 이상 "1:1" 폴백. */
+function layoutSchool(name: string, subjectLabel: string): Layout {
   const suffix = `${subjectLabel}과외`;
-  // 약칭 기준 글자 수(코드포인트) — 4자 이하만 학교명 표기, 5자 이상은 폴백.
   const nameChars = [...name].length;
-  if (nameChars <= NAME_MAX_CHARS) {
-    const lines = [name, suffix];
-    return { lines, fontSize: fitFontSize(lines) };
-  }
-  // 폴백도 2줄 — 학교명 버전과 동일한 폰트/줄간격/띠 높이로 시각적 톤 통일.
-  const lines = ["1:1", suffix]; // 예: "1:1" / "수학과외"
-  return { lines, fontSize: fitFontSize(lines) };
+  if (nameChars <= NAME_MAX_CHARS) return withFit([name, suffix]);
+  return withFit(["1:1", suffix]); // 예: "1:1" / "수학과외"
+}
+
+/** 초등: 시군구 지역명 표기(학교 데이터에 동 없음) / "1:1 {과목}과외". */
+function layoutSchoolElem(sigunguName: string, subjectLabel: string): Layout {
+  return withFit([sigunguName, `1:1 ${subjectLabel}과외`]);
+}
+
+/** 지역(동)×과목: 동명(넘치면 축소) / "{과목}과외". */
+function layoutRegion(dongName: string, subjectLabel: string): Layout {
+  return withFit([dongName, `${subjectLabel}과외`]);
+}
+
+/** 과목 상세: "{과목}과외" / "1:1 내신 기출". */
+function layoutSubject(subjectLabel: string): Layout {
+  return withFit([`${subjectLabel}과외`, "1:1 내신 기출"]);
+}
+
+/** 지역 랜딩: 지명(축소) / "1:1 과외". */
+function layoutLanding(regionName: string): Layout {
+  return withFit([regionName, "1:1 과외"]);
+}
+
+/** 동 해석(경기=gyeonggi.ts / 그 외=sidoRegions) → 동명. */
+function resolveDongName(sidoSlug: string, sgSlug: string, dongSlug: string): string | null {
+  const sd = getSido(sidoSlug);
+  const dong = sd?.sigungu.find((s) => s.slug === sgSlug)?.dong.find((d) => d.slug === dongSlug);
+  if (dong) return dong.name;
+  const g = findDong(sgSlug, dongSlug); // 경기 pSEO(한글 slug)
+  return g ? g.name : null;
 }
 
 function notFound(): Response {
@@ -111,19 +138,49 @@ export async function GET(
   const { type, slug, subject } = await params;
 
   // ── 검증 우선(이미지 생성 전) — 무효 조합은 여기서 전부 404 ──────────
-  if (type !== "school") return notFound();
+  let picked: Layout | null = null;
 
-  const subjectSlug = slugKey(subject);
-  if (!THUMB_SUBJECTS.has(subjectSlug)) return notFound();
-  const subj = subjectBySlug[subjectSlug];
-  if (!subj) return notFound();
-
-  const ctx = findSchoolBySlug(slugKey(slug));
-  if (!ctx) return notFound();
-  if (ctx.school.level !== "high") return notFound(); // 파일럿은 고교만
+  if (type === "school") {
+    // 학교×과목 — 초·중·고 전체 × 8과목. 초등은 시군구 지역명 표기.
+    const subjectSlug = slugKey(subject);
+    if (!THUMB_SUBJECTS.has(subjectSlug)) return notFound();
+    const subj = subjectBySlug[subjectSlug];
+    if (!subj) return notFound();
+    const ctx = findSchoolBySlug(slugKey(slug));
+    if (!ctx) return notFound();
+    picked =
+      ctx.school.level === "elem"
+        ? layoutSchoolElem(ctx.sigunguName, subj.label)
+        : layoutSchool(ctx.school.name, subj.label);
+  } else if (type === "region") {
+    // 지역(동)×과목 — slug = "{sido}~{시군구}~{동}".
+    const subjectSlug = slugKey(subject);
+    if (!THUMB_SUBJECTS.has(subjectSlug)) return notFound();
+    const subj = subjectBySlug[subjectSlug];
+    if (!subj) return notFound();
+    const parts = slugKey(slug).split("~");
+    if (parts.length !== 3) return notFound();
+    const dongName = resolveDongName(parts[0], parts[1], parts[2]);
+    if (!dongName) return notFound();
+    picked = layoutRegion(dongName, subj.label);
+  } else if (type === "subject") {
+    // 과목 상세 — slug = 과목slug(3번째 세그먼트는 자리표시자).
+    const subjectSlug = slugKey(slug);
+    if (!THUMB_SUBJECTS.has(subjectSlug)) return notFound();
+    const subj = subjectBySlug[subjectSlug];
+    if (!subj) return notFound();
+    picked = layoutSubject(subj.label);
+  } else if (type === "landing") {
+    // 지역 랜딩 — slug = regionId(한글). getLandingRegion 로 검증.
+    const r = getLandingRegion(slugKey(slug));
+    if (!r) return notFound();
+    picked = layoutLanding(r.name);
+  } else {
+    return notFound();
+  }
 
   // ── 검증 통과 후에만 렌더 ────────────────────────────────────────────
-  const { lines, fontSize } = layout(ctx.school.name, subj.label);
+  const { lines, fontSize } = picked;
   const [fontData, bg] = await Promise.all([loadFont(), loadBackground()]);
 
   return new ImageResponse(

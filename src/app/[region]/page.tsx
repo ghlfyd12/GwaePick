@@ -8,6 +8,7 @@ import { site } from "@/data/site";
 import CTAButton from "@/components/ui/CTAButton";
 import ReviewSection from "@/components/ReviewSection";
 import { reviewsForRegion } from "@/data/reviewMatch";
+import { landingThumbPath, landingThumbAlt, THUMB_SIZE } from "@/lib/thumb";
 import Curriculum from "@/components/sections/Curriculum";
 import WhyUs from "@/components/sections/WhyUs";
 import TeacherIntro from "@/components/sections/TeacherIntro";
@@ -62,6 +63,13 @@ export async function generateMetadata({
     ? `${r.province} ${r.name}${landmarks.length ? " " + landmarks.join("·") : ""}에서 과외 선생님을 찾고 계신가요? 2028 대입 개편·내신 5등급제 대비, 아이의 성향과 호흡까지 맞춰 줄 전담 선생님을 직접 상담으로 연결해 드립니다.`
     : `학원에 다녀도 성적이 그대로라면 문제는 맞는 선생님을 만나지 못한 것입니다. 2028 대입 개편 및 내신 5등급제 대비, ${r.name} 학생들의 성향과 호흡까지 맞춰줄 전담 선생님 무료 상담 신청해보세요.`;
   const url = `/${r.id}`;
+  // 지역 랜딩 텍스트 썸네일 og:image(지명/"1:1 과외"). 코랄 #FF6B4A, 800×600.
+  const ogImage = {
+    url: landingThumbPath(r.id),
+    width: THUMB_SIZE.width,
+    height: THUMB_SIZE.height,
+    alt: landingThumbAlt(r.name),
+  };
 
   return {
     title: { absolute: title },
@@ -74,9 +82,9 @@ export async function generateMetadata({
       type: "website",
       locale: "ko_KR",
       siteName: site.name,
-      // 루트 openGraph 를 덮어쓰므로 공유 이미지를 함께 지정(미상속 보완)
-      images: [site.ogImage],
+      images: [ogImage],
     },
+    twitter: { card: "summary_large_image", title, description, images: [ogImage] },
   };
 }
 

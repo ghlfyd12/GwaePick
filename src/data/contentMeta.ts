@@ -12,6 +12,11 @@
  */
 export const SCHOOL_PUBLISHED = "2026-06-24";
 export const SCHOOL_MODIFIED = "2026-08-24"; // @indexnow-group: school
+/**
+ * OG 썸네일 전면 확장으로 og:image 가 신규 연결된 학교×과목(중·초 전 과목 + 고교 역사·논술·코딩).
+ * 고교×핵심5 는 og 무변경이라 SCHOOL_MODIFIED 를 유지(정직·diff 0)하고, 이 그룹만 배포일로 갱신한다.
+ */
+export const SCHOOL_THUMB_MODIFIED = "2026-08-28"; // @indexnow-group: school-thumb
 
 /**
  * 학교 단위 허브 /tutoring/by-school/{학교}(과목 없음) — 고교 파일럿(2,457).
@@ -30,18 +35,18 @@ export const SCHOOL_HUB_MODIFIED = "2026-08-24"; // @indexnow-group: school-hub
  */
 /** 홈·신청(/apply)·개인정보처리방침(/privacy) 본문. */
 export const CORE_MODIFIED = "2026-07-29"; // @indexnow-group: core
-/** 지역 랜딩 /[region] (템플릿·regions.ts 데이터). */
-export const REGION_MODIFIED = "2026-06-24"; // @indexnow-group: region
-/** 신도시 키워드 보강된 시군구 랜딩(regionLandmarks 대상)만 — description 실변경일. 나머지 랜딩은 REGION_MODIFIED 유지. */
-export const REGION_LANDMARK_MODIFIED = "2026-08-22"; // @indexnow-group: region-landmark
+/** 지역 랜딩 /[region] (템플릿·regions.ts 데이터). 2026-08-28 og:image 텍스트 썸네일 신규 연결(전 랜딩). */
+export const REGION_MODIFIED = "2026-08-28"; // @indexnow-group: region
+/** 신도시 키워드 보강된 시군구 랜딩(regionLandmarks 대상)만. 2026-08-28 랜딩 썸네일 og 연결로 갱신. */
+export const REGION_LANDMARK_MODIFIED = "2026-08-28"; // @indexnow-group: region-landmark
 /** 생활권·신도시 지명 랜딩(mainDistricts, 어학의참견 동기화 94) 신규 발행일. */
 export const MAIN_DISTRICT_MODIFIED = "2026-08-28"; // @indexnow-group: main-district
 /** 경기 pSEO(시도×과목·시군구×과목) — PseoLanding·regionContent·경기 데이터·렌더 링크 구성. */
 export const GYEONGGI_PSEO_MODIFIED = "2026-08-13"; // @indexnow-group: gyeonggi
-/** 영어 동(洞) pSEO pilot(동×과목) — DongSubjectDetail·DongHub 본문·메타. */
-export const DONG_PSEO_MODIFIED = "2026-08-05"; // @indexnow-group: dong
-/** 과목 단독 상세 /tutoring/by-subject/[과목] — SubjectDetail 카피·데이터. */
-export const SUBJECT_MODIFIED = "2026-07-31"; // @indexnow-group: subject
+/** 영어 동(洞) pSEO pilot(동×과목) — DongSubjectDetail·DongHub 본문·메타. 2026-08-28 동×과목 og:image 썸네일 신규 연결. */
+export const DONG_PSEO_MODIFIED = "2026-08-28"; // @indexnow-group: dong
+/** 과목 단독 상세 /tutoring/by-subject/[과목] — SubjectDetail 카피·데이터. 2026-08-28 과목 상세 og:image 썸네일 신규 연결. */
+export const SUBJECT_MODIFIED = "2026-08-28"; // @indexnow-group: subject
 /** 어학의참견(/power) 전 유형 — 지역랜딩·언어·schools·regions·performance·by-school. (지역축 회화·시험은 아래 전용 상수로 분리) */
 export const POWER_MODIFIED = "2026-07-31"; // @indexnow-group: power
 /**
