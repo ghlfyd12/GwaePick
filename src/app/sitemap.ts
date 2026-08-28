@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { regions } from "@/data/regions";
+import { mainDistricts } from "@/data/mainDistricts";
 import { site } from "@/data/site";
 import { subjects } from "@/data/pseo";
 import { gyeonggi } from "@/data/gyeonggi";
@@ -41,6 +42,7 @@ import {
   CORE_MODIFIED,
   REGION_MODIFIED,
   REGION_LANDMARK_MODIFIED,
+  MAIN_DISTRICT_MODIFIED,
   GYEONGGI_PSEO_MODIFIED,
   DONG_PSEO_MODIFIED,
   SUBJECT_MODIFIED,
@@ -90,6 +92,14 @@ function coreSitemap(): MetadataRoute.Sitemap {
     url: `${base}/${enc(r.id)}`,
     // 신도시 키워드 보강된 랜딩만 실변경일, 나머지는 기존 REGION_MODIFIED(가짜 갱신 방지).
     lastModified: REGION_LANDMARKS[r.id] ? REGION_LANDMARK_MODIFIED : REGION_MODIFIED,
+    changeFrequency: "weekly",
+    priority: 0.8,
+  }));
+
+  // 생활권·신도시 랜딩(mainDistricts 94) — 신규 발행일(MAIN_DISTRICT_MODIFIED).
+  const mainDistrictPages: MetadataRoute.Sitemap = mainDistricts.map((r) => ({
+    url: `${base}/${enc(r.id)}`,
+    lastModified: MAIN_DISTRICT_MODIFIED,
     changeFrequency: "weekly",
     priority: 0.8,
   }));
@@ -221,6 +231,7 @@ function coreSitemap(): MetadataRoute.Sitemap {
     ...home,
     ...consultPages,
     ...regionPages,
+    ...mainDistrictPages,
     ...subjectDetailPages,
     ...pseoPages,
     ...pilotDetail,

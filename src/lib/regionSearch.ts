@@ -1,5 +1,6 @@
 import { REGIONS } from "@/data/sidoRegions";
 import { dongHref } from "@/data/dongPageCopy";
+import { mainDistricts } from "@/data/mainDistricts";
 
 /*
  * 전국 통합 지역 검색 인덱스 — sidoRegions.ts(REGIONS)에서 파생한 순수 함수.
@@ -8,7 +9,7 @@ import { dongHref } from "@/data/dongPageCopy";
  * 하드코딩 없음. 라우팅 규칙은 기존 dongHref·[sido] 해시 동선을 재사용.
  */
 
-export type RegionKind = "dong" | "sigungu" | "sido";
+export type RegionKind = "dong" | "sigungu" | "sido" | "district";
 
 export interface RegionSearchItem {
   kind: RegionKind;
@@ -49,6 +50,16 @@ export function buildRegionSearchIndex(): RegionSearchItem[] {
       }
     }
   }
+  // 생활권·신도시 지명(mainDistricts 94) — /[region] 랜딩으로 직접 이동. "수완지구" 류 검색 대응.
+  for (const d of mainDistricts) {
+    items.push({
+      kind: "district",
+      label: d.name,
+      sub: `${d.cityQuery} · ${d.province}`,
+      href: `/${encodeURIComponent(d.id)}`,
+      key: `district:${d.id}`,
+    });
+  }
   return items;
 }
 
@@ -67,7 +78,8 @@ export function searchRegions<T extends { label: string; kind: string }>(
   for (const item of index) {
     const at = item.label.indexOf(q);
     if (at < 0) continue;
-    const kindBias = item.kind === "dong" ? 0 : item.kind === "sigungu" ? 1 : 2;
+    const kindBias =
+      item.kind === "dong" ? 0 : item.kind === "sigungu" || item.kind === "district" ? 1 : 2;
     // 점수 낮을수록 상위: 시작 일치(0) vs 중간 포함(100) + 라벨 길이 + 종류 가중
     const score = (at === 0 ? 0 : 100) + item.label.length + kindBias * 3;
     matches.push({ item, score });

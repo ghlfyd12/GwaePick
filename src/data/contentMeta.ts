@@ -34,6 +34,8 @@ export const CORE_MODIFIED = "2026-07-29"; // @indexnow-group: core
 export const REGION_MODIFIED = "2026-06-24"; // @indexnow-group: region
 /** 신도시 키워드 보강된 시군구 랜딩(regionLandmarks 대상)만 — description 실변경일. 나머지 랜딩은 REGION_MODIFIED 유지. */
 export const REGION_LANDMARK_MODIFIED = "2026-08-22"; // @indexnow-group: region-landmark
+/** 생활권·신도시 지명 랜딩(mainDistricts, 어학의참견 동기화 94) 신규 발행일. */
+export const MAIN_DISTRICT_MODIFIED = "2026-08-28"; // @indexnow-group: main-district
 /** 경기 pSEO(시도×과목·시군구×과목) — PseoLanding·regionContent·경기 데이터·렌더 링크 구성. */
 export const GYEONGGI_PSEO_MODIFIED = "2026-08-13"; // @indexnow-group: gyeonggi
 /** 영어 동(洞) pSEO pilot(동×과목) — DongSubjectDetail·DongHub 본문·메타. */

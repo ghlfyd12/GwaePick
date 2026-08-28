@@ -46,6 +46,7 @@ export const KIND_TAG: Record<string, string> = {
   dong: "동",
   sigungu: "시·군·구",
   sido: "시·도",
+  district: "생활권",
   subject: "과목",
   school: "학교",
 };

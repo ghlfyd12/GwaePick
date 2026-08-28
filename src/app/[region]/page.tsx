@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { regions, getRegionById, type Region } from "@/data/regions";
+import { regions, type Region } from "@/data/regions";
+import { allLandingRegions, getLandingRegion } from "@/data/mainDistricts";
 import { REGION_LANDMARKS } from "@/data/regionLandmarks";
 import { site } from "@/data/site";
 import CTAButton from "@/components/ui/CTAButton";
@@ -20,18 +21,18 @@ import Teachers from "@/components/sections/Teachers";
  * 규칙: "컨설턴트" 금지 → "선생님/직접 가르쳐 온 선생님". 보라색 없음. 모바일 390px 우선.
  */
 
-// regions.ts 에 없는 슬러그는 404 (정적 생성된 지역만 노출).
+// 등록된 슬러그(regions 122 + 생활권 94)만 노출, 그 외 404.
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return regions.map((r) => ({ region: r.id }));
+  return allLandingRegions.map((r) => ({ region: r.id }));
 }
 
-/** Next 가 디코드해 주지만, 인코딩된 채 들어오는 경우까지 안전하게 조회. */
+/** Next 가 디코드해 주지만, 인코딩된 채 들어오는 경우까지 안전하게 조회(생활권 포함). */
 function resolveRegion(raw: string): Region | undefined {
   return (
-    getRegionById(raw) ??
-    getRegionById((() => {
+    getLandingRegion(raw) ??
+    getLandingRegion((() => {
       try {
         return decodeURIComponent(raw);
       } catch {
