@@ -10,6 +10,7 @@
 import { REGIONS } from "@/data/sidoRegions";
 import { isKnownPowerRegion } from "@/data/byRegionSubject";
 import { isExpansionRegionSlug } from "@/data/powerRegionsExpansion";
+import { isPowerDistrictSlug } from "@/data/powerDistricts";
 import { resolvePowerRegionName } from "@/data/powerRegions";
 
 /** 비교용 정규화 — 공백·하이픈 제거 + 소문자(한글은 소문자 영향 없음). */
@@ -78,6 +79,11 @@ function isRealDong(param: string): boolean {
 export function isValidPowerRegion(param: string): boolean {
   const decoded = slugKey(param);
   if (RESERVED_SEGMENTS.has(normalize(decoded))) return false;
-  if (isKnownPowerRegion(param) || isExpansionRegionSlug(param)) return true;
+  if (
+    isKnownPowerRegion(param) ||
+    isExpansionRegionSlug(param) ||
+    isPowerDistrictSlug(param) // 신도시·생활권 지명(powerDistricts) 랜딩도 유효
+  )
+    return true;
   return isRealDong(param);
 }
