@@ -18,6 +18,7 @@ import SchoolStruggles from "@/components/school/SchoolStruggles";
 import SchoolExamPrep from "@/components/school/SchoolExamPrep";
 import SchoolExamGuide from "@/components/school/SchoolExamGuide";
 import { buildSchoolExamGuide } from "@/data/schoolExamGuide";
+import { getDetailSubjectCopy } from "@/data/detailSubjectCopy";
 import SchoolRegionLinks from "@/components/SchoolRegionLinks";
 import type { SchoolArticle } from "@/data/schoolArticleSections";
 import PageBanner from "@/components/PageBanner";
@@ -88,6 +89,9 @@ export default function SchoolSubjectDetail({
 
   // 학교급×과목 고유 콘텐츠(자주 겪는 어려움 · 시험 대비 관리) — 학교 slug 해시로 결정론적 변형 선택.
   const schoolContentVariant = selectSchoolContent(schoolSlug, levelLabel, subject.slug);
+
+  // 세부 과목 안내(과학·사회·역사만) — 커리큘럼 직후 h2+p. 그 외 과목은 null(미렌더).
+  const detailSubjectCopy = getDetailSubjectCopy(subject.slug);
 
   // 내신·기출 정보 섹션 — 고교 × 핵심5과목만. 밑판 + 학교명·인근학교·계열 주입. 그 외는 null(미렌더).
   const examGuide = buildSchoolExamGuide({
@@ -282,6 +286,18 @@ export default function SchoolSubjectDetail({
             </div>
           )}
         </section>
+
+        {/* 4-0. 세부 과목 안내(과학·사회·역사만) — 커리큘럼 직후. 확정 카피 h2+p. */}
+        {detailSubjectCopy && (
+          <section aria-labelledby="detail-subject-heading">
+            <h2 id="detail-subject-heading" className="break-keep text-xl font-bold text-ink sm:text-2xl">
+              {detailSubjectCopy.heading}
+            </h2>
+            <p className="mt-3 break-keep text-base leading-relaxed text-muted sm:text-lg">
+              {detailSubjectCopy.body}
+            </p>
+          </section>
+        )}
 
         {/* 4-1. 학교급×과목 고유 콘텐츠 — 자주 겪는 어려움 / 시험 대비 관리(하단 상담 CTA) */}
         {schoolContentVariant && (

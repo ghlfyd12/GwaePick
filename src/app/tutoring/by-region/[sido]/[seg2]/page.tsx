@@ -56,6 +56,7 @@ export async function generateMetadata({
     return buildRegionMeta({
       regionName: gyeonggi.sidoLabel,
       subjectLabel: subj.label,
+      subjectSlug: subj.slug,
       canonicalPath: pseoHref.sidoSubject(subj.slug),
     });
   }
@@ -118,6 +119,7 @@ export default async function Seg2Page({
         breadcrumb={breadcrumb}
         regionLabel={gyeonggi.sidoLabel}
         consultMessage={`${gyeonggi.sidoLabel} ${subj.label} 과외 문의드립니다.`}
+        detailSubjectSlug={subj.slug}
       >
         <SubjectChips current={subj.slug} makeHref={(s) => pseoHref.sidoSubject(s)} />
         <div className="mt-8">

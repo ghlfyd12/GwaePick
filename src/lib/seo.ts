@@ -21,6 +21,7 @@ import {
   type TitleLevel,
 } from "@/data/seoTitlePhrases";
 import { resolveTitleKeyword, type TitlePageType } from "@/data/titleKeywords";
+import { getDetailSubjectCopy } from "@/data/detailSubjectCopy";
 import { buildRegionDongTitle } from "@/lib/regionSchoolPick";
 import { getSubjectUnits } from "@/data/subjectUnits";
 import { isThumbEligible, thumbPath, thumbAlt, THUMB_SIZE } from "@/lib/thumb";
@@ -211,7 +212,11 @@ function composeTitle(p: {
     const lead = p.lead ? `${p.lead} ` : "";
     return `${p.head} ${lead}${phrase.text} | ${SITE_NAME}`;
   }
-  const keyword = resolveTitleKeyword(p.pageType, p.level);
+  // 과학·사회·역사: 접미 키워드를 세부 과목 대표 세트로 교체(그 외 과목은 기존 유형×학교급 키워드).
+  const detail = getDetailSubjectCopy(p.subjectSlug);
+  const keyword = detail
+    ? detail.titleKeyword
+    : resolveTitleKeyword(p.pageType, p.level);
   // 문구가 lead 로 시작하면(예: "초등 단원평가 …" + lead "초등") 중복이므로 lead 를 생략한다.
   const dropLead = !!p.lead && keyword.startsWith(`${p.lead} `);
   const lead = p.lead && !dropLead ? `${p.lead} ` : "";
@@ -248,11 +253,13 @@ export function buildSchoolMeta(p: SchoolMetaInput): Metadata {
         ? SCHOOL_DESC_MIDDLE
         : SCHOOL_DESC;
   // 학년 검색어 보강 — 학교급 학년 구를 학교명 head 직후(스니펫 앞부분)에 중앙 삽입.
-  const description = insertGradePhrase(
-    pick(descSet, p.canonicalPath)(p),
-    p.schoolName,
-    SCHOOL_GRADE_PHRASE[p.level ?? "high"],
-  );
+  const detailDesc = getDetailSubjectCopy(p.subjectSlug);
+  const description =
+    insertGradePhrase(
+      pick(descSet, p.canonicalPath)(p),
+      p.schoolName,
+      SCHOOL_GRADE_PHRASE[p.level ?? "high"],
+    ) + (detailDesc ? ` ${detailDesc.descTail}` : "");
   // 파일럿: 고교×핵심5과목만 페이지별 텍스트 썸네일을 og:image 로 사용(그 외는 기본 정적 OG).
   const og: OgImage | undefined =
     p.schoolSlug && p.subjectSlug && p.level && isThumbEligible(p.level, p.subjectSlug)
@@ -388,10 +395,12 @@ export function buildRegionMeta(p: RegionMetaInput): Metadata {
         : p.level === "middle"
           ? REGION_DESC_MIDDLE
           : REGION_DESC;
-    const description = pick(regionDescSet, p.canonicalPath)({
-      regionName: p.regionName,
-      subjectPhrase,
-    });
+    const detailDesc = getDetailSubjectCopy(p.subjectSlug);
+    const description =
+      pick(regionDescSet, p.canonicalPath)({
+        regionName: p.regionName,
+        subjectPhrase,
+      }) + (detailDesc ? ` ${detailDesc.descTail}` : "");
     return baseMetadata(title, description, p.canonicalPath);
   }
   const title = `${p.regionName} ${REGION_HUB_TITLE_PHRASE} | ${SITE_NAME}`;
@@ -401,11 +410,27 @@ export function buildRegionMeta(p: RegionMetaInput): Metadata {
 
 export interface SubjectMetaInput {
   subjectLabel: string;
+  /** 과목 slug — 세부 과목 오버라이드(science/social/history) 조회용. */
+  subjectSlug?: string;
   canonicalPath: string;
 }
+/** 과목 상세 title 꼬리(비-detail 과목) — 학부모 검색 키워드. 미지정 교과는 기본값. */
+const SUBJECT_TITLE_TAIL: Record<string, string> = {
+  essay: "대입 수시 첨삭 1:1", // 논술
+  coding: "정보 수행평가 1:1", // 코딩
+};
+const DEFAULT_SUBJECT_TITLE_TAIL = "내신 기출 1:1"; // 국어·영어·수학 등 교과
+
 export function buildSubjectMeta(p: SubjectMetaInput): Metadata {
-  const title = `${p.subjectLabel}과외 1:1 맞춤 매칭 | ${SITE_NAME}`;
-  const description = pick(SUBJECT_DESC, p.canonicalPath)(p);
+  const detail = getDetailSubjectCopy(p.subjectSlug);
+  // 과목 상세 title 꼬리 — 서비스 용어("매칭") 제거, 학부모 검색 키워드로 통일.
+  //  - 과학·사회·역사: 세부 과목 대표 세트 + "내신 기출 1:1"(detail 경로).
+  //  - 논술·코딩: 과목 특성 검색어. 그 외 교과(국어·영어·수학): "내신 기출 1:1".
+  const title = detail
+    ? `${p.subjectLabel}과외 ${detail.titleKeyword} 내신 기출 1:1 | ${SITE_NAME}`
+    : `${p.subjectLabel}과외 ${SUBJECT_TITLE_TAIL[p.subjectSlug ?? ""] ?? DEFAULT_SUBJECT_TITLE_TAIL} | ${SITE_NAME}`;
+  const description =
+    pick(SUBJECT_DESC, p.canonicalPath)(p) + (detail ? ` ${detail.descTail}` : "");
   return baseMetadata(title, description, p.canonicalPath);
 }
 

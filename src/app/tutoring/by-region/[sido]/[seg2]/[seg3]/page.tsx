@@ -82,6 +82,7 @@ export async function generateMetadata({
     return buildRegionMeta({
       regionName: r.sg.name,
       subjectLabel: r.subj.label,
+      subjectSlug: r.subj.slug,
       canonicalPath: pseoHref.sigunguSubject(r.sg.slug, r.subj.slug),
     });
   }
@@ -175,6 +176,7 @@ export default async function Seg3Page({
       breadcrumb={breadcrumb}
       regionLabel={sg.name}
       consultMessage={`${sg.name} ${subj.label} 과외 문의드립니다.`}
+      detailSubjectSlug={subj.slug}
     >
       <SubjectChips
         current={subj.slug}

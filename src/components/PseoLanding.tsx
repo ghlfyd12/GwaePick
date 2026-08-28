@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import ConsultForm from "@/components/ConsultForm";
 import type { RegionContent } from "@/lib/regionContent";
+import { getDetailSubjectCopy } from "@/data/detailSubjectCopy";
 import { CONSULT_PHONE } from "@/lib/regionContent";
 
 /*
@@ -17,6 +18,7 @@ export default function PseoLanding({
   regionLabel,
   gradeLabel,
   consultMessage,
+  detailSubjectSlug,
   children,
 }: {
   content: RegionContent;
@@ -24,8 +26,11 @@ export default function PseoLanding({
   regionLabel: string;
   gradeLabel?: string;
   consultMessage: string;
+  /** 과학·사회·역사면 세부 과목 섹션을 핵심 섹션 뒤에 렌더. */
+  detailSubjectSlug?: string;
   children?: ReactNode;
 }) {
+  const detailSubject = getDetailSubjectCopy(detailSubjectSlug);
   return (
     <>
       {/* 브레드크럼 */}
@@ -101,6 +106,17 @@ export default function PseoLanding({
               </p>
             </div>
           ))}
+          {/* 세부 과목 안내(과학·사회·역사만) — 핵심 섹션 직후. 확정 카피 h2+p. */}
+          {detailSubject && (
+            <div>
+              <h2 className="break-keep text-xl font-bold text-ink sm:text-2xl">
+                {detailSubject.heading}
+              </h2>
+              <p className="mt-3 break-keep text-base leading-relaxed text-muted sm:text-lg">
+                {detailSubject.body}
+              </p>
+            </div>
+          )}
         </div>
       </section>
 

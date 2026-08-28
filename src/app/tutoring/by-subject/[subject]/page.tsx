@@ -33,6 +33,7 @@ export async function generateMetadata({
   if (!subj) return {};
   return buildSubjectMeta({
     subjectLabel: subj.label,
+    subjectSlug: subj.slug,
     canonicalPath: `/tutoring/by-subject/${subj.slug}`,
   });
 }

@@ -19,6 +19,7 @@ import {
 } from "@/data/dongPageCopy";
 import { gradeBlock } from "@/data/gradeContent";
 import { pickRegionSchools } from "@/lib/regionSchoolPick";
+import { getDetailSubjectCopy } from "@/data/detailSubjectCopy";
 import { getSubjectUnits } from "@/data/subjectUnits";
 import RegionSchoolLinks from "@/components/RegionSchoolLinks";
 
@@ -58,6 +59,7 @@ export default function DongSubjectDetail({
   const faq = buildFaq(dong.name);
   // 학년 블록(변주) — 동 slug + 과목으로 3종 중 1종 선택(gradeContent). 미등록 과목이면 미노출.
   const gradeText = gradeBlock(subject.slug, dong.slug);
+  const detailSubjectCopy = getDetailSubjectCopy(subject.slug);
   // 인근 학교(중2·고2) + 과목 단원 키워드 도입 문단 — 메타(title·desc)와 동일 소스.
   const schoolPick = pickRegionSchools(sidoSlug, sigungu.slug);
   const units = getSubjectUnits(subject.slug);
@@ -200,6 +202,18 @@ export default function DongSubjectDetail({
             </div>
           )}
         </section>
+
+        {/* 4-0. 세부 과목 안내(과학·사회·역사만) — 커리큘럼 직후. 확정 카피 h2+p. */}
+        {detailSubjectCopy && (
+          <section aria-labelledby="detail-subject-heading">
+            <h2 id="detail-subject-heading" className="break-keep text-xl font-bold text-ink sm:text-2xl">
+              {detailSubjectCopy.heading}
+            </h2>
+            <p className="mt-3 break-keep text-base leading-relaxed text-muted sm:text-lg">
+              {detailSubjectCopy.body}
+            </p>
+          </section>
+        )}
 
         {/* 4-1. 학년별 학습 목표(학년 변주 블록) — 학년+과목 검색어 부분매칭 커버 */}
         {gradeText && (

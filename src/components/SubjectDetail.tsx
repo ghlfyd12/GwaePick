@@ -8,6 +8,7 @@ import { buildSubjectKeywords } from "@/data/subjectKeywords";
 import { subjectHeroImages } from "@/data/subjectHeroImages";
 import PageBanner from "@/components/PageBanner";
 import { buildSubjectBanner } from "@/data/pageBannerCopy";
+import { getDetailSubjectCopy } from "@/data/detailSubjectCopy";
 
 /*
  * SubjectDetail — 과목 단독 상세(서버 컴포넌트). SchoolSubjectDetail 패턴 축약판.
@@ -24,6 +25,7 @@ const SUBJECT_HERO_FALLBACK = {
 export default function SubjectDetail({ subject }: { subject: Subject }) {
   const faq = buildSubjectFaq(subject.label);
   const keywords = buildSubjectKeywords(subject.slug);
+  const detailSubjectCopy = getDetailSubjectCopy(subject.slug);
   const consultMessage = `${subject.label} 과외 문의드립니다.`;
   // slug 로 과목별 이미지를 조회하고, 없으면 공용 이미지로 대체.
   const hero = subjectHeroImages[subject.slug] ?? SUBJECT_HERO_FALLBACK;
@@ -125,6 +127,18 @@ export default function SubjectDetail({ subject }: { subject: Subject }) {
             </div>
           )}
         </section>
+
+        {/* 3-0. 세부 과목 안내(과학·사회·역사만) — 커리큘럼 직후. 확정 카피 h2+p. */}
+        {detailSubjectCopy && (
+          <section aria-labelledby="detail-subject-heading">
+            <h2 id="detail-subject-heading" className="break-keep text-xl font-bold text-ink sm:text-2xl">
+              {detailSubjectCopy.heading}
+            </h2>
+            <p className="mt-3 break-keep text-base leading-relaxed text-muted sm:text-lg">
+              {detailSubjectCopy.body}
+            </p>
+          </section>
+        )}
 
         {/* 3-1. 진행 순서 STEP — 학교/지역 상세와 동일(학교명 비의존, 그대로 재사용) */}
         <section>
