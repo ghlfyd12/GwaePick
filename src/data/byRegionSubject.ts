@@ -30,12 +30,16 @@ import {
 
 const subjectBySlug = new Map(POWER_SUBJECTS.map((s) => [s.slug, s]));
 
-/** 지역 축 title 키워드(단일 소스 — 이 값만 바꾸면 전 페이지 반영). 느낌표·금지어 없음. */
+/**
+ * 지역 축 title 키워드(단일 소스 — 이 값만 바꾸면 전 페이지 반영). 느낌표·금지어 없음.
+ * 회화 3종은 "{언어}회화 과외" 연접으로 "과외"를 1회 포함(회화·과외·1:1 과외 조합 동시 수용).
+ * "과외" 삽입분만큼 말미 1항목을 덜어 ~30자(지역명+키워드)를 유지한다(잘린 항목은 보고서에 명시).
+ */
 export const REGION_SUBJECT_KEYWORD: Record<string, string> = {
-  "english-conversation": "1:1 영어회화 기초 토익 토플 오픽 스피킹",
-  "japanese-conversation": "1:1 일본어회화 왕초보 기초 JLPT 프리토킹",
+  "english-conversation": "1:1 영어회화 과외 기초 토익 토플 오픽", // (기존 말미 '스피킹' 제외)
+  "japanese-conversation": "1:1 일본어회화 과외 왕초보 기초 JLPT", // (기존 말미 '프리토킹' 제외)
   "japanese-tutoring": "1:1 일본어과외 기초 히라가나 문법 JLPT JPT",
-  "chinese-conversation": "1:1 중국어회화 왕초보 성조 HSKK 프리토킹",
+  "chinese-conversation": "1:1 중국어회화 과외 왕초보 성조 HSKK", // (기존 말미 '프리토킹' 제외)
   "chinese-tutoring": "1:1 중국어과외 기초 병음 HSK 비즈니스",
 };
 
@@ -236,7 +240,7 @@ export function buildByRegionData(
   const head = `${regionName} ${subject.label}`;
   // title = "{지역} {키워드}" — 키워드에 과목명이 이미 포함되어 지역명만 앞에 둔다(중복 없음).
   const metaTitle = `${regionName} ${keyword} | 어학의참견`;
-  const metaDescription = district
+  const baseDescription = district
     ? buildDistrictDescriptions({
         regionName,
         sigungu: district.sigunguText,
@@ -250,6 +254,11 @@ export function buildByRegionData(
         terms,
         type: subject.type,
       })[hashSlug(`${regionSlug}/${subjectSlug}`) % 3];
+  // 회화 유형은 description 에 "과외"가 없어(label=영어회화 등), 1문장 보강(과외 검색 수용).
+  const metaDescription =
+    subject.type === "conversation"
+      ? `${baseDescription} ${subject.label} 과외를 1:1로 진행합니다.`
+      : baseDescription;
 
   const otherSubjects = POWER_SUBJECTS.filter((s) => s.slug !== subjectSlug).map((s) => ({
     href: `/power/by-region/${enc}/${s.slug}`,
