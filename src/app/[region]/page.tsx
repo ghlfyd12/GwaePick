@@ -6,6 +6,8 @@ import { allLandingRegions, getLandingRegion } from "@/data/mainDistricts";
 import { REGION_LANDMARKS } from "@/data/regionLandmarks";
 import { site } from "@/data/site";
 import CTAButton from "@/components/ui/CTAButton";
+import ReviewSection from "@/components/ReviewSection";
+import { reviewsForRegion } from "@/data/reviewMatch";
 import Curriculum from "@/components/sections/Curriculum";
 import WhyUs from "@/components/sections/WhyUs";
 import TeacherIntro from "@/components/sections/TeacherIntro";
@@ -90,6 +92,8 @@ export default async function RegionPage({
   const subjects = ["수학", "영어", "국어", "과학", "사회", "코딩"];
   const dongLine = r.dongs?.slice(0, 12).join(", ");
   const schoolLine = r.schools?.slice(0, 12).join(", ");
+  // 이 지역(생활권은 소속 시군구) 매칭 후기 — 0건이면 섹션 미렌더.
+  const regionReviews = reviewsForRegion(r.cityQuery, r.province);
 
   return (
     <>
@@ -156,6 +160,13 @@ export default async function RegionPage({
       <WhyUs />
       <TeacherIntro />
       <Teachers />
+
+      {/* 지역 매칭 후기 — 본문 전문(검색 매칭). 0건이면 미렌더. 합격 캐러셀과 병행. */}
+      {regionReviews.length > 0 && (
+        <section className="border-t border-line bg-surface px-4 py-14 sm:px-6">
+          <ReviewSection reviews={regionReviews} heading={`${r.name} 과외 후기`} />
+        </section>
+      )}
 
       {/* 지역 맞춤 무료 상담 신청 — 모든 CTA 의 앵커 목적지(#consult) */}
       <section

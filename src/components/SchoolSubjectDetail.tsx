@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import ConsultForm from "@/components/ConsultForm";
+import ReviewSection from "@/components/ReviewSection";
+import { reviewsForSchoolSubject } from "@/data/reviewMatch";
 import type { Subject } from "@/data/subjects";
 import SubjectTabs from "@/components/SubjectTabs";
 import { CONSULT_PHONE, STEPS, TRUST, REVIEW_PLACEHOLDERS } from "@/data/dongPageCopy";
@@ -86,6 +88,7 @@ export default function SchoolSubjectDetail({
   // "과목별 1:1 과외" — 전 학교급. 초등 8과목 / 중·고등 5과목.
   const subjectOverview = buildSubjectOverview(displayName, isElem);
   const consultMessage = `${schoolName} ${subject.label} 과외 문의드립니다.`;
+  const schoolSubjectReviews = reviewsForSchoolSubject(schoolName, subject.label);
 
   // 학교급×과목 고유 콘텐츠(자주 겪는 어려움 · 시험 대비 관리) — 학교 slug 해시로 결정론적 변형 선택.
   const schoolContentVariant = selectSchoolContent(schoolSlug, levelLabel, subject.slug);
@@ -396,6 +399,14 @@ export default function SchoolSubjectDetail({
               ))}
             </ul>
           </section>
+        )}
+
+        {/* 8-1. 학교×과목 매칭 후기 — 본문 전문(검색 매칭). 0건이면 미렌더. */}
+        {schoolSubjectReviews.length > 0 && (
+          <ReviewSection
+            reviews={schoolSubjectReviews}
+            heading={`${schoolName} ${subject.label} 과외 후기`}
+          />
         )}
 
         {/* 8-2. 관련 검색어 — 전부 장식 태그(클릭 불가) */}

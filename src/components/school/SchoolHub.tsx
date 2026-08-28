@@ -1,5 +1,7 @@
 import Link from "next/link";
 import ConsultForm from "@/components/ConsultForm";
+import ReviewSection from "@/components/ReviewSection";
+import { reviewsForSchool } from "@/data/reviewMatch";
 import SchoolRegionLinks from "@/components/SchoolRegionLinks";
 import { subjectBySlug } from "@/data/subjects";
 import { CONSULT_PHONE, STEPS, TRUST } from "@/data/dongPageCopy";
@@ -46,6 +48,7 @@ export default function SchoolHub({
   const guide = buildHubGuide(displayName);
   const faq = buildSchoolFaq(schoolName, levelLabel);
   const consultMessage = `${schoolName} 과외 문의드립니다.`;
+  const schoolReviews = reviewsForSchool(schoolName);
 
   const otherSchoolLinks = otherSchools
     .slice(0, 12)
@@ -158,6 +161,11 @@ export default function SchoolHub({
             ))}
           </div>
         </section>
+
+        {/* 학교 매칭 후기 — 본문 전문(검색 매칭). 0건이면 미렌더. */}
+        {schoolReviews.length > 0 && (
+          <ReviewSection reviews={schoolReviews} heading={`${schoolName} 과외 후기`} />
+        )}
 
         {/* 인근 학교 허브 링크 */}
         {otherSchoolLinks.length > 0 && (

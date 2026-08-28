@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import ConsultForm from "@/components/ConsultForm";
+import ReviewSection from "@/components/ReviewSection";
+import { reviewsForSubject } from "@/data/reviewMatch";
 import type { Subject } from "@/data/subjects";
 import { CONSULT_PHONE, STEPS, TRUST } from "@/data/dongPageCopy";
 import { buildSubjectFaq } from "@/data/subjectDetailCopy";
@@ -27,6 +29,7 @@ export default function SubjectDetail({ subject }: { subject: Subject }) {
   const keywords = buildSubjectKeywords(subject.slug);
   const detailSubjectCopy = getDetailSubjectCopy(subject.slug);
   const consultMessage = `${subject.label} 과외 문의드립니다.`;
+  const subjectReviews = reviewsForSubject(subject.label);
   // slug 로 과목별 이미지를 조회하고, 없으면 공용 이미지로 대체.
   const hero = subjectHeroImages[subject.slug] ?? SUBJECT_HERO_FALLBACK;
 
@@ -184,6 +187,11 @@ export default function SubjectDetail({ subject }: { subject: Subject }) {
             ))}
           </div>
         </section>
+
+        {/* 4-1. 과목 매칭 후기 — 본문 전문(검색 매칭). 0건이면 미렌더. */}
+        {subjectReviews.length > 0 && (
+          <ReviewSection reviews={subjectReviews} heading={`${subject.label} 과외 후기`} />
+        )}
 
         {/* 5. 관련 검색어 — 전부 장식 태그(클릭 불가) */}
         {keywords.length > 0 && (
