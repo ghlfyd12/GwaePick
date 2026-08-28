@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import ConsultForm from "@/components/ConsultForm";
 import LessonModeSection from "@/components/power/LessonModeSection";
@@ -15,6 +16,7 @@ import {
   dongsOfSigunguHub,
 } from "@/data/powerRegionsExpansion";
 import { districtsOfHub } from "@/data/powerDistricts";
+import { isValidPowerRegion } from "@/data/powerRegionValidation";
 
 /*
  * /power/[region] — 파워 홈페이지 지역별 영어회화 동적 상세(pSEO).
@@ -45,6 +47,8 @@ export async function generateMetadata({
   params: Promise<Params>;
 }): Promise<Metadata> {
   const { region } = await params;
+  // 무효(garbage·예약경로) slug 은 메타 미생성 — 페이지에서 notFound() 로 404.
+  if (!isValidPowerRegion(region)) return {};
   const name = resolvePowerRegionName(region);
 
   const title = `${name} 영어 회화 과외 추천 - 1:1 맞춤 원어민/교포 선생님 매칭 | 지식의 참견`;
@@ -82,6 +86,8 @@ export default async function PowerRegionPage({
   params: Promise<Params>;
 }) {
   const { region } = await params;
+  // 알려진 지역·확장 허브·실제 시군구/동만 렌더. garbage·예약경로(by-region 등)는 404.
+  if (!isValidPowerRegion(region)) notFound();
   const name = resolvePowerRegionName(region);
   // 알려진 지역이면 신규 유형 A(지역×어학과목) 5과목 진입 링크를 노출한다(무효 지역은 빈 배열 → 미노출).
   const subjectLinks = regionSubjectEntryLinks(region);
