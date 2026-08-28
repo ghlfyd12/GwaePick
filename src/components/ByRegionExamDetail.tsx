@@ -3,6 +3,7 @@ import ConsultForm from "@/components/ConsultForm";
 import JsonLd from "@/components/JsonLd";
 import { site } from "@/data/site";
 import { buildByExamData } from "@/data/byRegionExam";
+import { buildExamBookSection } from "@/data/power/examBooks";
 import LessonModeSection from "@/components/power/LessonModeSection";
 
 /*
@@ -26,6 +27,9 @@ export default function ByRegionExamDetail({
 }) {
   const data = buildByExamData(regionParam, examSlug);
   if (!data) return null;
+
+  // 교재 활용 섹션(시험별 인기 교재 롱테일 — 본문만, title/og 미유입).
+  const bookSection = buildExamBookSection(examSlug, data.exam.name);
 
   const canonical = `/power/by-region/${encodeURIComponent(data.regionSlug)}/${examSlug}`;
   const jsonLd = [
@@ -89,6 +93,47 @@ export default function ByRegionExamDetail({
             ))}
           </ul>
         </section>
+
+        {/* ── 2.5 교재 활용 — 시험별 인기 교재 롱테일(본문만, 상표는 title/og 미유입) ── */}
+        {bookSection && (
+          <section aria-labelledby="books-heading">
+            <h2
+              id="books-heading"
+              className="break-keep text-center text-2xl font-bold text-ink sm:text-3xl"
+            >
+              {bookSection.heading}
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl break-keep text-center text-base leading-relaxed text-muted sm:text-lg">
+              {bookSection.lead}
+            </p>
+
+            {bookSection.blocks.length > 0 ? (
+              <div className="mt-8 space-y-4">
+                {bookSection.blocks.map((b) => (
+                  <div
+                    key={b.heading}
+                    className="rounded-3xl border border-line bg-white p-6 shadow-sm"
+                  >
+                    <h3 className="break-keep text-lg font-bold text-accent sm:text-xl">
+                      {b.heading}
+                    </h3>
+                    <p className="mt-2 break-keep text-sm leading-relaxed text-muted sm:text-base">
+                      {b.body}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="mx-auto mt-8 max-w-2xl break-keep text-center text-base leading-relaxed text-muted sm:text-lg">
+                {bookSection.genericBody}
+              </p>
+            )}
+
+            <p className="mx-auto mt-6 max-w-2xl break-keep text-center text-sm leading-relaxed text-muted sm:text-base">
+              {bookSection.closing}
+            </p>
+          </section>
+        )}
 
         {/* ── 3. 연결 안내 ─────────────────────────────────────────── */}
         <section
