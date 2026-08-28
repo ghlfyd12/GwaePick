@@ -12,6 +12,20 @@ import {
   powerExpansionRegions,
 } from "@/data/powerRegionsExpansion";
 import { powerDistricts } from "@/data/powerDistricts";
+import { regions } from "@/data/regions";
+
+/** regions.ts province(약칭) → 정식 시도명(기존 인덱스 sidos 라벨과 정합). */
+const SIDO_FULL: Record<string, string> = {
+  경기: "경기도",
+  서울: "서울특별시",
+  부산: "부산광역시",
+  대구: "대구광역시",
+  인천: "인천광역시",
+  광주: "광주광역시",
+  대전: "대전광역시",
+  울산: "울산광역시",
+  세종: "세종특별자치시",
+};
 
 export type SearchItem =
   | readonly [string, number]
@@ -52,6 +66,18 @@ export function buildPowerRegionSearchIndex(): PowerRegionSearchIndex {
   }
   // 신도시 지명
   for (const d of powerDistricts) add(d.name, d.slug, d.sidoLabel);
+
+  // 963(isKnownPowerRegion) 동 전량 — regions.ts. 검색 인덱스 누락(수내동 등) 해소.
+  //   과목 페이지(isByRegionAllowed=isKnownPowerRegion 포함)가 유효하므로 링크 죽지 않는다.
+  //   name===slug(한글) 이라 dedup(seen by slug)으로 기존 시군구/확장/신도시와 중복 자동 제거.
+  for (const r of regions) {
+    const sido = SIDO_FULL[r.province] ?? r.province;
+    if (r.dongs && r.dongs.length > 0) {
+      for (const dong of r.dongs) add(dong, dong, sido);
+    } else {
+      add(r.name, r.name, sido);
+    }
+  }
 
   return { sidos, items };
 }
