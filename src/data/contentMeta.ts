@@ -54,3 +54,9 @@ export const POWER_MODIFIED = "2026-07-31"; // @indexnow-group: power
  * 교체한 배포일. 이 그룹만 실변경(썸네일)이므로 POWER_MODIFIED 와 분리해 나머지 /power 의 가짜 갱신을 막는다.
  */
 export const POWER_REGION_THUMB_MODIFIED = "2026-08-26"; // @indexnow-group: power-region-thumb
+/**
+ * /power 지역축(시험 region×exam + 회화·과외 region×subject) title/description 개편 배포일.
+ * "어학의참견" 제거 + 영문약칭·목표 키워드·개인과외 desc 로 교체한 실변경. 썸네일 date(THUMB)와
+ * 분리해 이 그룹의 sitemap lastmod 로 쓴다. THUMB 상수는 무변경(썸네일 자체는 색·규격 불변).
+ */
+export const POWER_REGION_META_MODIFIED = "2026-08-28"; // @indexnow-group: power-region-meta

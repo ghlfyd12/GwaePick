@@ -31,17 +31,35 @@ import {
 const subjectBySlug = new Map(POWER_SUBJECTS.map((s) => [s.slug, s]));
 
 /**
- * 지역 축 title 키워드(단일 소스 — 이 값만 바꾸면 전 페이지 반영). 느낌표·금지어 없음.
- * 회화 3종은 "{언어}회화 과외" 연접으로 "과외"를 1회 포함(회화·과외·1:1 과외 조합 동시 수용).
- * "과외" 삽입분만큼 말미 1항목을 덜어 ~30자(지역명+키워드)를 유지한다(잘린 항목은 보고서에 명시).
+ * 지역 축 title/description 메타(사용자 확정 형식 — "어학의참견" 제거).
+ * title: "{지역} {head} | 1:1 개인과외 {kw}"
+ * desc:  "{지역} {descRef}, {descBody}. 첫 상담은 무료입니다."
+ * head/descRef 로 회화(영어회화 과외)·과외(일본어 과외)를 구분. 느낌표·서비스어("매칭") 없음.
  */
-export const REGION_SUBJECT_KEYWORD: Record<string, string> = {
-  "english-conversation": "1:1 영어회화 과외 기초 토익 토플 오픽", // (기존 말미 '스피킹' 제외)
-  "japanese-conversation": "1:1 일본어회화 과외 왕초보 기초 JLPT", // (기존 말미 '프리토킹' 제외)
-  "japanese-tutoring": "1:1 일본어과외 기초 히라가나 문법 JLPT JPT",
-  "chinese-conversation": "1:1 중국어회화 과외 왕초보 성조 HSKK", // (기존 말미 '프리토킹' 제외)
-  "chinese-tutoring": "1:1 중국어과외 기초 병음 HSK 비즈니스",
+export const REGION_SUBJECT_META: Record<
+  string,
+  { head: string; kw: string; descRef: string; descBody: string }
+> = {
+  "english-conversation": { head: "영어회화 과외", kw: "기초·비즈니스·여행·면접영어", descRef: "영어회화", descBody: "왕초보 기초부터 비즈니스·여행·면접까지 목표에 맞춰 성인·직장인을 일대일로 지도합니다" },
+  "japanese-conversation": { head: "일본어회화 과외", kw: "왕초보·JLPT·프리토킹·여행", descRef: "일본어회화", descBody: "왕초보 히라가나부터 JLPT·프리토킹까지 성인·직장인을 일대일로 지도합니다" },
+  "chinese-conversation": { head: "중국어회화 과외", kw: "왕초보·성조·HSK·비즈니스", descRef: "중국어회화", descBody: "왕초보 성조부터 HSK·비즈니스까지 성인·직장인을 일대일로 지도합니다" },
+  "japanese-tutoring": { head: "일본어 과외", kw: "왕초보·JLPT·회화", descRef: "일본어 과외", descBody: "왕초보 문자부터 JLPT·회화까지 성인·대학생을 일대일로 지도합니다" },
+  "chinese-tutoring": { head: "중국어 과외", kw: "왕초보·HSK·회화", descRef: "중국어 과외", descBody: "왕초보 병음부터 HSK·회화까지 성인·대학생을 일대일로 지도합니다" },
 };
+
+// 빌드시 title/desc 길이 검증(위반 시 빌드 실패). 앞 25자 "{지역} {head}", title ≤ 60, desc ≤ 160.
+// 최장 지역명(생활권·동 포함 보수적 상한)으로 검사.
+{
+  const MAXR = "전농답십리뉴타운"; // 8자
+  for (const [slug, m] of Object.entries(REGION_SUBJECT_META)) {
+    const front = `${MAXR} ${m.head}`;
+    const title = `${MAXR} ${m.head} | 1:1 개인과외 ${m.kw}`;
+    const desc = `${MAXR} ${m.descRef}, ${m.descBody}. 첫 상담은 무료입니다.`;
+    if ([...front].length > 25) throw new Error(`[byRegionSubject] "${slug}" 앞부분 >25자(${[...front].length}): ${front}`);
+    if ([...title].length > 60) throw new Error(`[byRegionSubject] "${slug}" title >60자(${[...title].length}): ${title}`);
+    if ([...desc].length > 160) throw new Error(`[byRegionSubject] "${slug}" desc >160자(${[...desc].length}): ${desc}`);
+  }
+}
 
 /* ── 과목별 특화 카드 3종(지역 축 — 왕초보·성인·기초 프레이밍). "수행평가" 미사용. ── */
 export type SubjectCard = { title: string; desc: string };
@@ -121,7 +139,6 @@ export type ByRegionPageData = {
   label: string;
   type: PowerSubject["type"];
   head: string;
-  keyword: string;
   metaTitle: string;
   metaDescription: string;
   intro: string;
@@ -144,21 +161,6 @@ function buildIntro(p: { regionName: string; label: string; terms: string }): st
   return variants[hashSlug(`${G}/${L}`) % variants.length];
 }
 
-function buildDescriptions(p: {
-  regionName: string;
-  label: string;
-  terms: string;
-  type: PowerSubject["type"];
-}): string[] {
-  const { regionName: G, label: L, terms: T, type } = p;
-  const teacher = type === "conversation" ? "원어민·교포 선생님" : "선생님";
-  return [
-    `${G} ${L}를 찾고 계신가요. 직접 가르쳐 온 상담 선생님이 지금 수준과 목표를 먼저 듣고, ${T}까지 호흡이 맞는 ${teacher}을 1:1로 연결해 드립니다. 왕초보도 첫 상담은 무료입니다.`,
-    `${G}에서 ${L}를 1:1로 시작하세요. 상담 선생님이 전화·화상 여건과 목표를 확인하고 ${T}${objJosa(T)} 포함해 수업할 ${teacher}을 연결해 드립니다. 무료 상담으로 시작하세요.`,
-    `${G} ${L}가 학원 단체 수업으로 부족하다면 1:1 맞춤이 답입니다. 상담 선생님이 ${T}까지 함께 잡아 줄 ${teacher}을 찾아 연결하며, 잘 맞지 않으면 다시 연결해 드립니다.`,
-  ];
-}
-
 /* 신도시·생활권 지명 도입 3종 — 소속 시군구를 1회 언급(예: "하남시 미사에서…"). */
 function buildDistrictIntro(p: {
   regionName: string;
@@ -173,22 +175,6 @@ function buildDistrictIntro(p: {
     `${S} ${G}에서 ${L}가 학원 단체 수업으로는 늘 부족했다면 1:1이 답입니다. 상담 선생님이 왕초보인지 실력을 다지는 단계인지 먼저 듣고, ${T}까지 함께 잡아 줄 선생님을 연결해 드립니다.`,
   ];
   return variants[hashSlug(`${G}/${L}`) % variants.length];
-}
-
-function buildDistrictDescriptions(p: {
-  regionName: string;
-  sigungu: string;
-  label: string;
-  terms: string;
-  type: PowerSubject["type"];
-}): string[] {
-  const { regionName: G, sigungu: S, label: L, terms: T, type } = p;
-  const teacher = type === "conversation" ? "원어민·교포 선생님" : "선생님";
-  return [
-    `${S} ${G} ${L}를 찾고 계신가요. 직접 가르쳐 온 상담 선생님이 지금 수준과 목표를 먼저 듣고, ${T}까지 호흡이 맞는 ${teacher}을 1:1로 연결해 드립니다. 왕초보도 첫 상담은 무료입니다.`,
-    `${S} ${G}에서 ${L}를 1:1로 시작하세요. 상담 선생님이 전화·화상 여건과 목표를 확인하고 ${T}${objJosa(T)} 포함해 수업할 ${teacher}을 연결해 드립니다. 무료 상담으로 시작하세요.`,
-    `${S} ${G} ${L}가 학원 단체 수업으로 부족하다면 1:1 맞춤이 답입니다. 상담 선생님이 ${T}까지 함께 잡아 줄 ${teacher}을 찾아 연결하며, 잘 맞지 않으면 다시 연결해 드립니다.`,
-  ];
 }
 
 function buildFaq(p: { regionName: string; label: string }): { q: string; a: string }[] {
@@ -236,29 +222,11 @@ export function buildByRegionData(
   }
   const enc = encodeURIComponent(regionSlug);
   const terms = REGION_TERMS[subjectSlug];
-  const keyword = REGION_SUBJECT_KEYWORD[subjectSlug];
   const head = `${regionName} ${subject.label}`;
-  // title = "{지역} {키워드}" — 키워드에 과목명이 이미 포함되어 지역명만 앞에 둔다(중복 없음).
-  const metaTitle = `${regionName} ${keyword} | 어학의참견`;
-  const baseDescription = district
-    ? buildDistrictDescriptions({
-        regionName,
-        sigungu: district.sigunguText,
-        label: subject.label,
-        terms,
-        type: subject.type,
-      })[hashSlug(`${regionSlug}/${subjectSlug}`) % 3]
-    : buildDescriptions({
-        regionName,
-        label: subject.label,
-        terms,
-        type: subject.type,
-      })[hashSlug(`${regionSlug}/${subjectSlug}`) % 3];
-  // 회화 유형은 description 에 "과외"가 없어(label=영어회화 등), 1문장 보강(과외 검색 수용).
-  const metaDescription =
-    subject.type === "conversation"
-      ? `${baseDescription} ${subject.label} 과외를 1:1로 진행합니다.`
-      : baseDescription;
+  // title/description — 확정 형식("어학의참견" 제거, "{지역} {head} | 1:1 개인과외 {kw}").
+  const sm = REGION_SUBJECT_META[subjectSlug];
+  const metaTitle = `${regionName} ${sm.head} | 1:1 개인과외 ${sm.kw}`;
+  const metaDescription = `${regionName} ${sm.descRef}, ${sm.descBody}. 첫 상담은 무료입니다.`;
 
   const otherSubjects = POWER_SUBJECTS.filter((s) => s.slug !== subjectSlug).map((s) => ({
     href: `/power/by-region/${enc}/${s.slug}`,
@@ -281,7 +249,6 @@ export function buildByRegionData(
     label: subject.label,
     type: subject.type,
     head,
-    keyword,
     metaTitle,
     metaDescription,
     intro: district

@@ -47,7 +47,7 @@ import {
   DONG_PSEO_MODIFIED,
   SUBJECT_MODIFIED,
   POWER_MODIFIED,
-  POWER_REGION_THUMB_MODIFIED,
+  POWER_REGION_META_MODIFIED,
 } from "@/data/contentMeta";
 import { REGION_LANDMARKS } from "@/data/regionLandmarks";
 
@@ -255,7 +255,7 @@ function powerRegionSitemap(chunk: number): MetadataRoute.Sitemap {
     const { region, subject } = POWER_REGION_PAIRS[p];
     out.push({
       url: `${base}/power/by-region/${enc(region)}/${subject}`,
-      lastModified: POWER_REGION_THUMB_MODIFIED,
+      lastModified: POWER_REGION_META_MODIFIED,
       changeFrequency: "weekly",
       priority: 0.5,
     });
@@ -272,7 +272,7 @@ function powerExamSitemap(chunk: number): MetadataRoute.Sitemap {
     const { region, subject } = POWER_EXAM_PAIRS[p];
     out.push({
       url: `${base}/power/by-region/${enc(region)}/${subject}`,
-      lastModified: POWER_REGION_THUMB_MODIFIED,
+      lastModified: POWER_REGION_META_MODIFIED,
       changeFrequency: "weekly",
       priority: 0.5,
     });

@@ -99,7 +99,9 @@ function resolveLines(
   if (kind === "conversation") {
     const d = buildByRegionData(regionParam, itemSlug);
     if (!d) return null;
-    return [d.regionName, d.label]; // label = subject.label(영어회화·중국어과외 등)
+    // 회화는 "과외" 부착("영어회화 과외"), 과외 과목(label 이 이미 …과외)은 이중 방지.
+    const suffix = d.label.endsWith("과외") ? d.label : `${d.label} 과외`;
+    return [d.regionName, suffix];
   }
   return null;
 }

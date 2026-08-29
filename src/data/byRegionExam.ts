@@ -22,10 +22,11 @@ import {
   examBySlug,
   isExamSlug,
   examsOfLanguage,
-  SPEAKING_EXAM_SLUGS,
   REPRESENTATIVE_EXAM_SLUG,
   LANGUAGE_CONVERSATION_SLUG,
   LANGUAGE_LABEL,
+  buildExamTitle,
+  buildExamDescription,
   type PowerExam,
 } from "@/data/power/exams";
 
@@ -167,16 +168,11 @@ export function buildByExamData(
   const regionSlug = region ? region.slug : slugKey(regionParam);
   const regionName = region ? region.name : resolveExamRegionName(regionParam);
   const enc = encodeURIComponent(regionSlug);
-  const speaking = SPEAKING_EXAM_SLUGS.has(examSlug);
 
   const head = `${regionName} ${exam.name}`;
-  const langLabel = LANGUAGE_LABEL[exam.language];
-  const metaTitle = speaking
-    ? `${regionName} ${exam.name} 과외 | 어학의참견 - 1:1 ${langLabel} 말하기 시험 준비`
-    : `${regionName} ${exam.name} 과외 | 어학의참견 - 1:1 맞춤 ${langLabel} 시험 준비`;
-  const metaDescription =
-    `${regionName}에서 ${exam.name}을 준비하는 분을 위한 1:1 과외. 직접 가르쳐 온 상담 ` +
-    `선생님이 수준과 목표를 듣고 호흡이 맞는 선생님을 연결해 드립니다. 첫 상담은 무료입니다.`;
+  // title/description 은 exams.ts 확정 형식("어학의참견" 제거, 영문약칭·목표 키워드 반영).
+  const metaTitle = buildExamTitle(regionName, exam);
+  const metaDescription = buildExamDescription(regionName, exam);
 
   const intro =
     `${regionName}에서 ${exam.name}을 준비하는 분들의 목표와 일정은 저마다 다릅니다. ` +

@@ -21,6 +21,47 @@ export interface PowerExam {
   prepPoints: { title: string; desc: string }[];
 }
 
+/** 시험별 메타(title/description) 데이터 — 13종 상수화. name 은 POWER_EXAMS 에서 참조. */
+export interface ExamMeta {
+  /** 영문약칭(TOEIC·IELTS·OPIc 등). name 과 같으면(JLPT·HSK 등) title 에서 중복 생략. */
+  abbr: string;
+  /** title 꼬리 키워드("800·900 단기" 등). 서비스어("매칭")·느낌표 없음. */
+  titleKw: string;
+  /** description 꼬리 — "{지역} {시험명}, " 뒤에 붙는 목표·대상 문장(첫 상담 무료 포함). */
+  descTail: string;
+}
+
+/** slug → ExamMeta. 13종 전량. 표기·키워드는 사용자 확정본. */
+export const EXAM_META: Record<string, ExamMeta> = {
+  toeic: { abbr: "TOEIC", titleKw: "800·900 단기", descTail: "목표 점수(800·900)와 마감까지 남은 기간에 맞춰 성인·직장인·대학생을 일대일로 지도합니다. 첫 상담은 무료입니다." },
+  "toeic-speaking": { abbr: "TOEIC Speaking", titleKw: "레벨6·7", descTail: "목표 레벨(6·7)에 맞춰 답변 구성과 발화를 성인·직장인 대상 일대일로 준비합니다. 첫 상담은 무료입니다." },
+  opic: { abbr: "OPIc", titleKw: "IH·AL 스피킹", descTail: "목표 등급(IH·AL)에 맞춰 답변 전략과 발화를 성인·직장인·대학생 일대일로 준비합니다. 첫 상담은 무료입니다." },
+  toefl: { abbr: "TOEFL", titleKw: "스피킹·라이팅", descTail: "목표 점수와 유학 일정에 맞춰 스피킹·라이팅까지 성인·대학생을 일대일로 지도합니다. 첫 상담은 무료입니다." },
+  ielts: { abbr: "IELTS", titleKw: "스피킹·라이팅", descTail: "목표 밴드와 준비 기간에 맞춰 지도 경험이 있는 선생님이 성인·대학생을 일대일로 지도합니다. 첫 상담은 무료입니다." },
+  teps: { abbr: "TEPS", titleKw: "청해·문법 집중", descTail: "목표 점수와 청해·문법을 성인·대학생·직장인 대상 일대일로 준비합니다. 첫 상담은 무료입니다." },
+  gtelp: { abbr: "G-TELP", titleKw: "65점·32점", descTail: "목표 점수(65·32)와 자격·공무원 일정에 맞춰 성인·직장인을 일대일로 지도합니다. 첫 상담은 무료입니다." },
+  jlpt: { abbr: "JLPT", titleKw: "N1·N2", descTail: "목표 급수(N1·N2)와 준비 기간에 맞춰 성인·대학생·직장인을 일대일로 지도합니다. 첫 상담은 무료입니다." },
+  jpt: { abbr: "JPT", titleKw: "700·800", descTail: "목표 점수(700·800)에 맞춰 청해·독해를 성인·직장인 대상 일대일로 준비합니다. 첫 상담은 무료입니다." },
+  sjpt: { abbr: "SJPT", titleKw: "레벨 5·6", descTail: "목표 레벨(5·6)에 맞춰 말하기를 성인·직장인 대상 일대일로 준비합니다. 첫 상담은 무료입니다." },
+  hsk: { abbr: "HSK", titleKw: "5급·6급", descTail: "목표 급수(5급·6급)와 준비 기간에 맞춰 성인·대학생·직장인을 일대일로 지도합니다. 첫 상담은 무료입니다." },
+  hskk: { abbr: "HSKK", titleKw: "중급·고급", descTail: "목표 등급(중급·고급) 말하기를 성인·대학생 대상 일대일로 준비합니다. 첫 상담은 무료입니다." },
+  tsc: { abbr: "TSC", titleKw: "4급·5급", descTail: "목표 등급(4급·5급) 말하기를 성인·직장인 대상 일대일로 준비합니다. 첫 상담은 무료입니다." },
+};
+
+/**
+ * /power 시험 title/description 조립(사용자 확정 형식).
+ * title: "{지역} {시험명} 과외 | [{약칭} ]1:1 개인과외 {키워드}" (약칭=시험명이면 생략)
+ * desc:  "{지역} {시험명}, {descTail}"
+ */
+export function buildExamTitle(regionName: string, exam: PowerExam): string {
+  const m = EXAM_META[exam.slug];
+  const abbrPart = m.abbr === exam.name ? "" : `${m.abbr} `;
+  return `${regionName} ${exam.name} 과외 | ${abbrPart}1:1 개인과외 ${m.titleKw}`;
+}
+export function buildExamDescription(regionName: string, exam: PowerExam): string {
+  return `${regionName} ${exam.name}, ${EXAM_META[exam.slug].descTail}`;
+}
+
 export const POWER_EXAMS: PowerExam[] = [
   /* ── 영어 ─────────────────────────────────────────────────────────── */
   {
@@ -214,3 +255,19 @@ export const LANGUAGE_LABEL: Record<PowerExam["language"], string> = {
   japanese: "일본어",
   chinese: "중국어",
 };
+
+/**
+ * 빌드시 title/description 길이 검증(모듈 로드 1회, 위반 시 빌드 실패).
+ * 규칙: 앞 25자 안에 "{지역} {시험명} 과외", title ≤ 60자, desc ≤ 160자.
+ * 최장 지역명(보수적 상한)으로 검사 — 실제 시험 지역(시군구, ≤7자)보다 길게 잡는다.
+ */
+const ASSERT_MAX_REGION = "전농답십리뉴타운"; // 8자(보수적 상한)
+for (const e of POWER_EXAMS) {
+  if (!EXAM_META[e.slug]) throw new Error(`[exams] EXAM_META 누락: ${e.slug}`);
+  const front = `${ASSERT_MAX_REGION} ${e.name} 과외`;
+  const title = buildExamTitle(ASSERT_MAX_REGION, e);
+  const desc = buildExamDescription(ASSERT_MAX_REGION, e);
+  if ([...front].length > 25) throw new Error(`[exams] "{지역} {시험명} 과외" >25자(${[...front].length}): ${front}`);
+  if ([...title].length > 60) throw new Error(`[exams] title >60자(${[...title].length}): ${title}`);
+  if ([...desc].length > 160) throw new Error(`[exams] desc >160자(${[...desc].length}): ${desc}`);
+}
