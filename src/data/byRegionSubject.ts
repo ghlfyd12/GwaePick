@@ -14,6 +14,8 @@
  */
 import type { Metadata } from "next";
 import { site } from "@/data/site";
+import { REGIONS } from "@/data/sidoRegions";
+import { gyeonggi } from "@/data/gyeonggi";
 import { powerRegionSlugs, resolvePowerRegionName } from "@/data/powerRegions";
 import { POWER_SUBJECTS, objJosa, type PowerSubject } from "@/data/bySchoolSubject";
 import {
@@ -38,25 +40,55 @@ const subjectBySlug = new Map(POWER_SUBJECTS.map((s) => [s.slug, s]));
  */
 export const REGION_SUBJECT_META: Record<
   string,
-  { head: string; kw: string; descRef: string; descBody: string }
+  { titleKw: string; descRef: string; descBody: string }
 > = {
-  "english-conversation": { head: "영어회화 과외", kw: "기초·비즈니스·여행·면접영어", descRef: "영어회화", descBody: "왕초보 기초부터 비즈니스·여행·면접까지 목표에 맞춰 성인·직장인을 일대일로 지도합니다" },
-  "japanese-conversation": { head: "일본어회화 과외", kw: "왕초보·JLPT·프리토킹·여행", descRef: "일본어회화", descBody: "왕초보 히라가나부터 JLPT·프리토킹까지 성인·직장인을 일대일로 지도합니다" },
-  "chinese-conversation": { head: "중국어회화 과외", kw: "왕초보·성조·HSK·비즈니스", descRef: "중국어회화", descBody: "왕초보 성조부터 HSK·비즈니스까지 성인·직장인을 일대일로 지도합니다" },
-  "japanese-tutoring": { head: "일본어 과외", kw: "왕초보·JLPT·회화", descRef: "일본어 과외", descBody: "왕초보 문자부터 JLPT·회화까지 성인·대학생을 일대일로 지도합니다" },
-  "chinese-tutoring": { head: "중국어 과외", kw: "왕초보·HSK·회화", descRef: "중국어 과외", descBody: "왕초보 병음부터 HSK·회화까지 성인·대학생을 일대일로 지도합니다" },
+  "english-conversation": { titleKw: "영어회화 과외 1:1 왕초보 기초 비즈니스 여행영어 면접 성인 개인과외 수업", descRef: "영어회화", descBody: "왕초보 기초부터 비즈니스·여행·면접까지 목표에 맞춰 성인·직장인을 일대일로 지도합니다" },
+  "japanese-conversation": { titleKw: "일본어회화 과외 1:1 왕초보 히라가나 프리토킹 JLPT 여행 개인과외 수업", descRef: "일본어회화", descBody: "왕초보 히라가나부터 JLPT·프리토킹까지 성인·직장인을 일대일로 지도합니다" },
+  "chinese-conversation": { titleKw: "중국어회화 과외 1:1 왕초보 성조 HSK 비즈니스 개인과외 수업", descRef: "중국어회화", descBody: "왕초보 성조부터 HSK·비즈니스까지 성인·직장인을 일대일로 지도합니다" },
+  "japanese-tutoring": { titleKw: "일본어과외 일본어회화 1:1 왕초보 히라가나 문법 JLPT JPT 개인과외 수업", descRef: "일본어 과외", descBody: "왕초보 문자부터 JLPT·회화까지 성인·대학생을 일대일로 지도합니다" },
+  "chinese-tutoring": { titleKw: "중국어과외 중국어회화 1:1 왕초보 병음 성조 HSK 개인과외 수업", descRef: "중국어 과외", descBody: "왕초보 병음부터 HSK·회화까지 성인·대학생을 일대일로 지도합니다" },
 };
 
-// 빌드시 title/desc 길이 검증(위반 시 빌드 실패). 앞 25자 "{지역} {head}", title ≤ 60, desc ≤ 160.
-// 최장 지역명(생활권·동 포함 보수적 상한)으로 검사.
+/**
+ * 동명 → 시군구(sg.name, 예 "고양시 일산동구") 맵. 소스 내 중복 동명은 null(모호 제외).
+ * 전국(sidoRegions)과 경기(gyeonggi-regions) 두 맵을 둔다 — "백석동"처럼 전국 중복이나 경기 내
+ * 유일한 동은 경기 맵으로 해석되게 한다.
+ */
+const buildDongMap = (
+  entries: { dong: { name: string }[]; sg: string }[],
+): Map<string, string | null> => {
+  const m = new Map<string, string | null>();
+  for (const { dong, sg } of entries) for (const d of dong) m.set(d.name, m.has(d.name) ? null : sg);
+  return m;
+};
+const DONG_SIGUNGU_ALL = buildDongMap(
+  REGIONS.flatMap((sido) => sido.sigungu.map((sg) => ({ dong: sg.dong, sg: sg.name }))),
+);
+const DONG_SIGUNGU_GG = buildDongMap(
+  gyeonggi.sigungu.map((sg) => ({ dong: sg.dongs, sg: sg.name })),
+);
+
+/**
+ * title "{시군구} {동}" 용 시군구 해석 — 비경기 동은 expansion(slug로 정확 판별),
+ * 경기 동은 경기 맵(경기 내 유일), 그 외 전국 유일 폴백. 못 찾으면 null(동명만).
+ */
+function dongSigunguName(regionParam: string, regionName: string): string | null {
+  const exp = getExpansionRegion(regionParam);
+  if (exp?.level === "dong" && exp.sigunguName) return exp.sigunguName;
+  return DONG_SIGUNGU_GG.get(regionName) ?? DONG_SIGUNGU_ALL.get(regionName) ?? null;
+}
+
+// 빌드시 title/desc 길이 검증(위반 시 빌드 실패). 앞 25자 "{지역} {과목}", title ≤ 80, desc ≤ 160.
+// 최장 지역명(시군구+동 보수적 상한)으로 검사.
 {
-  const MAXR = "전농답십리뉴타운"; // 8자
+  const MAXR = "고양시 일산동구 백석동"; // 최장 동 표기(시군구+동) 보수 상한
   for (const [slug, m] of Object.entries(REGION_SUBJECT_META)) {
-    const front = `${MAXR} ${m.head}`;
-    const title = `${MAXR} ${m.head} | 1:1 개인과외 ${m.kw}`;
+    const subj = m.titleKw.split(" ")[0]; // 과목(영어회화·일본어과외 등)
+    const front = `${MAXR} ${subj}`;
+    const title = `${MAXR} ${m.titleKw}`;
     const desc = `${MAXR} ${m.descRef}, ${m.descBody}. 첫 상담은 무료입니다.`;
-    if ([...front].length > 25) throw new Error(`[byRegionSubject] "${slug}" 앞부분 >25자(${[...front].length}): ${front}`);
-    if ([...title].length > 60) throw new Error(`[byRegionSubject] "${slug}" title >60자(${[...title].length}): ${title}`);
+    if ([...front].length > 25) throw new Error(`[byRegionSubject] "${slug}" "{지역} {과목}" >25자(${[...front].length}): ${front}`);
+    if ([...title].length > 80) throw new Error(`[byRegionSubject] "${slug}" title >80자(${[...title].length}): ${title}`);
     if ([...desc].length > 160) throw new Error(`[byRegionSubject] "${slug}" desc >160자(${[...desc].length}): ${desc}`);
   }
 }
@@ -223,9 +255,13 @@ export function buildByRegionData(
   const enc = encodeURIComponent(regionSlug);
   const terms = REGION_TERMS[subjectSlug];
   const head = `${regionName} ${subject.label}`;
-  // title/description — 확정 형식("어학의참견" 제거, "{지역} {head} | 1:1 개인과외 {kw}").
+  // title 전용 지역 표기 — 동 페이지는 "{시군구} {동}"(sidoRegions 동명→시군구, 모호명 제외),
+  // 시군구·생활권은 기존 지역명. desc·head·og 는 regionName 그대로.
+  const dongSigungu = district ? null : dongSigunguName(regionParam, regionName);
+  const titleRegion = dongSigungu ? `${dongSigungu} ${regionName}` : regionName;
+  // title = "{지역} {titleKw}"(키워드 확장). description 은 기존 형식 유지(regionName·변경 없음).
   const sm = REGION_SUBJECT_META[subjectSlug];
-  const metaTitle = `${regionName} ${sm.head} | 1:1 개인과외 ${sm.kw}`;
+  const metaTitle = `${titleRegion} ${sm.titleKw}`;
   const metaDescription = `${regionName} ${sm.descRef}, ${sm.descBody}. 첫 상담은 무료입니다.`;
 
   const otherSubjects = POWER_SUBJECTS.filter((s) => s.slug !== subjectSlug).map((s) => ({
