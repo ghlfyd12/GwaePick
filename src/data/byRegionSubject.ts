@@ -74,8 +74,12 @@ const DONG_SIGUNGU_GG = buildDongMap(
  */
 function dongSigunguName(regionParam: string, regionName: string): string | null {
   const exp = getExpansionRegion(regionParam);
-  if (exp?.level === "dong" && exp.sigunguName) return exp.sigunguName;
-  return DONG_SIGUNGU_GG.get(regionName) ?? DONG_SIGUNGU_ALL.get(regionName) ?? null;
+  const sg = exp?.level === "dong" && exp.sigunguName ? exp.sigunguName : null;
+  const resolved = sg ?? DONG_SIGUNGU_GG.get(regionName) ?? DONG_SIGUNGU_ALL.get(regionName) ?? null;
+  // 전국 중복 동명은 expansion 이 regionName 에 이미 시군구를 포함시켜 유일화한다
+  // (예: "인천 서구 백석동"). 그 경우 접두를 생략해 중복("서구 인천 서구 백석동")을 막는다.
+  if (resolved && regionName.includes(resolved)) return null;
+  return resolved;
 }
 
 // 빌드시 title/desc 길이 검증(위반 시 빌드 실패). 앞 25자 "{지역} {과목}", title ≤ 80, desc ≤ 160.
