@@ -80,13 +80,12 @@ const powerConfig: ConsultFormConfig = {
 const gumjungConfig: ConsultFormConfig = {
   gradeOptions: ["초졸", "중졸", "고졸", "성인"],
   choiceOptions: [
-    "빠른 대입 준비",
+    "빠른 대입 전략",
     "예체능·실기 병행",
     "학업 공백",
     "성인·만학도",
     "고입 준비",
     "국제학교",
-    "대입 전략",
   ],
   choiceLabel: "준비 유형",
   choicePlaceholder: "준비 유형을 선택해주세요",
