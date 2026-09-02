@@ -13,10 +13,16 @@
 export const SCHOOL_PUBLISHED = "2026-06-24";
 export const SCHOOL_MODIFIED = "2026-08-24"; // @indexnow-group: school
 /**
- * OG 썸네일 전면 확장으로 og:image 가 신규 연결된 학교×과목(중·초 전 과목 + 고교 역사·논술·코딩).
- * 고교×핵심5 는 og 무변경이라 SCHOOL_MODIFIED 를 유지(정직·diff 0)하고, 이 그룹만 배포일로 갱신한다.
+ * OG 텍스트 썸네일이 신규 연결된 후 og 가 그대로인 그룹(현재는 고교 역사·논술·코딩 중 논술·코딩).
+ * 2026-08-28 연결 이후 og·title 무변경이므로 그 날짜를 유지한다(초·중 프로필 교체와 무관 — 아래 PROFILE 분리).
+ * (고교 역사는 이번에 title 이 바뀌어 SCHOOL_DETAIL_TITLE_MODIFIED 로 이동했다.)
  */
-export const SCHOOL_THUMB_MODIFIED = "2026-09-02"; // @indexnow-group: school-thumb
+export const SCHOOL_THUMB_MODIFIED = "2026-08-28"; // @indexnow-group: school-thumb
+/**
+ * 초·중 학교×과목 og:image 를 코랄 텍스트 썸네일 → 인물 프로필 사진으로 교체한 배포일.
+ * 초·중 전 과목이 대상이며, 고교 그룹(THUMB/DETAIL_TITLE/MODIFIED)과 분리해 과잉 신선도를 막는다.
+ */
+export const SCHOOL_PROFILE_MODIFIED = "2026-09-02"; // @indexnow-group: school-profile
 /**
  * 고교×{사회·과학·역사} title 개편(세부 과목 나열 제거 → 수학 형식 통일) 배포일.
  * 고교×핵심5 중 사회·과학은 og 무변경이라 SCHOOL_MODIFIED(08-24)를 벗어나지 못했는데,

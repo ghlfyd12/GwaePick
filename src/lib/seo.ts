@@ -43,6 +43,7 @@ import {
   SCHOOL_PUBLISHED,
   SCHOOL_MODIFIED,
   SCHOOL_THUMB_MODIFIED,
+  SCHOOL_PROFILE_MODIFIED,
   SCHOOL_DETAIL_TITLE_MODIFIED,
   SCHOOL_HUB_PUBLISHED,
   SCHOOL_HUB_MODIFIED,
@@ -299,15 +300,19 @@ export function buildSchoolMeta(p: SchoolMetaInput): Metadata {
         }
       : undefined;
   // 검색결과 신선도 신호 — og:type("website")은 유지하고 article:*_time 을 raw meta 로 병기.
-  //  - 고교 국·영·수: og·title 모두 무변경 → SCHOOL_MODIFIED(08-24) 유지(정직).
-  //  - 고교 사회·과학·역사: og 는 그대로지만 title 이 개편됨 → SCHOOL_DETAIL_TITLE_MODIFIED.
-  //  - 그 외(초·중 전 과목 og 갱신 + 고교 역사논술코딩 og 연결): SCHOOL_THUMB_MODIFIED.
-  const hs = p.level === "high" ? (p.subjectSlug ?? "") : "";
-  const modifiedTime = ["korean", "english", "math"].includes(hs)
-    ? SCHOOL_MODIFIED
-    : ["social", "science", "history"].includes(hs)
-      ? SCHOOL_DETAIL_TITLE_MODIFIED
-      : SCHOOL_THUMB_MODIFIED;
+  // 정직한 4단 분리(과잉 신선도 방지):
+  //  - 초·중 전 과목: og 를 인물 프로필로 교체 → SCHOOL_PROFILE_MODIFIED(09-02).
+  //  - 고교 국·영·수: og·title 모두 무변경 → SCHOOL_MODIFIED(08-24).
+  //  - 고교 사회·과학·역사: og 는 그대로지만 title 개편 → SCHOOL_DETAIL_TITLE_MODIFIED(09-02).
+  //  - 그 외(고교 논술·코딩 등): og·title 무변경 → SCHOOL_THUMB_MODIFIED(08-28).
+  const hs = isElemMiddle ? "" : (p.subjectSlug ?? "");
+  const modifiedTime = isElemMiddle
+    ? SCHOOL_PROFILE_MODIFIED
+    : ["korean", "english", "math"].includes(hs)
+      ? SCHOOL_MODIFIED
+      : ["social", "science", "history"].includes(hs)
+        ? SCHOOL_DETAIL_TITLE_MODIFIED
+        : SCHOOL_THUMB_MODIFIED;
   const base = baseMetadata(title, description, p.canonicalPath, og);
   return {
     ...base,
