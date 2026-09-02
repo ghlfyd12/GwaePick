@@ -11,6 +11,7 @@ import { usePathname } from "next/navigation";
  *  - usePathname 은 SSR 시에도 현재 경로를 반환하므로 첫 페인트부터 색이 정확하다(깜빡임 없음).
  */
 const POWER_PATH = "/power";
+const GUMJUNG_PATH = "/gumjung";
 
 export default function RootShell({
   children,
@@ -20,8 +21,9 @@ export default function RootShell({
   const pathname = usePathname();
   const isPower =
     pathname === POWER_PATH || pathname.startsWith(`${POWER_PATH}/`);
+  const isGumjung =
+    pathname === GUMJUNG_PATH || pathname.startsWith(`${GUMJUNG_PATH}/`);
+  const themeClass = isPower ? " power-theme" : isGumjung ? " gumjung-theme" : "";
 
-  return (
-    <div className={`contents${isPower ? " power-theme" : ""}`}>{children}</div>
-  );
+  return <div className={`contents${themeClass}`}>{children}</div>;
 }

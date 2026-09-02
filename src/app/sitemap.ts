@@ -48,8 +48,10 @@ import {
   SUBJECT_MODIFIED,
   POWER_MODIFIED,
   POWER_REGION_META_MODIFIED,
+  GUMJUNG_MODIFIED,
 } from "@/data/contentMeta";
 import { REGION_LANDMARKS } from "@/data/regionLandmarks";
+import { GUMJUNG_PATHS, GUMJUNG_URL_COUNT } from "@/lib/gumjungSitemap";
 
 /*
  * 동적 sitemap — 분할 구조(/sitemap/[id].xml). robots.txt 가 각 파일 URL 을 모두 가리킨다.
@@ -303,6 +305,26 @@ function provinceDongSitemap(chunk: number): MetadataRoute.Sitemap {
   return out;
 }
 
+/**
+ * 검고의참견 청크 — /gumjung 전 유형(급별·급별×과목·지역·가이드) 한 청크(슬라이스).
+ * 경로는 GUMJUNG_PATHS 에 이미 인코딩되어 담겨 있다(추가 enc 불필요). lastmod=GUMJUNG_MODIFIED.
+ * 항상 맨 뒤 id 라 기존 shard id 불변.
+ */
+function gumjungSitemap(chunk: number): MetadataRoute.Sitemap {
+  const start = chunk * SITEMAP_URLS_PER_FILE;
+  const end = Math.min(start + SITEMAP_URLS_PER_FILE, GUMJUNG_URL_COUNT);
+  const out: MetadataRoute.Sitemap = [];
+  for (let p = start; p < end; p++) {
+    out.push({
+      url: `${base}${GUMJUNG_PATHS[p]}`,
+      lastModified: GUMJUNG_MODIFIED,
+      changeFrequency: "weekly",
+      priority: 0.6,
+    });
+  }
+  return out;
+}
+
 /** id 1..N — 학교×과목 상세 한 청크. 평탄화된 (학교,과목) 쌍을 슬라이스로만 생성(메모리 안전). lastmod=SCHOOL_MODIFIED. */
 function schoolSitemap(chunk: number): MetadataRoute.Sitemap {
   const start = chunk * SITEMAP_URLS_PER_FILE;
@@ -356,6 +378,9 @@ export default async function sitemap({
   const afterExam = afterPowerRegion - POWER_EXAM_SITEMAP_CHUNKS;
   if (afterExam < PROVINCE_DONG_SITEMAP_CHUNKS)
     return provinceDongSitemap(afterExam);
-  // 맨 뒤 — 고교 허브 청크(append, 기존 shard id 불변).
-  return schoolHubSitemap(afterExam - PROVINCE_DONG_SITEMAP_CHUNKS);
+  const afterProvinceDong = afterExam - PROVINCE_DONG_SITEMAP_CHUNKS;
+  if (afterProvinceDong < SCHOOL_HUB_SITEMAP_CHUNKS)
+    return schoolHubSitemap(afterProvinceDong);
+  // 맨 뒤 — 검고의참견 청크(append, 기존 shard id 불변).
+  return gumjungSitemap(afterProvinceDong - SCHOOL_HUB_SITEMAP_CHUNKS);
 }

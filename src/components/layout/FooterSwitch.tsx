@@ -1,9 +1,10 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { isPowerPath } from "@/data/service";
+import { serviceFromPath, SERVICE } from "@/data/service";
 import Footer from "@/components/layout/Footer";
 import PowerFooter from "@/components/layout/PowerFooter";
+import GumjungFooter from "@/components/layout/GumjungFooter";
 
 /*
  * 경로별 푸터 선택 — /power(및 하위)는 어학 전용 PowerFooter, 그 외는 기존 메인 Footer.
@@ -13,5 +14,8 @@ import PowerFooter from "@/components/layout/PowerFooter";
  * 판별은 service.ts 단일 소스(헤더 CTA·플로팅·ConsultLink 와 같은 기준).
  */
 export default function FooterSwitch() {
-  return isPowerPath(usePathname()) ? <PowerFooter /> : <Footer />;
+  const service = serviceFromPath(usePathname());
+  if (service === SERVICE.power) return <PowerFooter />;
+  if (service === SERVICE.gumjung) return <GumjungFooter />;
+  return <Footer />;
 }

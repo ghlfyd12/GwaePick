@@ -1,20 +1,31 @@
 /**
- * 서비스 구분 — 지식의참견(메인) / 어학의참견(/power). 상담 리드에 어느 서비스에서 왔는지 표시.
- * 클라이언트·서버 양쪽에서 import(서버 전용 의존성 없음). 오타 방지를 위해 값은 여기서만 정의.
+ * 서비스 구분 — 지식의참견(메인) / 어학의참견(/power) / 검고의참견(/gumjung).
+ * 상담 리드에 어느 서비스에서 왔는지 표시. 클라이언트·서버 양쪽에서 import(서버 전용 의존성 없음).
+ * 오타 방지를 위해 값은 여기서만 정의.
  */
 export const SERVICE = {
   main: "지식의참견",
   power: "어학의참견",
+  gumjung: "검고의참견",
 } as const;
 
 export type ServiceName = (typeof SERVICE)[keyof typeof SERVICE];
 
-export const ALL_SERVICES: readonly ServiceName[] = [SERVICE.main, SERVICE.power];
+export const ALL_SERVICES: readonly ServiceName[] = [
+  SERVICE.main,
+  SERVICE.power,
+  SERVICE.gumjung,
+];
 
-/** 현재 경로로 서비스 판별 — /power(및 하위)면 어학의참견, 그 외 지식의참견. */
+/**
+ * 현재 경로로 서비스 판별 — /power(및 하위)=어학의참견, /gumjung(및 하위)=검고의참견, 그 외=지식의참견.
+ * 축 전용 헤더·푸터·플로팅·상담폼이 모두 이 단일 소스로 분기한다.
+ */
 export function serviceFromPath(pathname: string | null | undefined): ServiceName {
   const p = pathname ?? "";
-  return p === "/power" || p.startsWith("/power/") ? SERVICE.power : SERVICE.main;
+  if (p === "/power" || p.startsWith("/power/")) return SERVICE.power;
+  if (p === "/gumjung" || p.startsWith("/gumjung/")) return SERVICE.gumjung;
+  return SERVICE.main;
 }
 
 /**
@@ -22,6 +33,9 @@ export function serviceFromPath(pathname: string | null | undefined): ServiceNam
  * 지식의참견 도착지는 site.cta.href 그대로다(여기서 다루지 않는다).
  */
 export const POWER_CONSULT_HREF = "/power/consult";
+
+/** 검고의참견 전용 상담 폼 경로 — /gumjung 스코프 상담 CTA 의 도착지(단일 소스). */
+export const GUMJUNG_CONSULT_HREF = "/gumjung/consult";
 
 /**
  * /power(및 하위) 경로인지 — 상담 CTA·플로팅 버튼이 같은 기준으로 분기하도록 여기서만 판별한다.
@@ -31,6 +45,11 @@ export function isPowerPath(pathname: string | null | undefined): boolean {
   return serviceFromPath(pathname) === SERVICE.power;
 }
 
+/** /gumjung(및 하위) 경로인지 — 검고의참견 축 공유 컴포넌트 분기 단일 소스. */
+export function isGumjungPath(pathname: string | null | undefined): boolean {
+  return serviceFromPath(pathname) === SERVICE.gumjung;
+}
+
 export function isServiceName(v: unknown): v is ServiceName {
-  return v === SERVICE.main || v === SERVICE.power;
+  return v === SERVICE.main || v === SERVICE.power || v === SERVICE.gumjung;
 }

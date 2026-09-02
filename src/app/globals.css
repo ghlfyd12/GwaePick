@@ -63,6 +63,23 @@
   color: #ffffff;
 }
 
+/*
+ * /gumjung(검고의참견) 전용 청록 스코프.
+ * RootShell 이 /gumjung 경로에서만 <body> 하위 래퍼에 .gumjung-theme 를 붙이고,
+ * 여기서 accent 토큰만 청록으로 덮어쓴다. 코랄·퍼플과 구분되는 검정고시 브랜드색.
+ * bg-accent/10 등 연한 틴트 유틸은 이 청록의 자동 파생을 쓰므로 두 값만 바꾸면 전체가 통일된다.
+ */
+.gumjung-theme {
+  --color-accent: #0f766e; /* 청록 (CTA·활성 칩·강조) */
+  --color-accent-dark: #0b5e57; /* hover/진한 강조 */
+}
+
+/* 카톡 상담 버튼 — /gumjung 에서만 청록+화이트로 통일(메인 카카오 노랑과 구분). */
+.gumjung-theme .cta-kakao {
+  background-color: var(--color-accent);
+  color: #ffffff;
+}
+
 html {
   /* 전체 타이포 한 단계 확대 — 루트 폰트 크기 16px → 18px (rem 기반 글씨가 일괄 확대) */
   font-size: 112.5%;

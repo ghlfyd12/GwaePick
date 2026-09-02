@@ -54,6 +54,21 @@ export const site = {
     },
   },
 
+  /**
+   * 검고의참견(/gumjung 및 하위) 전용 OG/브랜드 — 지식의참견·어학의참견과 분리한다.
+   * 축 내부 페이지·빌더는 site.name/site.ogImage 대신 이 값을 지정해 검정고시 브랜드로 오버라이드한다.
+   * OG 는 급별×과목·지역은 동적 썸네일(청록)로, 급별 상세·가이드·홈은 이 기본값으로 렌더한다.
+   */
+  gumjung: {
+    name: "검고의참견",
+    ogImage: {
+      url: "/api/power-thumb/gumjung-level/gojol/base",
+      width: 800,
+      height: 600,
+      alt: "검고의참견 — 직접 가르쳐 온 선생님이 1:1로 연결하는 검정고시 맞춤 과외",
+    },
+  },
+
   /** 핵심 슬로건 (CLAUDE.md 고정 규칙) */
   slogan: "선생님을 보는 눈은, 선생님이 가장 정확합니다.",
 

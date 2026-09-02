@@ -128,3 +128,35 @@ src/data/reviewMatch.ts 가 담당한다.
   짧은 표기). 매칭 누락을 막기 위한 필수 절차다.
 - reviewItems.ts 자체는 매칭 로직이 없으니, 새 region 표기가 들어올 때마다
   reviewMatch.ts 맵 갱신을 함께 검토한다.
+
+## 검고의참견(검정고시 축, /gumjung) 규칙
+
+지식의참견 레포 안의 독립 브랜드 축. 어학의참견(/power) 분리 방식을 그대로 따른다.
+
+**브랜드·워딩**
+- 축 내부 표기는 **"검고의참견"** 으로 통일. 축 내부 코드/카피에서 **"어학의참견" 0건**.
+- 자퇴·중퇴를 부정적으로 묘사하는 표현 금지("실패·뒤처짐·방황" 등). "학교 밖에서·다시
+  시작·나에게 맞는 속도" 톤 유지.
+- 성과·기간 보장 금지, 느낌표 금지, 컨설턴트/멘토/강사 금지, 실제 사례·점수·이름 인용 금지.
+- 검정고시 성적의 입시 활용은 **"전형에 따라 다르므로 상담에서 확인"** 수준까지만. 특정
+  대학·고교·전형 언급 금지(고입 준비·대입 전략 페이지 포함). 심리 상담 제공 표현 금지.
+
+**디자인 토큰 (보라·코랄 금지)**
+- 포인트 컬러 = **청록** `#0F766E`(hover `#0B5E57`). `globals.css` 의 `.gumjung-theme` 스코프가
+  `accent` 토큰만 청록으로 오버라이드한다(RootShell 이 `/gumjung` 경로에 클래스 부착).
+- 공유 컴포넌트(Header·FooterSwitch·FloatingButtons·ConsultForm)는 `service.ts` 의
+  `serviceFromPath`(3-way: main/power/gumjung)로 분기. 브랜드색 하드코딩 금지 — `text-accent`/
+  `bg-accent` 유틸이 스코프에서 청록으로 렌더된다.
+
+**라우트 (additive만, 기존 축 diff 0)**
+- `/gumjung`(홈) · `/gumjung/[level]`(급별 gojol·jungjol·chojol) ·
+  `/gumjung/[level]/[subject]`(급별×과목 15) · `/gumjung/by-region/[region]`(지역 253) ·
+  `/gumjung/guide/[type]`(유형 7) · `/gumjung/consult`(색인 제외) · `/gumjung/regions`(지역 허브).
+- 지역축 253 = **examRegions(byRegionExam) 재사용**(재클론 금지). 검증은 `isGumjungRegionSlug`.
+- SSG 파일럿(급별 3 + 급별×과목 15 + 가이드 7 전량 + 지역 20) + 나머지 지역 ISR
+  (`dynamicParams=true`, `revalidate=false`). SSG 범위 확대는 사전 보고.
+- 데이터는 `src/data/gumjung/*`(levels·subjects·guides) + `byRegionGumjung.ts` + `gumjungSearch.ts`.
+- 썸네일은 `/api/power-thumb` 의 `gumjung-*` kind(청록 칩) — 기존 exam·conversation 무변경.
+- contentMeta 는 `GUMJUNG_MODIFIED`(신규 분리 상수), sitemap 은 맨 뒤 청크로 append(기존 id 불변).
+- 상담 리드는 같은 Notion DB, `service="검고의참견"`. 폼은 `gumjungConfig`(급별·준비 유형 라벨
+  재활용, 스키마 무변경).

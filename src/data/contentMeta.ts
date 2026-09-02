@@ -73,3 +73,9 @@ export const POWER_REGION_THUMB_MODIFIED = "2026-08-26"; // @indexnow-group: pow
  * 분리해 이 그룹의 sitemap lastmod 로 쓴다. THUMB 상수는 무변경(썸네일 자체는 색·규격 불변).
  */
 export const POWER_REGION_META_MODIFIED = "2026-08-28"; // @indexnow-group: power-region-meta
+
+/**
+ * 검고의참견(/gumjung) 전 유형 — 급별 상세·급별×과목·지역×검정고시·유형 가이드.
+ * 신규 축이라 최초 발행일=수정일(배포일). 콘텐츠 실변경 시에만 손으로 갱신(가짜 갱신 금지).
+ */
+export const GUMJUNG_MODIFIED = "2026-09-02"; // @indexnow-group: gumjung

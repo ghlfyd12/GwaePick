@@ -73,7 +73,37 @@ const powerConfig: ConsultFormConfig = {
   },
 };
 
+/**
+ * 검고의참견(/gumjung): 급별(초졸·중졸·고졸·성인) + 준비 유형(빠른대입·예체능·공백·성인·고입·국제학교·대입전략).
+ * 기존 Notion 학년/과목 multi_select 속성을 라벨만 바꿔 재활용(스키마 무변경). "목표 시기" 전용 필드는 후속.
+ */
+const gumjungConfig: ConsultFormConfig = {
+  gradeOptions: ["초졸", "중졸", "고졸", "성인"],
+  choiceOptions: [
+    "빠른 대입 준비",
+    "예체능·실기 병행",
+    "학업 공백",
+    "성인·만학도",
+    "고입 준비",
+    "국제학교",
+    "대입 전략",
+  ],
+  choiceLabel: "준비 유형",
+  choicePlaceholder: "준비 유형을 선택해주세요",
+  nameLabel: "이름",
+  submitLabel: "무료 상담 신청하기 →",
+  header: {
+    eyebrow: "검정고시 1:1 상담",
+    titleTop: "무료 상담",
+    titleAccent: "신청하기",
+    intro:
+      "지금 상황과 목표 시기를 알려주시면, 직접 가르쳐 온 선생님이 검정고시 준비에 맞는 선생님을 연결해 드립니다.",
+  },
+};
+
 /** 서비스별 상담 폼 옵션·라벨. */
 export function consultFormConfig(service: ServiceName): ConsultFormConfig {
-  return service === SERVICE.power ? powerConfig : mainConfig;
+  if (service === SERVICE.power) return powerConfig;
+  if (service === SERVICE.gumjung) return gumjungConfig;
+  return mainConfig;
 }

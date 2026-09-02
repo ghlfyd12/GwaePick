@@ -5,7 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import CTAButton from "@/components/ui/CTAButton";
 import { site, type NavItem } from "@/data/site";
-import { POWER_CONSULT_HREF, isPowerPath } from "@/data/service";
+import {
+  POWER_CONSULT_HREF,
+  GUMJUNG_CONSULT_HREF,
+  serviceFromPath,
+  SERVICE,
+} from "@/data/service";
 
 /*
  * /power(어학 랜딩) 전용 헤더 변형 — 이 경로(및 하위)에서만 로고 텍스트와
@@ -14,6 +19,19 @@ import { POWER_CONSULT_HREF, isPowerPath } from "@/data/service";
  */
 const POWER_PATH = "/power";
 const POWER_BRAND = "어학의참견";
+const GUMJUNG_PATH = "/gumjung";
+const GUMJUNG_BRAND = "검고의참견";
+/*
+ * /gumjung(검고의참견) 전용 내비 — 급별(고졸·중졸·초졸) + 지역별 + 유형별.
+ * 메인 site.nav·POWER_NAV 와 독립. 색은 accent 토큰(청록, .gumjung-theme).
+ */
+const GUMJUNG_NAV: NavItem[] = [
+  { label: "고졸", href: "/gumjung/gojol" },
+  { label: "중졸", href: "/gumjung/jungjol" },
+  { label: "초졸", href: "/gumjung/chojol" },
+  { label: "지역별", href: "/gumjung/regions" },
+  { label: "유형별", href: "/gumjung#guides" },
+];
 /*
  * /power 전용 내비 전체 목록(메인 site.nav 와 독립).
  *  - 지역별/학교별/과목별 과외 → 영어/일본어/중국어(언어별 상세 라우트).
@@ -43,14 +61,24 @@ export default function Header() {
   const [mobileSub, setMobileSub] = useState<string | null>(null);
   const pathname = usePathname();
 
-  // /power(및 하위)에서만 어학 변형 — 로고 텍스트/링크와 내비 3개 항목 교체.
-  // 경로 판별은 service.ts 단일 소스(isPowerPath)로 — 헤더·플로팅이 같은 기준을 쓴다.
-  const isPower = isPowerPath(pathname);
-  const brandName = isPower ? POWER_BRAND : site.name;
-  const logoHref = isPower ? POWER_PATH : "/";
-  const navItems: NavItem[] = isPower ? POWER_NAV : site.nav;
-  // 상담 CTA 도착지 — /power(데스크톱 버튼·모바일 칩 공통)는 어학 전용 폼, 그 외는 메인 폼(변경 없음).
-  const ctaHref = isPower ? POWER_CONSULT_HREF : site.cta.href;
+  // 경로 → 서비스 단일 소스(service.ts). /power=어학, /gumjung=검고, 그 외=메인.
+  // 로고 텍스트/링크·내비·상담 CTA 도착지를 서비스별로 교체한다(메인은 변경 없음).
+  const service = serviceFromPath(pathname);
+  const isPower = service === SERVICE.power;
+  const isGumjung = service === SERVICE.gumjung;
+  const isMain = service === SERVICE.main;
+  const brandName = isPower ? POWER_BRAND : isGumjung ? GUMJUNG_BRAND : site.name;
+  const logoHref = isPower ? POWER_PATH : isGumjung ? GUMJUNG_PATH : "/";
+  const navItems: NavItem[] = isPower
+    ? POWER_NAV
+    : isGumjung
+      ? GUMJUNG_NAV
+      : site.nav;
+  const ctaHref = isPower
+    ? POWER_CONSULT_HREF
+    : isGumjung
+      ? GUMJUNG_CONSULT_HREF
+      : site.cta.href;
 
   // 라우트형 메뉴(/teachers 등)는 현재 경로와 일치하면 active(주황 강조).
   const isActive = (href: string) =>
@@ -75,8 +103,8 @@ export default function Header() {
   }, [open]);
 
   // 모바일 헤더 로고 옆 빠른 메뉴 — 메인만 학교별/지역별 2개(현행 유지).
-  //  - /power: 미표시(상단 과밀 해소). 언어 접근은 햄버거 드로어, 전환은 하단 플로팅이 담당.
-  const mobileQuick = isPower
+  //  - /power·/gumjung: 미표시(상단 과밀 해소). 축 진입은 햄버거 드로어·하단 플로팅이 담당.
+  const mobileQuick = !isMain
     ? []
     : ["/tutoring/by-school", "/tutoring/by-region"]
         .map((href) => site.nav.find((n) => n.href === href))
@@ -93,7 +121,7 @@ export default function Header() {
             <Link
               href={logoHref}
               className={`text-lg font-bold md:text-3xl lg:text-4xl xl:text-5xl ${
-                isPower ? "text-accent" : "text-[#FF7A59]"
+                isMain ? "text-[#FF7A59]" : "text-accent"
               }`}
               onClick={closeAll}
             >

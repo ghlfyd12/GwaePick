@@ -3,6 +3,8 @@
  *
  * GET /api/power-thumb/{kind}/{region}/{item} → 800×600 PNG
  *   - kind: "exam"(지역×시험) | "conversation"(지역×회화·과외 subject)
+ *          | "gumjung-subject"(급별×과목) | "gumjung-region"(지역×검정고시)
+ *          | "gumjung-level"(급별 상세) | "gumjung-guide"(유형 가이드) — 검고(청록 칩)
  *   - region: 지역 slug(한글) — 알려진 파워 지역/확장 지역만 허용, 그 외 404(스팸 생성 차단)
  *   - item: exam slug(examBySlug) 또는 회화 subject slug(POWER_SUBJECTS). 그 외 404.
  *
@@ -18,6 +20,10 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { buildByExamData } from "@/data/byRegionExam";
 import { buildByRegionData } from "@/data/byRegionSubject";
+import { buildGumjungSubjectData } from "@/data/gumjung/subjects";
+import { buildGumjungRegionData } from "@/data/byRegionGumjung";
+import { getGumjungLevel } from "@/data/gumjung/levels";
+import { getGumjungGuide } from "@/data/gumjung/guides";
 
 export const runtime = "nodejs";
 export const dynamic = "force-static";
@@ -25,7 +31,8 @@ export const revalidate = false;
 
 const W = 800;
 const H = 600;
-const PURPLE = "#7D0096";
+const PURPLE = "#7D0096"; // 어학의참견 칩색(기존)
+const TEAL = "#0F766E"; // 검고의참견 칩색(청록)
 
 const slugKey = (s: string) => decodeURIComponent(s).normalize("NFC");
 
@@ -113,6 +120,51 @@ function resolveContent(kind: string, regionParam: string, itemSlug: string): Co
       chips: ["#1:1맞춤", "#원어민·교포", "#첫상담무료"],
     };
   }
+  // ── 검고의참견(청록) kind — additive. 기존 exam·conversation 경로/출력 무변경. ──
+  if (kind === "gumjung-subject") {
+    // region=급별 slug, item=과목 slug → "{급별} 검정고시" / "{과목} 과외"
+    const d = buildGumjungSubjectData(regionParam, itemSlug);
+    if (!d) return null;
+    return {
+      region: `${d.levelName} 검정고시`,
+      main: `${d.subjectLabel} 과외`,
+      point: "1:1 맞춤 준비",
+      chips: ["#1:1맞춤", "#개념부터", "#첫상담무료"],
+    };
+  }
+  if (kind === "gumjung-region") {
+    // region=지역 slug, item 무시 → "{지역}" / "검정고시 과외"
+    const d = buildGumjungRegionData(regionParam);
+    if (!d) return null;
+    return {
+      region: d.regionName,
+      main: "검정고시 과외",
+      point: "고졸·중졸 1:1 준비",
+      chips: ["#1:1맞춤", "#급별 안내", "#첫상담무료"],
+    };
+  }
+  if (kind === "gumjung-level") {
+    // region=급별 slug, item 무시 → "검고의참견" / "{급별} 검정고시"
+    const level = getGumjungLevel(regionParam);
+    if (!level) return null;
+    return {
+      region: "검고의참견",
+      main: `${level.name} 검정고시`,
+      point: "나에게 맞는 속도로",
+      chips: ["#1:1맞춤", "#급별 준비", "#첫상담무료"],
+    };
+  }
+  if (kind === "gumjung-guide") {
+    // region=유형 slug, item 무시 → "검정고시 가이드" / "{유형}"
+    const guide = getGumjungGuide(regionParam);
+    if (!guide) return null;
+    return {
+      region: "검정고시 가이드",
+      main: guide.navLabel,
+      point: "1:1 맞춤 상담",
+      chips: ["#1:1맞춤", "#유형별", "#첫상담무료"],
+    };
+  }
   return null;
 }
 
@@ -130,6 +182,8 @@ export async function GET(
   const mainFs = Math.min(fitFontSize([c.main]), 116);
   const [fontData, bg] = await Promise.all([loadFont(), loadBackground(kind)]);
   const YELLOW = "#FFD84D";
+  // 칩색: 검고(청록) / 그 외(어학 퍼플). 기존 exam·conversation 은 PURPLE 유지 → 출력 무변경.
+  const chipColor = kind.startsWith("gumjung") ? TEAL : PURPLE;
 
   return new ImageResponse(
     (
@@ -193,7 +247,7 @@ export async function GET(
                   fontWeight: 700,
                   fontSize: 30,
                   color: "#FFFFFF",
-                  background: PURPLE,
+                  background: chipColor,
                   borderRadius: 999,
                   padding: "10px 22px",
                   display: "flex",

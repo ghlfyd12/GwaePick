@@ -4,7 +4,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { site } from "@/data/site";
-import { POWER_CONSULT_HREF, isPowerPath } from "@/data/service";
+import {
+  POWER_CONSULT_HREF,
+  GUMJUNG_CONSULT_HREF,
+  serviceFromPath,
+  SERVICE,
+} from "@/data/service";
 
 /*
  * 상담 바로가기 — 데스크톱(≥1024px)은 우측 하단 세로 플로팅(현행 유지),
@@ -65,16 +70,24 @@ export default function FloatingButtons() {
   const [reduced, setReduced] = useState(false);
   const pathname = usePathname();
 
-  const isPower = isPowerPath(pathname);
-  // 이미 어학 상담 폼 페이지면 상담 버튼을 다시 노출하지 않는다.
-  const onPowerConsult = pathname === POWER_CONSULT_HREF;
-  // 상담 도착지 — service.ts 기준(메인은 site.cta.href).
-  const consultHref = isPower ? POWER_CONSULT_HREF : site.cta.href;
+  // 경로 → 서비스(service.ts). /power·/gumjung 은 전용 상담 폼을 가진 축.
+  const service = serviceFromPath(pathname);
+  const isPower = service === SERVICE.power;
+  const isGumjung = service === SERVICE.gumjung;
+  const isAxis = isPower || isGumjung;
+  // 상담 도착지 — 축별 전용 폼(메인은 site.cta.href).
+  const consultHref = isGumjung
+    ? GUMJUNG_CONSULT_HREF
+    : isPower
+      ? POWER_CONSULT_HREF
+      : site.cta.href;
+  // 이미 해당 축 상담 폼 페이지면 상담 버튼을 다시 노출하지 않는다.
+  const onAxisConsult = pathname === consultHref;
 
-  // 데스크톱: 현행 그대로 — /power(상담 폼 페이지 제외)에서만 상담 버튼 + 전화 아웃라인.
-  const desktopConsult = isPower && !onPowerConsult;
-  // 모바일 바: 메인은 항상 상담 버튼, /power 는 상담 폼 페이지에서만 숨김.
-  const mobileConsult = isPower ? !onPowerConsult : true;
+  // 데스크톱: 축(상담 폼 페이지 제외)에서만 상담 버튼 + 전화 아웃라인.
+  const desktopConsult = isAxis && !onAxisConsult;
+  // 모바일 바: 메인은 항상 상담 버튼, 축은 상담 폼 페이지에서만 숨김.
+  const mobileConsult = isAxis ? !onAxisConsult : true;
 
   // prefers-reduced-motion: 부드러운 스크롤 → 즉시 이동
   useEffect(() => {
@@ -148,7 +161,7 @@ export default function FloatingButtons() {
         {/* 무료 상담 신청 — 데스크톱은 /power 전용(현행 유지). 어학 폼(/power/consult)으로 이동. */}
         {desktopConsult && (
           <Link
-            href={POWER_CONSULT_HREF}
+            href={consultHref}
             className="inline-flex min-h-12 items-center gap-2 rounded-full bg-accent px-5 font-semibold text-white shadow-lg transition-colors hover:bg-accent-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           >
             <ConsultIcon />
@@ -195,7 +208,7 @@ export default function FloatingButtons() {
             href={`tel:${PHONE}`}
             aria-label="상담전화연결"
             className={`${barBtn} ${
-              isPower
+              isAxis
                 ? "border-2 border-accent bg-white text-accent hover:bg-accent/5"
                 : "bg-accent text-white hover:bg-accent-dark"
             }`}
@@ -210,7 +223,7 @@ export default function FloatingButtons() {
               href={consultHref}
               aria-label={site.cta.label}
               className={`${barBtn} ${
-                isPower
+                isAxis
                   ? "bg-accent text-white hover:bg-accent-dark"
                   : "bg-primary text-white hover:bg-primary-dark"
               }`}

@@ -45,9 +45,18 @@ const powerLinks: FooterLink[] = [
   { label: "중국어 과외", href: "/power/chinese" },
 ];
 
+/** 그룹 5 — 검고의참견(/gumjung): 급별 허브 + 지역 목록(실존 라우트만). */
+const gumjungLinks: FooterLink[] = [
+  { label: "검고의참견", href: "/gumjung" },
+  { label: "고졸 검정고시", href: "/gumjung/gojol" },
+  { label: "중졸 검정고시", href: "/gumjung/jungjol" },
+  { label: "지역별 검정고시", href: "/gumjung/regions" },
+];
+
 export const footerGroups: FooterGroup[] = [
   { title: "지역별 과외", links: regionLinks },
   { title: "과목별 과외", links: subjectLinks },
   { title: "바로가기", links: serviceLinks },
   { title: "어학의참견", links: powerLinks },
+  { title: "검고의참견", links: gumjungLinks },
 ];

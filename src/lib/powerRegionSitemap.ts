@@ -13,6 +13,7 @@ import { allByRegionPairs } from "@/data/byRegionSubject";
 import { allByExamPairs } from "@/data/byRegionExam";
 import { provinceExpansionDongPairs } from "@/data/cityDong";
 import { subjects as detailSubjects } from "@/data/subjects";
+import { GUMJUNG_SITEMAP_CHUNKS } from "@/lib/gumjungSitemap";
 
 /** 지역 축 전체 (지역×과목) 조합 — 모듈 1회 계산. */
 export const POWER_REGION_PAIRS = allByRegionPairs();
@@ -55,4 +56,5 @@ export const TOTAL_SITEMAP_COUNT =
   POWER_REGION_SITEMAP_CHUNKS +
   POWER_EXAM_SITEMAP_CHUNKS +
   PROVINCE_DONG_SITEMAP_CHUNKS +
-  SCHOOL_HUB_SITEMAP_CHUNKS;
+  SCHOOL_HUB_SITEMAP_CHUNKS +
+  GUMJUNG_SITEMAP_CHUNKS;
