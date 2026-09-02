@@ -52,6 +52,21 @@ const SUBJECT_COPY: Record<
   },
 };
 
+/** 과목별 title/description 검색 키워드(전 급별 공통). 중졸 사회만 "한국사 포함" 추가. */
+const SUBJECT_META_KW: Record<string, string> = {
+  korean: "기출 독해",
+  math: "기초부터 개념",
+  english: "단어 문법 기초",
+  social: "개념 정리 암기",
+  science: "개념 유형 정리",
+  history: "흐름 정리 암기",
+};
+function subjectMetaKw(levelSlug: string, subjectSlug: string): string {
+  if (levelSlug === "jungjol" && subjectSlug === "social")
+    return "한국사 포함 개념 정리 암기";
+  return SUBJECT_META_KW[subjectSlug] ?? "";
+}
+
 /** 급별×과목 특이 범위 안내(사실). 없으면 빈 문자열. */
 function subjectScopeNote(levelSlug: string, subjectSlug: string): string {
   if (levelSlug === "gojol" && subjectSlug === "social")
@@ -129,9 +144,11 @@ export function buildGumjungSubjectData(
   const head = `${level.name} 검정고시 ${ref.label}`;
   const h1 = `${head}, ${copy.h1Tail}`;
   const structure = subjectStructure(level, subjectSlug);
-  const metaTitle = `${head} 과외 - 1:1 맞춤 준비 | ${SITE_NAME}`;
+  const kw = subjectMetaKw(level.slug, subjectSlug);
+  // title/description 은 브랜드명 없이 검색 롱테일(과목 키워드 + 1:1 개인과외 공부법).
+  const metaTitle = `${head} - ${kw} 1:1 개인과외 공부법`;
   const metaDescription =
-    `${copy.intro} 지금 수준을 확인하고 맞는 선생님을 1:1로 연결해 드립니다. 첫 상담은 무료입니다.`.slice(
+    `${head} ${kw} 중심으로 1:1 개인과외로 준비합니다. 지금 수준에서 시작하고, 무료 상담으로 시작하세요.`.slice(
       0,
       158,
     );
