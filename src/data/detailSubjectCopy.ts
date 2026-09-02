@@ -10,9 +10,15 @@
  */
 
 export interface DetailSubjectCopy {
-  /** title 접미 교체 키워드(대표 세트). */
+  /** title 접미 교체 키워드(초등·기본). 세부 과목 나열은 여기(초등 보류분)에만 남긴다. */
   titleKeyword: string;
-  /** description 말미 append 문장(세부 과목 전체 나열). */
+  /**
+   * 중·고 title 접미 키워드(수학 형식 — "내신대비 … 교과서 기출 1:1 맞춤지도").
+   * 지정된 과목(science·social)만 중·고에서 title 세부 과목 나열을 제거하고 이 값으로 대체.
+   * 미지정 과목(history)은 초등·중·고 모두 titleKeyword 사용.
+   */
+  titleKeywordMidHigh?: string;
+  /** description 말미 append 문장(세부 과목 전체 나열) — title 과 무관, 유지. */
   descTail: string;
   /** 본문 세부 과목 섹션(확정 카피). {region} 슬롯 = 학교명 또는 지역명. */
   heading: string;
@@ -24,12 +30,14 @@ export interface DetailSubjectCopy {
 export const detailSubjectCopy: Record<string, DetailSubjectCopy> = {
   science: {
     titleKeyword: "물리 화학 생명과학 지구과학",
+    titleKeywordMidHigh: "내신대비 물리 화학 교과서 기출 1:1 맞춤지도",
     descTail: "물리·화학·생명과학·지구과학 등 선택 과목별로 준비합니다.",
     heading: "물리·화학·생명과학·지구과학까지 과목별로 준비합니다",
     body: "고등 과학은 물리학, 화학, 생명과학, 지구과학으로 나뉘고 선택 과목에 따라 준비 방식이 다릅니다. 상담에서 현재 선택 과목과 학교 진도를 확인하고, 해당 과목 지도 경험이 있는 선생님을 연결해 드립니다. 중등 과학은 통합 과정을 기준으로 취약 단원부터 잡아 갑니다.",
   },
   social: {
     titleKeyword: "생활과 윤리 사회문화 한국지리",
+    titleKeywordMidHigh: "내신대비 한국사 사회문화 교과서 기출 1:1 맞춤지도",
     descTail: "생활과 윤리·사회문화·한국지리·정치와 법·윤리와 사상 등 선택 과목별로 준비합니다.",
     heading: "생활과 윤리·사회문화·한국지리까지 과목별로 준비합니다",
     body: "고등 사회는 생활과 윤리, 사회문화, 한국지리, 정치와 법, 윤리와 사상 등 선택 과목별로 출제 범위와 준비 방식이 다릅니다. 상담에서 선택 과목을 확인하고 해당 과목을 지도해 온 선생님을 연결해 드립니다. 중등 사회는 학교 진도에 맞춰 개념의 흐름부터 정리합니다.",

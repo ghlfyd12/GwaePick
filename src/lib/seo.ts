@@ -223,10 +223,14 @@ function composeTitle(p: {
     const lead = p.lead ? `${p.lead} ` : "";
     return `${p.head} ${lead}${phrase.text} | ${SITE_NAME}`;
   }
-  // 과학·사회·역사: 접미 키워드를 세부 과목 대표 세트로 교체(그 외 과목은 기존 유형×학교급 키워드).
+  // 과학·사회·역사: 접미 키워드를 세부 과목 카피로 교체(그 외 과목은 기존 유형×학교급 키워드).
+  // science·social 은 중·고 title 에서 세부 과목 나열을 빼고 수학 형식(titleKeywordMidHigh)으로,
+  // 초등은 "내신"이 안 맞아 기존 titleKeyword 유지(보류). history 는 미지정 → 전 학교급 titleKeyword.
   const detail = getDetailSubjectCopy(p.subjectSlug);
   const keyword = detail
-    ? detail.titleKeyword
+    ? p.level !== "elem" && detail.titleKeywordMidHigh
+      ? detail.titleKeywordMidHigh
+      : detail.titleKeyword
     : resolveTitleKeyword(p.pageType, p.level);
   // 문구가 lead 로 시작하면(예: "초등 단원평가 …" + lead "초등") 중복이므로 lead 를 생략한다.
   const dropLead = !!p.lead && keyword.startsWith(`${p.lead} `);
