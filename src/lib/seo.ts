@@ -43,6 +43,7 @@ import {
   SCHOOL_PUBLISHED,
   SCHOOL_MODIFIED,
   SCHOOL_THUMB_MODIFIED,
+  SCHOOL_DETAIL_TITLE_MODIFIED,
   SCHOOL_HUB_PUBLISHED,
   SCHOOL_HUB_MODIFIED,
 } from "@/data/contentMeta";
@@ -226,14 +227,14 @@ function composeTitle(p: {
     const lead = p.lead ? `${p.lead} ` : "";
     return `${p.head} ${lead}${phrase.text} | ${SITE_NAME}`;
   }
-  // 과학·사회·역사: 접미 키워드를 세부 과목 카피로 교체(그 외 과목은 기존 유형×학교급 키워드).
-  // science·social 은 중·고 title 에서 세부 과목 나열을 빼고 수학 형식(titleKeywordMidHigh)으로,
-  // 초등은 "내신"이 안 맞아 기존 titleKeyword 유지(보류). history 는 미지정 → 전 학교급 titleKeyword.
+  // 과학·사회·역사: 접미 키워드를 학교급별 세부 카피로 교체(그 외 과목은 기존 유형×학교급 키워드).
+  //  - 중·고: 세부 과목 나열을 빼고 수학 형식(titleKeywordMidHigh).
+  //  - 초등: 학년에 맞는 표현(titleKeywordElem). 어느 쪽도 없으면 titleKeyword 로 폴백.
   const detail = getDetailSubjectCopy(p.subjectSlug);
   const keyword = detail
-    ? p.level !== "elem" && detail.titleKeywordMidHigh
-      ? detail.titleKeywordMidHigh
-      : detail.titleKeyword
+    ? p.level === "elem"
+      ? detail.titleKeywordElem ?? detail.titleKeyword
+      : detail.titleKeywordMidHigh ?? detail.titleKeyword
     : resolveTitleKeyword(p.pageType, p.level);
   // 문구가 lead 로 시작하면(예: "초등 단원평가 …" + lead "초등") 중복이므로 lead 를 생략한다.
   const dropLead = !!p.lead && keyword.startsWith(`${p.lead} `);
@@ -298,18 +299,21 @@ export function buildSchoolMeta(p: SchoolMetaInput): Metadata {
         }
       : undefined;
   // 검색결과 신선도 신호 — og:type("website")은 유지하고 article:*_time 을 raw meta 로 병기.
-  // 고교×핵심5는 og 무변경이라 SCHOOL_MODIFIED 유지(정직·diff 0), 그 외(중·초·고교 역사논술코딩)는
-  // 이번 배포에서 og:image 가 신규 연결되어 SCHOOL_THUMB_MODIFIED(배포일)로 갱신.
-  const isCore5High =
-    p.level === "high" &&
-    !!p.subjectSlug &&
-    ["korean", "english", "math", "social", "science"].includes(p.subjectSlug);
+  //  - 고교 국·영·수: og·title 모두 무변경 → SCHOOL_MODIFIED(08-24) 유지(정직).
+  //  - 고교 사회·과학·역사: og 는 그대로지만 title 이 개편됨 → SCHOOL_DETAIL_TITLE_MODIFIED.
+  //  - 그 외(초·중 전 과목 og 갱신 + 고교 역사논술코딩 og 연결): SCHOOL_THUMB_MODIFIED.
+  const hs = p.level === "high" ? (p.subjectSlug ?? "") : "";
+  const modifiedTime = ["korean", "english", "math"].includes(hs)
+    ? SCHOOL_MODIFIED
+    : ["social", "science", "history"].includes(hs)
+      ? SCHOOL_DETAIL_TITLE_MODIFIED
+      : SCHOOL_THUMB_MODIFIED;
   const base = baseMetadata(title, description, p.canonicalPath, og);
   return {
     ...base,
     other: {
       "article:published_time": isoKST(SCHOOL_PUBLISHED),
-      "article:modified_time": isoKST(isCore5High ? SCHOOL_MODIFIED : SCHOOL_THUMB_MODIFIED),
+      "article:modified_time": isoKST(modifiedTime),
     },
   };
 }
@@ -482,11 +486,9 @@ const DEFAULT_SUBJECT_TITLE_TAIL = "내신 기출 1:1"; // 국어·영어·수�
 export function buildSubjectMeta(p: SubjectMetaInput): Metadata {
   const detail = getDetailSubjectCopy(p.subjectSlug);
   // 과목 상세 title 꼬리 — 서비스 용어("매칭") 제거, 학부모 검색 키워드로 통일.
-  //  - 과학·사회·역사: 세부 과목 대표 세트 + "내신 기출 1:1"(detail 경로).
-  //  - 논술·코딩: 과목 특성 검색어. 그 외 교과(국어·영어·수학): "내신 기출 1:1".
-  const title = detail
-    ? `${p.subjectLabel}과외 ${detail.titleKeyword} 내신 기출 1:1 | ${SITE_NAME}`
-    : `${p.subjectLabel}과외 ${SUBJECT_TITLE_TAIL[p.subjectSlug ?? ""] ?? DEFAULT_SUBJECT_TITLE_TAIL} | ${SITE_NAME}`;
+  //  - 교과(국어·영어·수학·과학·사회·역사): "내신 기출 1:1" 로 통일(세부 과목 나열은 title 에서 제거).
+  //  - 논술·코딩: 과목 특성 검색어. 세부 과목 나열은 description 말미(descTail)에만 유지한다.
+  const title = `${p.subjectLabel}과외 ${SUBJECT_TITLE_TAIL[p.subjectSlug ?? ""] ?? DEFAULT_SUBJECT_TITLE_TAIL} | ${SITE_NAME}`;
   const description =
     pick(SUBJECT_DESC, p.canonicalPath)(p) + (detail ? ` ${detail.descTail}` : "");
   // 과목 상세 썸네일 og:image(8과목).

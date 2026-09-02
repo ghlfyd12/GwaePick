@@ -17,6 +17,13 @@ export const SCHOOL_MODIFIED = "2026-08-24"; // @indexnow-group: school
  * 고교×핵심5 는 og 무변경이라 SCHOOL_MODIFIED 를 유지(정직·diff 0)하고, 이 그룹만 배포일로 갱신한다.
  */
 export const SCHOOL_THUMB_MODIFIED = "2026-09-02"; // @indexnow-group: school-thumb
+/**
+ * 고교×{사회·과학·역사} title 개편(세부 과목 나열 제거 → 수학 형식 통일) 배포일.
+ * 고교×핵심5 중 사회·과학은 og 무변경이라 SCHOOL_MODIFIED(08-24)를 벗어나지 못했는데,
+ * title 이 실제로 바뀌었으므로 이 그룹만 배포일로 갱신해 정직한 신선도를 부여한다.
+ * (고교 역사는 og 는 그대로지만 이번에 title 이 바뀌어 함께 이 상수를 쓴다.)
+ */
+export const SCHOOL_DETAIL_TITLE_MODIFIED = "2026-09-02"; // @indexnow-group: school-detail-title
 
 /**
  * 학교 단위 허브 /tutoring/by-school/{학교}(과목 없음) — 고교 파일럿(2,457).
