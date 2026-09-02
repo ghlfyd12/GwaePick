@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import ConsultForm from "@/components/ConsultForm";
 import JsonLd from "@/components/JsonLd";
+import GumjungHero from "@/components/gumjung/GumjungHero";
 import { site } from "@/data/site";
 import { GUMJUNG_LEVELS } from "@/data/gumjung/levels";
 import { GUMJUNG_GUIDES } from "@/data/gumjung/guides";
@@ -62,30 +63,21 @@ export default function GumjungHomePage() {
     <>
       <JsonLd data={jsonLd} />
 
-      {/* Hero */}
-      <section className="border-b border-line bg-surface px-5 py-14 sm:px-6 sm:py-20">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-widest text-accent">
-            검고의참견
-          </p>
-          <h1 className="mt-2 break-keep text-[1.8rem] font-bold leading-snug text-ink sm:text-4xl sm:leading-tight">
-            검정고시, 나에게 맞는 속도로 준비합니다
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl break-keep text-base leading-relaxed text-muted sm:text-lg">
-            학교 밖에서 공부하는 이유는 저마다 다릅니다. 검정고시는 출제 범위가 정해져 있어 방향만 잡으면 혼자보다 빠르게 준비할 수 있습니다. 직접 가르쳐 온 선생님이 상담으로 맞는 선생님을 1:1로 연결해 드립니다.
-          </p>
-          <div className="mt-7 flex justify-center">
-            <a
-              href={CONSULT_ANCHOR}
-              className="inline-flex min-h-14 w-full max-w-xs items-center justify-center rounded-full bg-accent px-8 text-base font-semibold text-white shadow-md transition-colors hover:bg-accent-dark sm:w-auto sm:text-lg"
-            >
-              {site.cta.label}
-            </a>
-          </div>
-        </div>
-      </section>
+      {/* Hero (개편) */}
+      <GumjungHero
+        eyebrow="검고의참견"
+        title="검정고시, 나에게 맞는 속도로"
+        sub="방향이 정해지면 준비는 단순해집니다. 1:1로 시작합니다."
+        ctaHref={CONSULT_ANCHOR}
+        ctaLabel={site.cta.label}
+      />
 
       <div className="mx-auto max-w-3xl space-y-16 px-5 py-14 sm:px-6 sm:py-20">
+        {/* 도입 본문(기존 히어로 서브 문단 이동 — SEO 텍스트 보존) */}
+        <p className="break-keep text-base leading-relaxed text-muted sm:text-lg">
+          학교 밖에서 공부하는 이유는 저마다 다릅니다. 검정고시는 출제 범위가 정해져 있어 방향만 잡으면 혼자보다 빠르게 준비할 수 있습니다. 직접 가르쳐 온 선생님이 상담으로 맞는 선생님을 1:1로 연결해 드립니다.
+        </p>
+
         {/* 급별 3 */}
         <section aria-labelledby="levels-heading">
           <h2 id="levels-heading" className="break-keep text-2xl font-bold text-ink sm:text-3xl">

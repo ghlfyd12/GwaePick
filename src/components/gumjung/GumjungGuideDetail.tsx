@@ -1,8 +1,14 @@
 import Link from "next/link";
 import ConsultForm from "@/components/ConsultForm";
 import JsonLd from "@/components/JsonLd";
+import GumjungHero from "@/components/gumjung/GumjungHero";
 import { site } from "@/data/site";
 import { getGumjungGuide } from "@/data/gumjung/guides";
+import {
+  GUMJUNG_LEVEL_FAQ_EXTRA,
+  gumjungGuideTags,
+} from "@/data/gumjung/detailContent";
+import { FaqList, TagCloud } from "@/components/gumjung/parts";
 
 /*
  * GumjungGuideDetail — /gumjung/guide/[type] 유형 가이드(7장) 공용 템플릿.
@@ -34,30 +40,21 @@ export default function GumjungGuideDetail({ typeSlug }: { typeSlug: string }) {
     <>
       <JsonLd data={jsonLd} />
 
-      {/* Hero */}
-      <section className="border-b border-line bg-surface px-5 py-12 sm:px-6 md:px-10 md:py-16">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-widest text-accent">
-            검고의참견 · {guide.eyebrow}
-          </p>
-          <h1 className="mt-2 break-keep text-[1.7rem] font-bold leading-snug text-ink sm:text-4xl sm:leading-tight">
-            {guide.h1}
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl break-keep text-base leading-relaxed text-muted sm:text-lg">
-            {guide.lead}
-          </p>
-          <div className="mt-6 flex justify-center">
-            <a
-              href={CONSULT_ANCHOR}
-              className="inline-flex min-h-14 w-full max-w-xs items-center justify-center rounded-full bg-accent px-8 text-base font-semibold text-white shadow-md transition-colors hover:bg-accent-dark sm:w-auto sm:text-lg"
-            >
-              {site.cta.label}
-            </a>
-          </div>
-        </div>
-      </section>
+      {/* Hero (개편) — h1 유지, 서브 1줄. lead 본문은 아래로 이동 */}
+      <GumjungHero
+        eyebrow={`검고의참견 · ${guide.eyebrow}`}
+        title={guide.h1}
+        sub="필요한 부분부터, 1:1로 준비합니다."
+        ctaHref={CONSULT_ANCHOR}
+        ctaLabel={site.cta.label}
+      />
 
       <div className="mx-auto max-w-3xl space-y-12 px-5 py-14 sm:px-6 sm:py-20">
+        {/* 도입 본문(히어로 아래로 이동) */}
+        <p className="break-keep text-base leading-relaxed text-muted sm:text-lg">
+          {guide.lead}
+        </p>
+
         {guide.sections.map((s) => (
           <section key={s.heading} aria-label={s.heading}>
             <h2 className="break-keep text-2xl font-bold text-ink sm:text-3xl">{s.heading}</h2>
@@ -66,6 +63,15 @@ export default function GumjungGuideDetail({ typeSlug }: { typeSlug: string }) {
             </p>
           </section>
         ))}
+
+        {/* FAQ (공통 2 + 유형별 1) */}
+        <FaqList
+          heading="자주 묻는 질문"
+          items={guide.faqExtra ? [...GUMJUNG_LEVEL_FAQ_EXTRA, guide.faqExtra] : GUMJUNG_LEVEL_FAQ_EXTRA}
+        />
+
+        {/* 관련 검색어 */}
+        <TagCloud tags={gumjungGuideTags(guide.navLabel)} />
 
         {/* 관련 링크 */}
         <section aria-labelledby="related-heading">

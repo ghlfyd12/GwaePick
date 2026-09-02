@@ -11,8 +11,10 @@ import type { Metadata } from "next";
 import { site } from "@/data/site";
 import { examRegions, isExamRegionSlug } from "@/data/byRegionExam";
 import { GUMJUNG_LEVELS } from "@/data/gumjung/levels";
+import { GUMJUNG_MODIFIED } from "@/data/contentMeta";
 
 const SITE_NAME = site.gumjung.name;
+const isoKST = (d: string) => `${d}T00:00:00+09:00`;
 
 const nfc = (s: string) => s.normalize("NFC");
 const slugKey = (s: string): string => {
@@ -25,6 +27,53 @@ const slugKey = (s: string): string => {
 
 /** 라우트 slug → 표기명(253 시군구, examRegions 재사용). */
 const regionNameBySlug = new Map(examRegions.map((r) => [nfc(r.slug), r.name]));
+
+/** 시도별 시군구 그룹(examRegions 순서 유지) — 인근 시군구 클러스터용. */
+const bySido = (() => {
+  const m = new Map<string, { slug: string; name: string }[]>();
+  for (const r of examRegions) {
+    if (!m.has(r.sidoLabel)) m.set(r.sidoLabel, []);
+    m.get(r.sidoLabel)!.push({ slug: r.slug, name: r.name });
+  }
+  return m;
+})();
+const sidoBySlug = new Map(examRegions.map((r) => [nfc(r.slug), r.sidoLabel]));
+
+export type GumjungRegionLink = { label: string; href: string };
+
+/**
+ * 같은 시도 내 인근 시군구 4~6곳(내부링크 클러스터). examRegions 가나다 순 인접분에서 wrap 선택.
+ * 데이터 재사용이라 빌드 영향 없음. 실재 slug 만 반환(404 없음).
+ */
+export function gumjungNearbyRegions(regionParam: string, count = 5): GumjungRegionLink[] {
+  const key = slugKey(regionParam);
+  const sido = sidoBySlug.get(key);
+  if (!sido) return [];
+  const list = bySido.get(sido) ?? [];
+  if (list.length <= 1) return [];
+  const idx = list.findIndex((r) => nfc(r.slug) === key);
+  if (idx === -1) return [];
+  const out: GumjungRegionLink[] = [];
+  const n = Math.min(count, list.length - 1);
+  for (let step = 1; out.length < n; step++) {
+    const r = list[(idx + step) % list.length];
+    if (nfc(r.slug) === key) break;
+    out.push({ label: r.name, href: `/gumjung/by-region/${encodeURIComponent(r.slug)}` });
+  }
+  return out;
+}
+
+/**
+ * 지역 title(브랜드명 없음, 검색 롱테일). 길면 뒤에서부터 탈락: "시험 일정" → "초졸".
+ * 표시 상한 40자(한글 기준) — 긴 복합 시군구 대응.
+ */
+function buildRegionTitle(regionName: string): string {
+  const full = `${regionName} 검정고시 과외 - 고졸 중졸 초졸 1:1 개인과외 공부법 시험 일정`;
+  if (full.length <= 40) return full;
+  const noSchedule = `${regionName} 검정고시 과외 - 고졸 중졸 초졸 1:1 개인과외 공부법`;
+  if (noSchedule.length <= 40) return noSchedule;
+  return `${regionName} 검정고시 과외 - 고졸 중졸 1:1 개인과외 공부법`;
+}
 
 /** 지역 파라미터가 검정고시 지역축(253 시군구)에 속하는지 — 어학시험축과 동일 판정 재사용. */
 export function isGumjungRegionSlug(regionParam: string): boolean {
@@ -63,9 +112,10 @@ export function buildGumjungRegionData(regionParam: string): GumjungRegionData |
   const regionName = gumjungRegionName(regionParam);
 
   const head = `${regionName} 검정고시`;
-  const metaTitle = `${regionName} 검정고시 과외 - 고졸 중졸 1:1 | ${SITE_NAME}`;
+  // title 은 브랜드명 없이 검색 롱테일(길이 초과 시 뒤에서부터 탈락).
+  const metaTitle = buildRegionTitle(regionName);
   const metaDescription =
-    `${regionName}에서 고졸·중졸·초졸 검정고시를 준비하는 1:1 맞춤 과외. 급별 안내와 출제 범위를 확인하고 맞는 선생님을 연결해 드립니다. 첫 상담은 무료입니다.`.slice(
+    `${regionName}에서 고졸·중졸·초졸 검정고시를 1:1로 준비합니다. 급별 안내와 공부법을 확인하고 맞는 선생님을 연결해 드립니다. 무료 상담으로 시작하세요.`.slice(
       0,
       158,
     );
@@ -94,6 +144,11 @@ export function buildGumjungRegionMetadata(regionParam: string): Metadata {
     description: data.metaDescription,
     alternates: { canonical },
     robots: { index: true, follow: true },
+    // 검색 신선도 신호 — 발행일=수정일=GUMJUNG_MODIFIED(신규 축). 화면 표기는 하지 않음.
+    other: {
+      "article:published_time": isoKST(GUMJUNG_MODIFIED),
+      "article:modified_time": isoKST(GUMJUNG_MODIFIED),
+    },
     openGraph: {
       title: data.metaTitle,
       description: data.metaDescription,

@@ -33,8 +33,18 @@ export type GumjungLevel = {
   totalCount: number;
   /** 선택 과목 표기(페이지 미생성 — 급별 상세 내 안내만). */
   electiveNote: string;
+  /** 선택 과목 목록(표 '과목' 열용, 짧은 나열). */
+  electiveList: string;
+  /** 필수 과목 범위 비고(표 '비고' 열용). 없으면 빈 문자열. */
+  requiredScopeNote: string;
   /** 문항·배점 사실. */
   questionInfo: string;
+  /** 문항·배점 짧은 표기(표 '문항·배점' 열용). */
+  questionShort: string;
+  /** 검색 롱테일 title(브랜드명 없음). */
+  metaTitle: string;
+  /** description(브랜드명 없음). */
+  metaDescription: string;
 };
 
 /**
@@ -113,8 +123,15 @@ export const GUMJUNG_LEVELS: GumjungLevel[] = [
     totalCount: 7,
     electiveNote:
       "선택 과목은 도덕·기술가정·체육·음악·미술 가운데 1과목으로, 페이지 없이 상담에서 함께 확인합니다.",
+    electiveList: "도덕·기술가정·체육·음악·미술 중 1",
+    requiredScopeNote: "사회=통합사회, 과학=통합과학 범위",
     questionInfo:
       "과목별 25문항(수학은 20문항), 문항당 4점(수학은 5점)으로 출제됩니다.",
+    questionShort: "25문항·4점(수학 20문항·5점)",
+    metaTitle:
+      "고졸 검정고시 전과목 공부법 - 응시 자격 시험 일정 성인 1:1 개인과외 수능 대입",
+    metaDescription:
+      "고졸 검정고시 과목 구성·합격 기준·응시 자격·시험 일정과 과목별 공부법을 정리했습니다. 성인 준비도 안내하며, 1:1 맞춤 준비는 무료 상담으로 시작합니다.",
   },
   {
     slug: "jungjol",
@@ -130,8 +147,15 @@ export const GUMJUNG_LEVELS: GumjungLevel[] = [
     totalCount: 6,
     electiveNote:
       "선택 과목은 도덕·기술가정·정보·체육·음악·미술 가운데 1과목으로, 페이지 없이 상담에서 함께 확인합니다.",
+    electiveList: "도덕·기술가정·정보·체육·음악·미술 중 1",
+    requiredScopeNote: "사회=한국사 포함·세계사 제외",
     questionInfo:
       "과목별 25문항(수학은 20문항), 문항당 4점(수학은 5점)으로 출제됩니다.",
+    questionShort: "25문항·4점(수학 20문항·5점)",
+    metaTitle:
+      "중졸 검정고시 전과목 공부법 - 응시 자격 시험 일정 1:1 개인과외 고입 준비",
+    metaDescription:
+      "중졸 검정고시 과목 구성·합격 기준·응시 자격·시험 일정과 과목별 공부법을 정리했습니다. 고등학교 진학(고입) 준비까지, 1:1 맞춤 준비는 무료 상담으로 시작합니다.",
   },
   {
     slug: "chojol",
@@ -147,7 +171,14 @@ export const GUMJUNG_LEVELS: GumjungLevel[] = [
     totalCount: 6,
     electiveNote:
       "선택 과목은 도덕·음악·미술·체육·실과·영어 가운데 2과목으로, 페이지 없이 상담에서 함께 확인합니다.",
+    electiveList: "도덕·음악·미술·체육·실과·영어 중 2",
+    requiredScopeNote: "",
     questionInfo: "과목별 20문항, 문항당 5점으로 출제됩니다.",
+    questionShort: "20문항·5점",
+    metaTitle:
+      "초졸 검정고시 전과목 공부법 - 응시 자격 시험 일정 1:1 개인과외 성인 만학도",
+    metaDescription:
+      "초졸 검정고시 과목 구성·합격 기준·응시 자격·시험 일정과 과목별 공부법을 정리했습니다. 성인·만학도 준비까지, 1:1 맞춤 준비는 무료 상담으로 시작합니다.",
   },
 ];
 

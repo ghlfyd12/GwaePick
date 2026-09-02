@@ -6,6 +6,9 @@ import {
   GUMJUNG_LEVEL_SLUGS,
   getGumjungLevel,
 } from "@/data/gumjung/levels";
+import { GUMJUNG_MODIFIED } from "@/data/contentMeta";
+
+const isoKST = (d: string) => `${d}T00:00:00+09:00`;
 
 /*
  * /gumjung/[level] — 검고의참견 급별 상세(고졸·중졸·초졸 3장).
@@ -26,8 +29,8 @@ export async function generateMetadata({
   const { level: levelSlug } = await params;
   const level = getGumjungLevel(levelSlug);
   if (!level) return {};
-  const title = `${level.examName} - 나에게 맞는 속도로 1:1 준비 | ${site.gumjung.name}`;
-  const description = `${level.intro}`.slice(0, 158);
+  const title = level.metaTitle;
+  const description = level.metaDescription;
   const canonical = `/gumjung/${level.slug}`;
   const thumb = `/api/power-thumb/gumjung-level/${level.slug}/base`;
   return {
@@ -35,6 +38,10 @@ export async function generateMetadata({
     description,
     alternates: { canonical },
     robots: { index: true, follow: true },
+    other: {
+      "article:published_time": isoKST(GUMJUNG_MODIFIED),
+      "article:modified_time": isoKST(GUMJUNG_MODIFIED),
+    },
     openGraph: {
       title,
       description,
