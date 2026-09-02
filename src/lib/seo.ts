@@ -34,6 +34,9 @@ import {
   regionThumbAlt,
   subjectThumbPath,
   subjectThumbAlt,
+  schoolProfilePath,
+  schoolProfileAlt,
+  PROFILE_SIZE,
 } from "@/lib/thumb";
 import { SCHOOL_GRADE_PHRASE } from "@/data/schoolGradeKeywords";
 import {
@@ -275,9 +278,18 @@ export function buildSchoolMeta(p: SchoolMetaInput): Metadata {
       p.schoolName,
       SCHOOL_GRADE_PHRASE[p.level ?? "high"],
     ) + (detailDesc ? ` ${detailDesc.descTail}` : "");
-  // 파일럿: 고교×핵심5과목만 페이지별 텍스트 썸네일을 og:image 로 사용(그 외는 기본 정적 OG).
-  const og: OgImage | undefined =
-    p.schoolSlug && p.subjectSlug && p.level && isThumbEligible(p.level, p.subjectSlug)
+  // og:image — 초·중은 정적 인물 사진(텍스트 없음, 학교 단위 고정), 고교(및 학교급 미상)는 기존 코랄 텍스트 썸네일 유지.
+  const isElemMiddle = p.level === "elem" || p.level === "middle";
+  const og: OgImage | undefined = isElemMiddle
+    ? p.schoolSlug
+      ? {
+          url: schoolProfilePath(p.schoolSlug),
+          width: PROFILE_SIZE.width,
+          height: PROFILE_SIZE.height,
+          alt: schoolProfileAlt(p.schoolName),
+        }
+      : undefined
+    : p.schoolSlug && p.subjectSlug && p.level && isThumbEligible(p.level, p.subjectSlug)
       ? {
           url: thumbPath(p.schoolSlug, p.subjectSlug),
           width: THUMB_SIZE.width,

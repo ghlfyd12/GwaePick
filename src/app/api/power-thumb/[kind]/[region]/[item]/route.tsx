@@ -6,9 +6,10 @@
  *   - region: 지역 slug(한글) — 알려진 파워 지역/확장 지역만 허용, 그 외 404(스팸 생성 차단)
  *   - item: exam slug(examBySlug) 또는 회화 subject slug(POWER_SUBJECTS). 그 외 404.
  *
- * 지식의참견 썸네일(/api/thumb) 템플릿을 그대로 재사용하되, 텍스트 색만 보라(#7D0096)로,
- * 배경만 /power 자산(power-school-banner.png)으로 바꾼다. 오버레이·흰 띠·규격·폰트·캐시는 동일.
- * 문구는 데이터 파생만("{지역명}" / "{시험명}과외" 또는 subject.label) — 과장·느낌표·"원어민" 금지.
+ * 구성: 성인 인물 배경(로고 크롭본 og-profiles/bg-exam·bg-conv) + 어두운 오버레이 위 4단 텍스트
+ *   — 1줄 지역(흰), 2줄 "{시험/과목} 과외"(흰 볼드), 3줄 포인트(옐로), 하단 칩 3개(퍼플 #7D0096).
+ * 문구는 데이터 파생 + 고정 카피(느낌표 없음). 규격 800×600·폰트·immutable 캐시 유지.
+ * og URL 은 메타에서 v=2 파라미터로 캐시 무효화(레이아웃 개편 배포).
  *
  * 캐시: 조합 결정론적 → 장기 immutable(배포 단위 무효화). 유효 조합만 렌더, 그 외 404로 비용 상한.
  */
@@ -39,14 +40,17 @@ function loadFont(): Promise<Buffer> {
   return fontPromise;
 }
 
-let bgPromise: Promise<string> | null = null;
-function loadBackground(): Promise<string> {
-  if (!bgPromise) {
-    bgPromise = readFile(
-      join(process.cwd(), "public/images/power-school-banner.png"),
-    ).then((b) => `data:image/png;base64,${b.toString("base64")}`);
+// 배경: og-profiles 성인 인물을 로고 없는 우측 영역만 크롭해 재구성한 800×600 배경
+// (bg-exam=4.jpg 남성·bg-conv=2.jpg 여성). 지식의참견 로고·워드마크 완전 제외 — 브랜드 혼선 방지.
+const bgCache: Record<string, Promise<string>> = {};
+function loadBackground(kind: string): Promise<string> {
+  const file = kind === "exam" ? "bg-exam.jpg" : "bg-conv.jpg";
+  if (!bgCache[file]) {
+    bgCache[file] = readFile(join(process.cwd(), "public/og-profiles", file)).then(
+      (b) => `data:image/jpeg;base64,${b.toString("base64")}`,
+    );
   }
-  return bgPromise;
+  return bgCache[file];
 }
 
 /* ── 텍스트 레이아웃(지식의참견 템플릿과 동일 알고리즘) ─────────────────────
@@ -86,22 +90,28 @@ function notFound(): Response {
  * 재사용해 지역명 표기가 실제 페이지 H1/메타와 정확히 일치하게 한다(재해석 불일치 방지).
  * 빌더가 null(무효 조합/미존재 지역)이면 null → 404.
  */
-function resolveLines(
-  kind: string,
-  regionParam: string,
-  itemSlug: string,
-): [string, string] | null {
+type Content = { region: string; main: string; point: string; chips: string[] };
+function resolveContent(kind: string, regionParam: string, itemSlug: string): Content | null {
   if (kind === "exam") {
     const d = buildByExamData(regionParam, itemSlug);
     if (!d) return null;
-    return [d.regionName, `${d.exam.name}과외`];
+    return {
+      region: d.regionName,
+      main: `${d.exam.name} 과외`,
+      point: "목표 점수까지 1:1 관리",
+      chips: ["#1:1맞춤", "#기출분석", "#첫상담무료"],
+    };
   }
   if (kind === "conversation") {
     const d = buildByRegionData(regionParam, itemSlug);
     if (!d) return null;
-    // 회화는 "과외" 부착("영어회화 과외"), 과외 과목(label 이 이미 …과외)은 이중 방지.
-    const suffix = d.label.endsWith("과외") ? d.label : `${d.label} 과외`;
-    return [d.regionName, suffix];
+    const main = d.label.endsWith("과외") ? d.label : `${d.label} 과외`;
+    return {
+      region: d.regionName,
+      main,
+      point: "왕초보도 1:1로 시작",
+      chips: ["#1:1맞춤", "#원어민·교포", "#첫상담무료"],
+    };
   }
   return null;
 }
@@ -115,10 +125,11 @@ export async function GET(
   const itemSlug = slugKey(item);
 
   // ── 검증 우선(렌더 전) — 무효 조합 404(페이지 빌더 기준으로 존재하는 조합만) ──
-  const lines = resolveLines(kind, regionParam, itemSlug);
-  if (!lines) return notFound();
-  const fontSize = fitFontSize(lines);
-  const [fontData, bg] = await Promise.all([loadFont(), loadBackground()]);
+  const c = resolveContent(kind, regionParam, itemSlug);
+  if (!c) return notFound();
+  const mainFs = Math.min(fitFontSize([c.main]), 116);
+  const [fontData, bg] = await Promise.all([loadFont(), loadBackground(kind)]);
+  const YELLOW = "#FFD84D";
 
   return new ImageResponse(
     (
@@ -128,6 +139,7 @@ export async function GET(
           height: H,
           position: "relative",
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
         }}
@@ -137,17 +149,10 @@ export async function GET(
           src={bg}
           width={W}
           height={H}
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: W,
-            height: H,
-            objectFit: "cover",
-          }}
+          style={{ position: "absolute", top: 0, left: 0, width: W, height: H, objectFit: "cover" }}
           alt=""
         />
-        {/* 밝은 오버레이 — 배경을 은은한 질감으로 낮춰 텍스트가 주인공이 되게 한다(school 과 동일 55%). */}
+        {/* 어두운 반투명 오버레이 — 텍스트 대비 확보 */}
         <div
           style={{
             position: "absolute",
@@ -155,42 +160,49 @@ export async function GET(
             left: 0,
             width: W,
             height: H,
-            background: "rgba(255,255,255,0.55)",
+            background: "rgba(20,10,28,0.62)",
             display: "flex",
           }}
         />
-        {/* 중앙 흰 가로 띠 */}
+        {/* 중앙 텍스트 구성(지역 / 주제 / 포인트 / 칩) */}
         <div
           style={{
-            width: "100%",
-            background: "rgba(255,255,255,0.96)",
-            paddingTop: 46,
-            paddingBottom: 46,
-            paddingLeft: 40,
-            paddingRight: 40,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
+            gap: 18,
+            padding: "0 48px",
           }}
         >
-          {lines.map((line, i) => (
-            <div
-              key={i}
-              style={{
-                fontFamily: "Pretendard",
-                fontWeight: 700,
-                fontSize,
-                lineHeight: 1.08,
-                color: PURPLE,
-                letterSpacing: "-0.02em",
-                textAlign: "center",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {line}
-            </div>
-          ))}
+          <div style={{ fontFamily: "Pretendard", fontWeight: 700, fontSize: 44, color: "#FFFFFF", letterSpacing: "-0.02em", display: "flex" }}>
+            {c.region}
+          </div>
+          <div style={{ fontFamily: "Pretendard", fontWeight: 700, fontSize: mainFs, color: "#FFFFFF", letterSpacing: "-0.02em", whiteSpace: "nowrap", display: "flex" }}>
+            {c.main}
+          </div>
+          <div style={{ fontFamily: "Pretendard", fontWeight: 700, fontSize: 46, color: YELLOW, letterSpacing: "-0.02em", display: "flex" }}>
+            {c.point}
+          </div>
+          <div style={{ display: "flex", flexDirection: "row", gap: 14, marginTop: 8 }}>
+            {c.chips.map((chip, i) => (
+              <div
+                key={i}
+                style={{
+                  fontFamily: "Pretendard",
+                  fontWeight: 700,
+                  fontSize: 30,
+                  color: "#FFFFFF",
+                  background: PURPLE,
+                  borderRadius: 999,
+                  padding: "10px 22px",
+                  display: "flex",
+                }}
+              >
+                {chip}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     ),

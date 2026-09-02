@@ -365,7 +365,8 @@ export function buildByRegionMetadata(
   if (!data) return {};
   const canonical = `/power/by-region/${encodeURIComponent(data.regionSlug)}/${subjectSlug}`;
   // 페이지별 동적 썸네일(보라 텍스트). data.label = 과목 표시명(영어회화·중국어과외 등).
-  const thumb = `/api/power-thumb/conversation/${encodeURIComponent(data.regionSlug)}/${subjectSlug}`;
+  // v=2: 썸네일 레이아웃 개편(인물 배경·4단 텍스트) 배포로 immutable 캐시 무효화.
+  const thumb = `/api/power-thumb/conversation/${encodeURIComponent(data.regionSlug)}/${subjectSlug}?v=2`;
   const thumbAlt = `${data.regionName} ${data.label} 안내`;
   return {
     title: { absolute: data.metaTitle },

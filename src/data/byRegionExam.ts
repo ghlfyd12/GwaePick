@@ -235,7 +235,8 @@ export function buildByExamMetadata(
   if (!data) return {};
   const canonical = `/power/by-region/${encodeURIComponent(data.regionSlug)}/${examSlug}`;
   // 페이지별 동적 썸네일(보라 텍스트). 데이터가 유효(=페이지 존재)하면 썸네일도 동일 빌더로 렌더된다.
-  const thumb = `/api/power-thumb/exam/${encodeURIComponent(data.regionSlug)}/${examSlug}`;
+  // v=2: 썸네일 레이아웃 개편(인물 배경·4단 텍스트) 배포로 immutable 캐시 무효화.
+  const thumb = `/api/power-thumb/exam/${encodeURIComponent(data.regionSlug)}/${examSlug}?v=2`;
   const thumbAlt = `${data.regionName} ${data.exam.name} 과외 안내`;
   return {
     title: { absolute: data.metaTitle },

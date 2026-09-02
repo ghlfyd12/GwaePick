@@ -16,7 +16,7 @@ export const SCHOOL_MODIFIED = "2026-08-24"; // @indexnow-group: school
  * OG 썸네일 전면 확장으로 og:image 가 신규 연결된 학교×과목(중·초 전 과목 + 고교 역사·논술·코딩).
  * 고교×핵심5 는 og 무변경이라 SCHOOL_MODIFIED 를 유지(정직·diff 0)하고, 이 그룹만 배포일로 갱신한다.
  */
-export const SCHOOL_THUMB_MODIFIED = "2026-08-28"; // @indexnow-group: school-thumb
+export const SCHOOL_THUMB_MODIFIED = "2026-09-02"; // @indexnow-group: school-thumb
 
 /**
  * 학교 단위 허브 /tutoring/by-school/{학교}(과목 없음) — 고교 파일럿(2,457).

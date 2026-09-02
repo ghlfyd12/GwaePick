@@ -37,6 +37,23 @@ export function thumbPath(schoolSlug: string, subjectSlug: string): string {
   return `/api/thumb/school/${schoolSlug}/${subjectSlug}`;
 }
 
+/* ── 초·중 학교×과목 og:image — 정적 인물 사진(텍스트 없음). 학교 slug 해시로 7장 중 1장 배분. ── */
+const PROFILE_COUNT = 7;
+export const PROFILE_SIZE = { width: 800, height: 800 } as const;
+function hashProfile(s: string): number {
+  let h = 0;
+  for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return h;
+}
+/** 초·중 학교 og:image 정적 경로(/og-profiles/1.jpg~7.jpg). 같은 학교 8과목은 같은 인물. */
+export function schoolProfilePath(schoolSlug: string): string {
+  return `/og-profiles/${(hashProfile(schoolSlug) % PROFILE_COUNT) + 1}.jpg`;
+}
+/** 초·중 학교 og alt(텍스트 없는 인물 카드). */
+export function schoolProfileAlt(schoolName: string): string {
+  return `${schoolName} 과외 안내`;
+}
+
 /** 지역(동)×과목: /api/thumb/region/{sido~시군구~동}/{과목slug}. sido/sg/dong 은 페이지 세그먼트 slug. */
 export function regionThumbPath(
   sidoSlug: string,
