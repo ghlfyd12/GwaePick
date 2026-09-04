@@ -18,6 +18,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { findSchoolBySlug } from "@/lib/findSchool";
 import { subjectBySlug } from "@/data/subjects";
+import { getHighDetailSubject } from "@/data/highDetailSubjects";
 import { getSido } from "@/data/sidoRegions";
 import { findDong } from "@/data/gyeonggi";
 import { getLandingRegion } from "@/data/mainDistricts";
@@ -144,10 +145,12 @@ export async function GET(
     // 학교×과목 — 초·중·고 전체 × 8과목. 초등은 시군구 지역명 표기.
     const subjectSlug = slugKey(subject);
     if (!THUMB_SUBJECTS.has(subjectSlug)) return notFound();
-    const subj = subjectBySlug[subjectSlug];
+    // 8과목(subjects) 또는 고교 세부과목(highDetail) 라벨 해석. 세부과목은 고교만 유효.
+    const subj = subjectBySlug[subjectSlug] ?? getHighDetailSubject(subjectSlug);
     if (!subj) return notFound();
     const ctx = findSchoolBySlug(slugKey(slug));
     if (!ctx) return notFound();
+    if (getHighDetailSubject(subjectSlug) && ctx.school.level !== "high") return notFound();
     picked =
       ctx.school.level === "elem"
         ? layoutSchoolElem(ctx.sigunguName, subj.label)

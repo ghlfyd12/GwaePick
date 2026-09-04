@@ -30,6 +30,11 @@ export const SCHOOL_PROFILE_MODIFIED = "2026-09-02"; // @indexnow-group: school-
  * (고교 역사는 og 는 그대로지만 이번에 title 이 바뀌어 함께 이 상수를 쓴다.)
  */
 export const SCHOOL_DETAIL_TITLE_MODIFIED = "2026-09-02"; // @indexnow-group: school-detail-title
+/**
+ * 고교 세부과목(과탐 4: 물리·화학·생명과학·지구과학) 신규 축 발행일=수정일(배포일).
+ * 신규 페이지 유형이라 최초 발행일. 콘텐츠 실변경 시에만 손으로 갱신.
+ */
+export const SCHOOL_HIGH_DETAIL_MODIFIED = "2026-09-04"; // @indexnow-group: school-high-detail
 
 /**
  * 학교 단위 허브 /tutoring/by-school/{학교}(과목 없음) — 고교 파일럿(2,457).

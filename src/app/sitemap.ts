@@ -51,7 +51,13 @@ import {
   GUMJUNG_MODIFIED,
 } from "@/data/contentMeta";
 import { REGION_LANDMARKS } from "@/data/regionLandmarks";
-import { GUMJUNG_PATHS, GUMJUNG_URL_COUNT } from "@/lib/gumjungSitemap";
+import {
+  GUMJUNG_PATHS,
+  GUMJUNG_URL_COUNT,
+  GUMJUNG_SITEMAP_CHUNKS,
+} from "@/lib/gumjungSitemap";
+import { HIGH_DETAIL_URL_COUNT, highDetailPairAt } from "@/lib/highDetailSitemap";
+import { SCHOOL_HIGH_DETAIL_MODIFIED } from "@/data/contentMeta";
 
 /*
  * 동적 sitemap — 분할 구조(/sitemap/[id].xml). robots.txt 가 각 파일 URL 을 모두 가리킨다.
@@ -325,6 +331,26 @@ function gumjungSitemap(chunk: number): MetadataRoute.Sitemap {
   return out;
 }
 
+/**
+ * 고교 세부과목(과탐 4) 청크 — /tutoring/by-school/{고교}/{physics|chemistry|biology|earth-science}.
+ * 항상 맨 뒤 id 라 기존 shard id 불변. lastmod=SCHOOL_HIGH_DETAIL_MODIFIED.
+ */
+function highDetailSitemap(chunk: number): MetadataRoute.Sitemap {
+  const start = chunk * SITEMAP_URLS_PER_FILE;
+  const end = Math.min(start + SITEMAP_URLS_PER_FILE, HIGH_DETAIL_URL_COUNT);
+  const out: MetadataRoute.Sitemap = [];
+  for (let p = start; p < end; p++) {
+    const { school, subject } = highDetailPairAt(p);
+    out.push({
+      url: `${base}/tutoring/by-school/${enc(school)}/${subject}`,
+      lastModified: SCHOOL_HIGH_DETAIL_MODIFIED,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    });
+  }
+  return out;
+}
+
 /** id 1..N — 학교×과목 상세 한 청크. 평탄화된 (학교,과목) 쌍을 슬라이스로만 생성(메모리 안전). lastmod=SCHOOL_MODIFIED. */
 function schoolSitemap(chunk: number): MetadataRoute.Sitemap {
   const start = chunk * SITEMAP_URLS_PER_FILE;
@@ -381,6 +407,8 @@ export default async function sitemap({
   const afterProvinceDong = afterExam - PROVINCE_DONG_SITEMAP_CHUNKS;
   if (afterProvinceDong < SCHOOL_HUB_SITEMAP_CHUNKS)
     return schoolHubSitemap(afterProvinceDong);
-  // 맨 뒤 — 검고의참견 청크(append, 기존 shard id 불변).
-  return gumjungSitemap(afterProvinceDong - SCHOOL_HUB_SITEMAP_CHUNKS);
+  const afterSchoolHub = afterProvinceDong - SCHOOL_HUB_SITEMAP_CHUNKS;
+  if (afterSchoolHub < GUMJUNG_SITEMAP_CHUNKS) return gumjungSitemap(afterSchoolHub);
+  // 맨 뒤 — 고교 세부과목 청크(append, 기존 shard id 불변).
+  return highDetailSitemap(afterSchoolHub - GUMJUNG_SITEMAP_CHUNKS);
 }

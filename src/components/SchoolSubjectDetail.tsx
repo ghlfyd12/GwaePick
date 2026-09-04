@@ -69,6 +69,7 @@ export default function SchoolSubjectDetail({
   const why = buildWhySchool(schoolName, levelLabel);
   const faq = buildSchoolFaq(schoolName, levelLabel);
   const isElem = levelLabel === "초등학교";
+  const isHigh = levelLabel === "고등학교"; // 고교만 세부과목(과탐 4) 노출·허브 링크
   // 파일럿: 고교×핵심5과목은 히어로를 페이지별 텍스트 썸네일(생성 라우트)로 교체.
   // 그 외(초·중·타 과목)는 기존 학생 사진 유지 — 실측 후 별도 승인 시 확대.
   const useThumb = levelLabel === "고등학교" && THUMB_SUBJECTS.has(subject.slug);
@@ -184,6 +185,7 @@ export default function SchoolSubjectDetail({
       <SubjectTabs
         currentSlug={subject.slug}
         makeHref={(s) => schoolDetailHref(schoolSlug, s)}
+        highDetail={isHigh}
       />
 
       <div className="mx-auto max-w-3xl space-y-12 px-4 py-12 sm:px-6 sm:py-16">
@@ -432,12 +434,42 @@ export default function SchoolSubjectDetail({
           </ul>
         </section>
 
-        {/* 8-3. 전과목 그리드 — 같은 학교의 다른 과목 교차 유도(상단 탭과 데이터 공유, 하단 유도) */}
+        {/* 8-3. 전과목 그리드 — 같은 학교의 다른 과목 교차 유도(상단 탭과 데이터 공유, 하단 유도). 고교는 12과목. */}
         <SchoolSubjectGrid
           schoolName={schoolName}
           currentSlug={subject.slug}
           makeHref={(s) => schoolDetailHref(schoolSlug, s)}
+          highDetail={isHigh}
         />
+
+        {/* 8-4. (고교 과학 허브) 세부 과목별로 준비하기 — 과탐 4장 링크. 고교 science 상세에서만. */}
+        {isHigh && subject.slug === "science" && (
+          <section aria-labelledby="detail-sci-heading">
+            <h2 id="detail-sci-heading" className="break-keep text-xl font-bold text-ink sm:text-2xl">
+              세부 과목별로 준비하기
+            </h2>
+            <p className="mt-2 break-keep text-sm leading-relaxed text-muted sm:text-base">
+              물리·화학·생명과학·지구과학은 과목별로 준비 방식이 다릅니다. {schoolName}에서 과목별로 1:1 준비를 시작하세요.
+            </p>
+            <ul className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+              {[
+                { slug: "physics", label: "물리" },
+                { slug: "chemistry", label: "화학" },
+                { slug: "biology", label: "생명과학" },
+                { slug: "earth-science", label: "지구과학" },
+              ].map((d) => (
+                <li key={d.slug}>
+                  <Link
+                    href={schoolDetailHref(schoolSlug, d.slug)}
+                    className="block break-keep rounded-xl border border-line bg-white px-3 py-2.5 text-center text-sm font-semibold text-ink transition-colors hover:border-accent hover:text-accent"
+                  >
+                    {schoolName} {d.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {/* 9. 내부 링크 블록 */}
         <section className="space-y-8">

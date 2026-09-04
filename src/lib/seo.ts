@@ -22,6 +22,7 @@ import {
 } from "@/data/seoTitlePhrases";
 import { resolveTitleKeyword, type TitlePageType } from "@/data/titleKeywords";
 import { getDetailSubjectCopy } from "@/data/detailSubjectCopy";
+import { getHighDetailTitleKeyword, HIGH_DETAIL_SLUGS } from "@/data/highDetailSubjects";
 import { buildRegionDongTitle } from "@/lib/regionSchoolPick";
 import { getSubjectUnits } from "@/data/subjectUnits";
 import {
@@ -45,6 +46,7 @@ import {
   SCHOOL_THUMB_MODIFIED,
   SCHOOL_PROFILE_MODIFIED,
   SCHOOL_DETAIL_TITLE_MODIFIED,
+  SCHOOL_HIGH_DETAIL_MODIFIED,
   SCHOOL_HUB_PUBLISHED,
   SCHOOL_HUB_MODIFIED,
 } from "@/data/contentMeta";
@@ -231,15 +233,19 @@ function composeTitle(p: {
   // 과학·사회·역사: 접미 키워드를 학교급별 세부 카피로 교체(그 외 과목은 기존 유형×학교급 키워드).
   //  - 중·고: 세부 과목 나열을 빼고 수학 형식(titleKeywordMidHigh).
   //  - 초등: 학년에 맞는 표현(titleKeywordElem). 어느 쪽도 없으면 titleKeyword 로 폴백.
+  // 고교 세부과목(물리·화학·생명과학·지구과학)은 전용 키워드 우선(고교 한정 라우트).
+  const hdKeyword = getHighDetailTitleKeyword(p.subjectSlug);
   const detail = getDetailSubjectCopy(p.subjectSlug);
-  const keyword = detail
-    ? p.level === "elem"
-      ? detail.titleKeywordElem ?? detail.titleKeyword
-      : p.level === "middle"
-        ? // 중등 개편: titleKeywordMid 우선(고교는 titleKeywordMidHigh 유지 — 세부과목 검색 유입 보존).
-          detail.titleKeywordMid ?? detail.titleKeywordMidHigh ?? detail.titleKeyword
-        : detail.titleKeywordMidHigh ?? detail.titleKeyword
-    : resolveTitleKeyword(p.pageType, p.level);
+  const keyword = hdKeyword
+    ? hdKeyword
+    : detail
+      ? p.level === "elem"
+        ? detail.titleKeywordElem ?? detail.titleKeyword
+        : p.level === "middle"
+          ? // 중등 개편: titleKeywordMid 우선(고교는 titleKeywordMidHigh 유지 — 세부과목 검색 유입 보존).
+            detail.titleKeywordMid ?? detail.titleKeywordMidHigh ?? detail.titleKeyword
+          : detail.titleKeywordMidHigh ?? detail.titleKeyword
+      : resolveTitleKeyword(p.pageType, p.level);
   // 문구가 lead 로 시작하면(예: "초등 단원평가 …" + lead "초등") 중복이므로 lead 를 생략한다.
   const dropLead = !!p.lead && keyword.startsWith(`${p.lead} `);
   const lead = p.lead && !dropLead ? `${p.lead} ` : "";
@@ -311,7 +317,9 @@ export function buildSchoolMeta(p: SchoolMetaInput): Metadata {
   const hs = isElemMiddle ? "" : (p.subjectSlug ?? "");
   const modifiedTime = isElemMiddle
     ? SCHOOL_PROFILE_MODIFIED
-    : ["korean", "english", "math"].includes(hs)
+    : HIGH_DETAIL_SLUGS.includes(hs)
+      ? SCHOOL_HIGH_DETAIL_MODIFIED
+      : ["korean", "english", "math"].includes(hs)
       ? SCHOOL_MODIFIED
       : ["social", "science", "history"].includes(hs)
         ? SCHOOL_DETAIL_TITLE_MODIFIED

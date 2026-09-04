@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { subjectBySlug } from "@/data/subjects";
+import { getHighDetailSubject, HIGH_DETAIL_SLUGS } from "@/data/highDetailSubjects";
 
 /*
  * SchoolSubjectGrid — 학교 상세 하단 "다른 과목도 함께 준비하세요" 전과목 그리드(서버 컴포넌트).
@@ -13,12 +14,18 @@ export default function SchoolSubjectGrid({
   schoolName,
   currentSlug,
   makeHref,
+  highDetail = false,
 }: {
   schoolName: string;
   currentSlug: string;
   makeHref: (slug: string) => string;
+  /** 고교 상세에서만 true — 세부과목(과탐 4) 포함 12과목 그리드. */
+  highDetail?: boolean;
 }) {
-  const ordered = TAB_ORDER.map((s) => subjectBySlug[s]).filter(Boolean);
+  const order = highDetail ? [...TAB_ORDER, ...HIGH_DETAIL_SLUGS] : TAB_ORDER;
+  const ordered = order
+    .map((s) => subjectBySlug[s] ?? getHighDetailSubject(s))
+    .filter(Boolean);
   return (
     <section aria-labelledby="allsubj-heading">
       <h2 id="allsubj-heading" className="break-keep text-xl font-bold text-ink sm:text-2xl">

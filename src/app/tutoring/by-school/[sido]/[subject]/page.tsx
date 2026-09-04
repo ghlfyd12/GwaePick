@@ -3,6 +3,11 @@ import { notFound } from "next/navigation";
 import SchoolSubjectDetail from "@/components/SchoolSubjectDetail";
 import JsonLd from "@/components/JsonLd";
 import { subjects, subjectBySlug } from "@/data/subjects";
+import {
+  getHighDetailSubject,
+  HIGH_DETAIL_SLUGS,
+} from "@/data/highDetailSubjects";
+import { HIGH_SCHOOL_HUB_SLUGS } from "@/lib/schoolSitemap";
 import { SCHOOLS, LEVEL_LABEL } from "@/data/schools";
 import {
   findSchoolBySlug,
@@ -51,17 +56,29 @@ export function generateStaticParams() {
   const articleSamples = articlePilotSchoolSlugs()
     .slice(0, 3)
     .flatMap((slug) => subjects.map((subj) => ({ sido: slug, subject: subj.slug })));
+  // 고교 세부과목(과탐 4) 파일럿 — 고교 앞 4교 × 4과목 = 16(나머지는 ISR).
+  const highDetailSamples = HIGH_SCHOOL_HUB_SLUGS.slice(0, 4).flatMap((slug) =>
+    HIGH_DETAIL_SLUGS.map((subject) => ({ sido: slug, subject })),
+  );
   const seen = new Set(base.map((p) => `${p.sido}/${p.subject}`));
   return [
     ...base,
     ...articleSamples.filter((p) => !seen.has(`${p.sido}/${p.subject}`)),
+    ...highDetailSamples,
   ];
 }
 
 function resolve(sidoParam: string, subjectParam: string) {
   const ctx = findSchoolBySlug(slugKey(sidoParam));
-  const subject = subjectBySlug[slugKey(subjectParam)];
-  if (!ctx || !subject) return null;
+  if (!ctx) return null;
+  const key = slugKey(subjectParam);
+  // 기존 8과목 → subjectBySlug. 고교 세부과목(과탐 4) → highDetail(고교일 때만). 중·초 세부과목은 404.
+  let subject = subjectBySlug[key];
+  if (!subject) {
+    const hd = getHighDetailSubject(key);
+    if (hd && ctx.school.level === "high") subject = hd;
+  }
+  if (!subject) return null;
   return { ctx, subject };
 }
 

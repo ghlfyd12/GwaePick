@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { subjectBySlug } from "@/data/subjects";
+import { getHighDetailSubject, HIGH_DETAIL_SLUGS } from "@/data/highDetailSubjects";
 
 /*
  * SubjectTabs — 과목 선택 탭(링크 탭, 서버 컴포넌트). JS 불필요.
@@ -22,11 +23,17 @@ const TAB_ORDER = [
 export default function SubjectTabs({
   currentSlug,
   makeHref,
+  highDetail = false,
 }: {
   currentSlug: string;
   makeHref: (slug: string) => string;
+  /** 고교 상세에서만 true — 세부과목(과탐 4)을 8과목 뒤에 이어 12과목 노출. */
+  highDetail?: boolean;
 }) {
-  const ordered = TAB_ORDER.map((slug) => subjectBySlug[slug]).filter(Boolean);
+  const order = highDetail ? [...TAB_ORDER, ...HIGH_DETAIL_SLUGS] : TAB_ORDER;
+  const ordered = order
+    .map((slug) => subjectBySlug[slug] ?? getHighDetailSubject(slug))
+    .filter(Boolean);
   return (
     <nav aria-label="과목 선택" className="border-b border-line bg-white px-4 py-4 sm:px-6">
       <div className="mx-auto max-w-5xl text-center">
