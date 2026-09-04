@@ -22,6 +22,11 @@ export interface DetailSubjectCopy {
    * 미지정 과목은 초등에서 titleKeyword 를 그대로 사용.
    */
   titleKeywordElem?: string;
+  /**
+   * 중등 전용 title 접미 키워드(중등 개편 2026-09). 지정 시 중등만 이 값, 고교는 titleKeywordMidHigh 유지.
+   * ⚠️ 고교 세부과목(물리·화학 등) 검색 유입을 titleKeywordMidHigh 가 받치므로 고교 값은 손대지 않는다.
+   */
+  titleKeywordMid?: string;
   /** description 말미 append 문장(세부 과목 전체 나열) — title 과 무관, 유지. */
   descTail: string;
   /** 본문 세부 과목 섹션(확정 카피). {region} 슬롯 = 학교명 또는 지역명. */
@@ -35,6 +40,7 @@ export const detailSubjectCopy: Record<string, DetailSubjectCopy> = {
   science: {
     titleKeyword: "물리 화학 생명과학 지구과학",
     titleKeywordMidHigh: "내신대비 물리 화학 교과서 기출 1:1 맞춤지도",
+    titleKeywordMid: "- 내신 수행평가 서술형 교과서 선행 기초 1:1",
     titleKeywordElem: "실험·관찰 교과서 개념 1:1 맞춤지도",
     descTail: "물리·화학·생명과학·지구과학 등 선택 과목별로 준비합니다.",
     heading: "물리·화학·생명과학·지구과학까지 과목별로 준비합니다",
@@ -43,6 +49,7 @@ export const detailSubjectCopy: Record<string, DetailSubjectCopy> = {
   social: {
     titleKeyword: "생활과 윤리 사회문화 한국지리",
     titleKeywordMidHigh: "내신대비 한국사 사회문화 교과서 기출 1:1 맞춤지도",
+    titleKeywordMid: "- 내신 수행평가 서술형 교과서 기초 1:1",
     titleKeywordElem: "교과서 개념 사회·역사 1:1 맞춤지도",
     descTail: "생활과 윤리·사회문화·한국지리·정치와 법·윤리와 사상 등 선택 과목별로 준비합니다.",
     heading: "생활과 윤리·사회문화·한국지리까지 과목별로 준비합니다",
@@ -51,6 +58,7 @@ export const detailSubjectCopy: Record<string, DetailSubjectCopy> = {
   history: {
     titleKeyword: "한국사 동아시아사 세계사",
     titleKeywordMidHigh: "내신대비 한국사 세계사 교과서 기출 1:1 맞춤지도",
+    titleKeywordMid: "- 한국사 내신 수행평가 서술형 기초 1:1",
     descTail: "한국사·동아시아사·세계사 등 과목별로 준비합니다.",
     heading: "한국사·동아시아사·세계사까지 과목별로 준비합니다",
     body: "역사는 한국사, 동아시아사, 세계사로 나뉘며 수능 필수인 한국사부터 선택 과목까지 범위가 다릅니다. 상담에서 준비 중인 과목과 학교 진도를 확인하고 맞는 선생님을 연결해 드립니다.",

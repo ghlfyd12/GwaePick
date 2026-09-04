@@ -235,7 +235,10 @@ function composeTitle(p: {
   const keyword = detail
     ? p.level === "elem"
       ? detail.titleKeywordElem ?? detail.titleKeyword
-      : detail.titleKeywordMidHigh ?? detail.titleKeyword
+      : p.level === "middle"
+        ? // 중등 개편: titleKeywordMid 우선(고교는 titleKeywordMidHigh 유지 — 세부과목 검색 유입 보존).
+          detail.titleKeywordMid ?? detail.titleKeywordMidHigh ?? detail.titleKeyword
+        : detail.titleKeywordMidHigh ?? detail.titleKeyword
     : resolveTitleKeyword(p.pageType, p.level);
   // 문구가 lead 로 시작하면(예: "초등 단원평가 …" + lead "초등") 중복이므로 lead 를 생략한다.
   const dropLead = !!p.lead && keyword.startsWith(`${p.lead} `);

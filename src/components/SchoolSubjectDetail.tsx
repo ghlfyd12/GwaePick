@@ -5,6 +5,7 @@ import ReviewSection from "@/components/ReviewSection";
 import { reviewsForSchoolSubject } from "@/data/reviewMatch";
 import type { Subject } from "@/data/subjects";
 import SubjectTabs from "@/components/SubjectTabs";
+import SchoolSubjectGrid from "@/components/school/SchoolSubjectGrid";
 import { CONSULT_PHONE, STEPS, TRUST, REVIEW_PLACEHOLDERS } from "@/data/dongPageCopy";
 import {
   buildSchoolIntro,
@@ -430,6 +431,13 @@ export default function SchoolSubjectDetail({
             )}
           </ul>
         </section>
+
+        {/* 8-3. 전과목 그리드 — 같은 학교의 다른 과목 교차 유도(상단 탭과 데이터 공유, 하단 유도) */}
+        <SchoolSubjectGrid
+          schoolName={schoolName}
+          currentSlug={subject.slug}
+          makeHref={(s) => schoolDetailHref(schoolSlug, s)}
+        />
 
         {/* 9. 내부 링크 블록 */}
         <section className="space-y-8">
