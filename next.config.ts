@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // 프록시(proxy.ts)가 정규화(param 디코드) 이전 raw 경로를 받도록 — 정적 프리픽스 없는
+  // 루트 동적 축(/[region])의 malformed 요청까지 프록시가 잡아 404 로 정규화할 수 있게 한다.
+  skipProxyUrlNormalize: true,
   // 동적 썸네일 라우트(/api/thumb)가 서버리스 함수 번들에 Pretendard 서브셋 폰트·배경
   // 이미지를 포함하도록 파일 추적에 명시(process.cwd() 기준 fs 읽기 대상). 없으면 Vercel 에서
   // ENOENT 로 렌더 실패할 수 있어 로컬 검증과 동일하게 배포에서도 파일을 확보한다.
