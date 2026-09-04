@@ -65,6 +65,62 @@ export const highDetailSubjects: Subject[] = [
       REVIEW("자주 나오는 자료 유형을 점검하고 보완합니다."),
     ],
   },
+  // ── 사탐 5과목(2단계) — 한국사 제외(history 담당) ──
+  {
+    slug: "life-ethics",
+    label: "생활과윤리",
+    why: "생활과 윤리는 개념을 실생활 사례에 적용하는 힘이 중요합니다. 쟁점을 흐름으로 잡으면 논술형에서 흔들리지 않습니다.",
+    curriculum: [
+      DIAGNOSE("생활과 윤리"),
+      { step: "STEP 2", title: "기초", desc: "핵심 개념과 쟁점을 흐름으로 정리합니다." },
+      { step: "STEP 3", title: "심화", desc: "쟁점을 사례에 적용하고 논술형까지 단계적으로 다룹니다." },
+      REVIEW("헷갈리는 쟁점을 비교하며 점검합니다."),
+    ],
+  },
+  {
+    slug: "social-culture",
+    label: "사회문화",
+    why: "사회문화는 개념 이해와 도표·자료 해석이 함께 갑니다. 자료를 읽는 훈련을 하면 실전에서 흔들리지 않습니다.",
+    curriculum: [
+      DIAGNOSE("사회문화"),
+      { step: "STEP 2", title: "기초", desc: "핵심 개념을 정리하고 도표 읽는 기본기를 다집니다." },
+      { step: "STEP 3", title: "심화", desc: "도표·자료 해석과 서술형까지 단계적으로 다룹니다." },
+      REVIEW("자주 나오는 자료 유형을 점검하고 보완합니다."),
+    ],
+  },
+  {
+    slug: "korean-geography",
+    label: "한국지리",
+    why: "한국지리는 개념을 지도·자료와 연결해 이해하면 오래 남습니다. 자료 해석 유형을 익히는 것이 핵심입니다.",
+    curriculum: [
+      DIAGNOSE("한국지리"),
+      { step: "STEP 2", title: "기초", desc: "핵심 개념을 지도·자료와 연결해 이해합니다." },
+      { step: "STEP 3", title: "심화", desc: "자료 해석 유형과 서술형까지 단계적으로 다룹니다." },
+      REVIEW("자주 나오는 자료를 점검하고 보완합니다."),
+    ],
+  },
+  {
+    slug: "politics-law",
+    label: "정치와법",
+    why: "정치와 법은 개념을 사례에 적용하는 힘이 중요합니다. 원리를 잡고 사례로 확인하면 응용에서 무너지지 않습니다.",
+    curriculum: [
+      DIAGNOSE("정치와 법"),
+      { step: "STEP 2", title: "기초", desc: "핵심 개념과 원리를 정리합니다." },
+      { step: "STEP 3", title: "심화", desc: "사례 적용과 서술형까지 단계적으로 다룹니다." },
+      REVIEW("헷갈리는 개념을 점검하고 보완합니다."),
+    ],
+  },
+  {
+    slug: "ethics-thought",
+    label: "윤리와사상",
+    why: "윤리와 사상은 사상가의 관점과 개념을 흐름으로 이해하는 과목입니다. 비교하며 정리하면 헷갈림이 줄어듭니다.",
+    curriculum: [
+      DIAGNOSE("윤리와 사상"),
+      { step: "STEP 2", title: "기초", desc: "주요 사상과 개념을 흐름으로 정리합니다." },
+      { step: "STEP 3", title: "심화", desc: "사상가별 관점을 비교하고 논술형까지 다룹니다." },
+      REVIEW("사상가별 관점을 점검하며 정리합니다."),
+    ],
+  },
 ];
 
 /** title 접미 키워드(과목별 검색 결). composeTitle 이 detail/기본보다 우선 적용. */
@@ -73,6 +129,12 @@ export const HIGH_DETAIL_TITLE_KEYWORD: Record<string, string> = {
   chemistry: "- 화학 내신 수능 기출 계산 1:1",
   biology: "- 생명과학 내신 수능 기출 자료해석 1:1",
   "earth-science": "- 지구과학 내신 수능 기출 개념 1:1",
+  // 사탐 — title 키워드엔 정식 표기(띄어쓰기) 병기.
+  "life-ethics": "- 생활과 윤리 내신 수능 기출 논술형 1:1",
+  "social-culture": "- 사회문화 내신 수능 기출 자료해석 1:1",
+  "korean-geography": "- 한국지리 내신 수능 기출 자료해석 1:1",
+  "politics-law": "- 정치와 법 내신 수능 기출 개념 1:1",
+  "ethics-thought": "- 윤리와 사상 내신 수능 기출 개념 1:1",
 };
 
 const bySlug: Record<string, Subject> = Object.fromEntries(

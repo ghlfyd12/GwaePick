@@ -20,11 +20,16 @@ export const THUMB_SUBJECTS = new Set([
   "history",
   "essay",
   "coding",
-  // 고교 세부과목(과탐 4) — 고교 한정 라우트에서만 유입(additive). 기존 8과목 출력 무변경.
+  // 고교 세부과목(과탐 4 + 사탐 5) — 고교 한정 라우트에서만 유입(additive). 기존 8과목 출력 무변경.
   "physics",
   "chemistry",
   "biology",
   "earth-science",
+  "life-ethics",
+  "social-culture",
+  "korean-geography",
+  "politics-law",
+  "ethics-thought",
 ]);
 
 /**

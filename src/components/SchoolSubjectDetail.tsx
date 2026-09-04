@@ -471,6 +471,36 @@ export default function SchoolSubjectDetail({
           </section>
         )}
 
+        {/* 8-5. (고교 사회 허브) 세부 과목별로 준비하기 — 사탐 5장 링크(한국사 제외). 고교 social 상세에서만. */}
+        {isHigh && subject.slug === "social" && (
+          <section aria-labelledby="detail-soc-heading">
+            <h2 id="detail-soc-heading" className="break-keep text-xl font-bold text-ink sm:text-2xl">
+              세부 과목별로 준비하기
+            </h2>
+            <p className="mt-2 break-keep text-sm leading-relaxed text-muted sm:text-base">
+              생활과윤리·사회문화·한국지리·정치와법·윤리와사상은 과목별로 준비 방식이 다릅니다. {schoolName}에서 과목별로 1:1 준비를 시작하세요.
+            </p>
+            <ul className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+              {[
+                { slug: "life-ethics", label: "생활과윤리" },
+                { slug: "social-culture", label: "사회문화" },
+                { slug: "korean-geography", label: "한국지리" },
+                { slug: "politics-law", label: "정치와법" },
+                { slug: "ethics-thought", label: "윤리와사상" },
+              ].map((d) => (
+                <li key={d.slug}>
+                  <Link
+                    href={schoolDetailHref(schoolSlug, d.slug)}
+                    className="block break-keep rounded-xl border border-line bg-white px-3 py-2.5 text-center text-sm font-semibold text-ink transition-colors hover:border-accent hover:text-accent"
+                  >
+                    {schoolName} {d.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         {/* 9. 내부 링크 블록 */}
         <section className="space-y-8">
           {otherSchoolLinks.length > 0 && (
