@@ -8,7 +8,7 @@ import { site } from "@/data/site";
  * /gumjung 스코프(.gumjung-theme)라 accent 가 청록으로, 옵션·라벨은 consultFormOptions 의
  * 검고 설정(급별·준비 유형)이 경로로 자동 선택된다. 제출은 기존 POST /api/consult → 노션.
  */
-const PAGE_TITLE = "검정고시 1:1 무료 상담 신청 | 검고의참견";
+const PAGE_TITLE = "검정고시 1:1 무료 상담 신청 - 고졸 중졸 초졸";
 const PAGE_DESCRIPTION =
   "고졸·중졸·초졸 검정고시 1:1 수업 무료 상담. 지금 상황과 목표 시기를 알려주시면 직접 가르쳐 온 선생님이 맞는 선생님을 연결해 드립니다.";
 

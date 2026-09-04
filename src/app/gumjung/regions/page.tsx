@@ -10,9 +10,9 @@ import { site } from "@/data/site";
  */
 export const dynamicParams = false;
 
-const PAGE_TITLE = "지역별 검정고시 과외 - 고졸 중졸 초졸 1:1 | 검고의참견";
+const PAGE_TITLE = "지역별 검정고시 과외 - 고졸 중졸 초졸 방문 화상 1:1 개인과외";
 const PAGE_DESCRIPTION =
-  "전국 시·도·시군구별 고졸·중졸·초졸 검정고시 1:1 맞춤 과외 안내. 우리 지역에서 전화·화상으로 시작할 수 있도록 지역별 검정고시 페이지를 모았습니다.";
+  "전국 시·도·시군구별 고졸·중졸·초졸 검정고시 1:1 맞춤 과외 안내. 우리 지역에서 방문·화상 1:1로 시작할 수 있도록 지역별 검정고시 페이지를 모았습니다.";
 
 export const metadata: Metadata = {
   title: { absolute: PAGE_TITLE },
