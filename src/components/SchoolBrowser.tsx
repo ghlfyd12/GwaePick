@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -16,7 +17,9 @@ import { flatSchoolsOfSido } from "@/lib/schoolList";
  * SchoolBrowser — 시/도의 학교 탐색 UI(지역 RegionDongBrowser 와 동일 패턴, 지도 없음).
  *
  * 시군구 "탭"(맨 앞 전체보기) + 학교급(초·중·고) 필터 + 학교 그리드(가나다) + 학교명 검색.
- * 전체보기는 처음 24개 + "학교 더보기"로 24개씩. 학교 클릭 → schoolHref(상담 컨텍스트).
+ * 모든 뷰(전체보기·시군구·학교급·검색)는 처음 48개 + "학교 더보기"로 48개씩만 렌더한다
+ * (대형 시도에서 매칭 전량 동기 렌더로 인한 잼 방지 — 검색은 debounce, filtered 는 메모).
+ * 학교 클릭 → schoolHref(상담 컨텍스트).
  * 데이터는 prop(sido)만 사용 — schools.ts(730KB)는 서버에서 추출해 이 시/도분만 전달(타입만 import).
  */
 
@@ -37,8 +40,15 @@ const BADGE: Record<SchoolLevel, string> = { elem: "초", middle: "중", high: "
 export default function SchoolBrowser({ sido }: { sido: SchoolSido }) {
   const [active, setActive] = useState<string | null>(null); // null = 전체보기
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [level, setLevel] = useState<"all" | SchoolLevel>("all");
   const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
+
+  // 입력은 즉시 반영(input 반응성 유지), 필터링은 200ms debounce — 키당 전량 재계산 방지.
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedQuery(query.trim()), 200);
+    return () => clearTimeout(id);
+  }, [query]);
 
   // 탭 바 가로 스와이프(데스크톱 드래그). 터치는 네이티브 스크롤.
   const tabBarRef = useRef<HTMLDivElement>(null);
@@ -87,16 +97,20 @@ export default function SchoolBrowser({ sido }: { sido: SchoolSido }) {
       .map((s) => ({ ...s, sigungu: sg!.name, sigunguSlug: sg!.slug }));
   }, [active, sigungu]);
 
-  // 학교급 필터 + 이름 검색
-  const q = query.trim();
-  const filtered = items
-    .filter((s) => level === "all" || s.level === level)
-    .filter((s) => (q ? s.name.includes(q) : true));
+  // 학교급 필터 + 이름 검색(debounce 값 사용). 매 렌더 재계산 방지 위해 메모.
+  const q = debouncedQuery;
+  const filtered = useMemo(
+    () =>
+      items
+        .filter((s) => level === "all" || s.level === level)
+        .filter((s) => (q ? s.name.includes(q) : true)),
+    [items, level, q],
+  );
 
-  // 노출 제한: 전체보기 + 검색 없을 때만(시군구 탭은 전체 표시)
-  const limited = active === null && !q;
-  const visible = limited ? filtered.slice(0, visibleCount) : filtered;
-  const hasMore = limited && visibleCount < filtered.length;
+  // 모든 뷰(전체보기·시군구·학교급·검색)를 visibleCount 로 캡 — 대형 시도 전량 동기 렌더 방지.
+  // 나머지는 "학교 더보기"(JS) 또는 크롤 경로(하단 Pagination /p/[n])로 도달.
+  const visible = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
+  const hasMore = visibleCount < filtered.length;
 
   const tabClass = (selected: boolean) =>
     `shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
@@ -211,6 +225,7 @@ export default function SchoolBrowser({ sido }: { sido: SchoolSido }) {
               <li key={`${s.sigunguSlug}-${s.slug}`}>
                 <Link
                   href={schoolHref(sido.slug, s.sigunguSlug, s)}
+                  prefetch={false}
                   className="flex h-full flex-col items-center justify-center gap-1 rounded-xl border border-line bg-white px-3 py-3 text-center transition-colors hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                 >
                   <span className="flex items-center gap-1.5">
