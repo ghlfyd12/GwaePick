@@ -33,20 +33,21 @@ import {
 const subjectBySlug = new Map(POWER_SUBJECTS.map((s) => [s.slug, s]));
 
 /**
- * 지역 축 title/description 메타(사용자 확정 형식 — "어학의참견" 제거).
- * title: "{지역} {head} | 1:1 개인과외 {kw}"
- * desc:  "{지역} {descRef}, {descBody}. 첫 상담은 무료입니다."
- * head/descRef 로 회화(영어회화 과외)·과외(일본어 과외)를 구분. 느낌표·서비스어("매칭") 없음.
+ * 지역 축 title/description 메타(브랜드 접미 없음 — 검색어 연속구문 선두 + 수요 키워드 롱테일).
+ * title: "{지역} {titleKw}"  ·  desc: "{지역} {descRef}, {descBody}. 첫 상담은 무료입니다."
+ * -conversation 은 "{언어}회화" 리드(회화 수요), -tutoring 은 "{언어}과외" 리드(교과·자격 수요)로
+ * 차별화해 같은 지역의 두 slug 간 title/desc 중복을 막는다. 전화·화상 수업은 실제 제공(사실 표기).
+ * 느낌표·서비스어("매칭")·금지어(컨설턴트·코치·멘토·강사) 없음.
  */
 export const REGION_SUBJECT_META: Record<
   string,
   { titleKw: string; descRef: string; descBody: string }
 > = {
-  "english-conversation": { titleKw: "영어회화 과외 1:1 왕초보 기초 비즈니스 여행영어 면접 성인 개인과외 수업", descRef: "영어회화", descBody: "왕초보 기초부터 비즈니스·여행·면접까지 목표에 맞춰 성인·직장인을 일대일로 지도합니다" },
-  "japanese-conversation": { titleKw: "일본어회화 과외 1:1 왕초보 히라가나 프리토킹 JLPT 여행 개인과외 수업", descRef: "일본어회화", descBody: "왕초보 히라가나부터 JLPT·프리토킹까지 성인·직장인을 일대일로 지도합니다" },
-  "chinese-conversation": { titleKw: "중국어회화 과외 1:1 왕초보 성조 HSK 비즈니스 개인과외 수업", descRef: "중국어회화", descBody: "왕초보 성조부터 HSK·비즈니스까지 성인·직장인을 일대일로 지도합니다" },
-  "japanese-tutoring": { titleKw: "일본어과외 일본어회화 1:1 왕초보 히라가나 문법 JLPT JPT 개인과외 수업", descRef: "일본어 과외", descBody: "왕초보 문자부터 JLPT·회화까지 성인·대학생을 일대일로 지도합니다" },
-  "chinese-tutoring": { titleKw: "중국어과외 중국어회화 1:1 왕초보 병음 성조 HSK 개인과외 수업", descRef: "중국어 과외", descBody: "왕초보 병음부터 HSK·회화까지 성인·대학생을 일대일로 지도합니다" },
+  "english-conversation": { titleKw: "영어회화과외 - 성인 왕초보 전화영어 화상영어 프리토킹 기초 1:1 개인과외", descRef: "영어회화 1:1 개인과외", descBody: "전화·화상 수업으로 왕초보·성인·직장인을 비즈니스·여행·면접까지 목표에 맞춰 지도합니다" },
+  "japanese-conversation": { titleKw: "일본어회화 과외 왕초보 히라가나 생활일본어 JLPT 전화 화상 1:1 개인과외", descRef: "일본어회화 1:1 개인과외", descBody: "전화·화상 수업으로 왕초보·성인·직장인을 히라가나부터 JLPT·생활일본어까지 목표에 맞춰 지도합니다" },
+  "chinese-conversation": { titleKw: "중국어회화 과외 왕초보 병음 성조 HSK 전화 화상 1:1 개인과외 비즈니스회화", descRef: "중국어회화 1:1 개인과외", descBody: "전화·화상 수업으로 왕초보·성인·직장인을 병음·성조부터 HSK·비즈니스까지 목표에 맞춰 지도합니다" },
+  "japanese-tutoring": { titleKw: "일본어과외 일본어회화 왕초보 히라가나 생활일본어 JLPT 전화 화상 1:1", descRef: "일본어과외 1:1 개인과외", descBody: "전화·화상 수업으로 왕초보·성인·대학생을 문자·문법부터 JLPT·회화까지 목표에 맞춰 지도합니다" },
+  "chinese-tutoring": { titleKw: "중국어과외 중국어회화 왕초보 병음 성조 HSK 전화 화상 1:1 개인과외", descRef: "중국어과외 1:1 개인과외", descBody: "전화·화상 수업으로 왕초보·성인·대학생을 병음·성조부터 HSK·회화까지 목표에 맞춰 지도합니다" },
 };
 
 /**
