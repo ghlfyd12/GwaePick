@@ -66,8 +66,36 @@ export default function GumjungRegionDetail({ regionParam }: { regionParam: stri
           {data.intro}
         </p>
 
-        {/* 급별 요약 링크 */}
-        <LinkChips heading={`${data.regionName}에서 준비하는 급별`} links={data.levelLinks.map((l) => ({ label: `${l.label} (${l.note})`, href: l.href }))} />
+        {/* 시도 문맥 1줄 — 지역 변별 */}
+        <p className="break-keep text-base font-medium leading-relaxed text-ink sm:text-lg">
+          {data.sidoContext}
+        </p>
+
+        {/* 급별 앵커 섹션 3개(고졸·중졸·초졸) — 과목명 + 요약 + 급별 상세 링크(전문은 상세 전용) */}
+        <section aria-labelledby="levels-heading">
+          <h2 id="levels-heading" className="break-keep text-2xl font-bold text-ink sm:text-3xl">
+            {data.regionName}에서 준비하는 급별
+          </h2>
+          <div className="mt-5 space-y-4">
+            {data.levelSections.map((s) => (
+              <div key={s.slug} className="rounded-2xl border border-line bg-white px-5 py-5 sm:px-6">
+                <h3 className="break-keep text-lg font-bold text-ink sm:text-xl">
+                  {data.regionName} {s.name} 검정고시
+                </h3>
+                <p className="mt-1 break-keep text-sm font-semibold text-accent">필수 {s.subjectsLine}</p>
+                <p className="mt-2 break-keep text-sm leading-relaxed text-muted sm:text-base">
+                  {s.summary}
+                </p>
+                <a
+                  href={s.href}
+                  className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-accent hover:text-accent-dark"
+                >
+                  {s.name} 검정고시 상세 →
+                </a>
+              </div>
+            ))}
+          </div>
+        </section>
 
         {/* 수업 진행 4단계 */}
         <StepList heading={GUMJUNG_STEPS.heading} steps={GUMJUNG_STEPS.steps} />

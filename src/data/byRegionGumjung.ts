@@ -67,12 +67,24 @@ export function gumjungNearbyRegions(regionParam: string, count = 5): GumjungReg
  * 지역 title(브랜드명 없음, 검색 롱테일). 길면 뒤에서부터 탈락: "시험 일정" → "초졸".
  * 표시 상한 40자(한글 기준) — 긴 복합 시군구 대응.
  */
+// title: "{지역} 검정고시" 를 앞 25자 내 고정, 대표 3과목(수학·영어·국어) 롱테일.
+// cap 40 — 길면 뒤에서부터 탈락: 국어 → 영어 → "1:1"(과목 전부 제거 후 "1:1 개인과외"로 대체).
 function buildRegionTitle(regionName: string): string {
-  const full = `${regionName} 검정고시 과외 - 고졸 중졸 초졸 1:1 개인과외 공부법 시험 일정`;
-  if (full.length <= 40) return full;
-  const noSchedule = `${regionName} 검정고시 과외 - 고졸 중졸 초졸 1:1 개인과외 공부법`;
-  if (noSchedule.length <= 40) return noSchedule;
-  return `${regionName} 검정고시 과외 - 고졸 중졸 1:1 개인과외 공부법`;
+  const base = `${regionName} 검정고시 과외 고졸 중졸 초졸`;
+  const full = `${base} 수학 영어 국어 1:1`;
+  if ([...full].length <= 40) return full;
+  const drop1 = `${base} 수학 영어 1:1`;
+  if ([...drop1].length <= 40) return drop1;
+  return `${base} 1:1 개인과외`;
+}
+
+// 빌드 검증: 최장 지역명 기준 title ≤40자 + 앞머리 "{지역} 검정고시" 고정(네이버 앞 25자 노출).
+{
+  const longest = examRegions.reduce((a, r) => (r.name.length > a.length ? r.name : a), "");
+  const t = buildRegionTitle(longest);
+  if ([...t].length > 40) throw new Error(`[byRegionGumjung] title >40자(${[...t].length}): ${t}`);
+  if (!t.startsWith(`${longest} 검정고시`))
+    throw new Error(`[byRegionGumjung] title 앞머리 "{지역} 검정고시" 규칙 위반: ${t}`);
 }
 
 /** 지역 파라미터가 검정고시 지역축(253 시군구)에 속하는지 — 어학시험축과 동일 판정 재사용. */
@@ -87,15 +99,28 @@ export function gumjungRegionName(regionParam: string): string {
 
 export type GumjungLevelLink = { label: string; href: string; note: string };
 
+/** 급별 앵커 섹션(지역 페이지 — 요약 + 과목명 1줄 + 급별 상세 링크. 시험 전문은 급별 상세 전용). */
+export type GumjungLevelSection = {
+  slug: string;
+  name: string; // "고졸" 등
+  subjectsLine: string; // "국어·수학·영어·사회·과학·한국사"
+  summary: string; // 1~2문장 요약(지역명·과목 포함, 전문 복제 없음)
+  href: string;
+};
+
 export type GumjungRegionData = {
   regionSlug: string;
   regionName: string;
+  sidoLabel: string; // 소속 시도(도/광역시) — 지역 변별 문맥용
+  sidoContext: string; // 시도 문맥 1줄
   head: string; // "{지역} 검정고시"
   metaTitle: string;
   metaDescription: string;
   intro: string;
   /** 급별 요약 링크(고졸/중졸/초졸 상세). */
   levelLinks: GumjungLevelLink[];
+  /** 급별 앵커 섹션(과목 키워드 자연 배치 + 상세 링크). */
+  levelSections: GumjungLevelSection[];
 };
 
 /** 급별 요약 노트(지역 페이지 요약용 — 시험 전문은 급별 상세에). */
@@ -111,17 +136,23 @@ export function buildGumjungRegionData(regionParam: string): GumjungRegionData |
   const regionSlug = slugKey(regionParam);
   const regionName = gumjungRegionName(regionParam);
 
+  const sidoLabel = sidoBySlug.get(nfc(regionSlug)) ?? "";
   const head = `${regionName} 검정고시`;
   // title 은 브랜드명 없이 검색 롱테일(길이 초과 시 뒤에서부터 탈락).
   const metaTitle = buildRegionTitle(regionName);
+  // desc: "검고" 1회 병기 + 급별 3 + 필수과목 + 첫 상담 무료(≤158, slice 는 안전망).
   const metaDescription =
-    `${regionName}에서 고졸·중졸·초졸 검정고시를 1:1로 준비합니다. 급별 안내와 공부법을 확인하고 맞는 선생님을 연결해 드립니다. 무료 상담으로 시작하세요.`.slice(
+    `${regionName} 검정고시(검고) 1:1 개인과외. 고졸·중졸·초졸 필수과목(국어·수학·영어·사회·과학)을 지금 막히는 지점부터 준비합니다. ${regionName} 맞춤 공부법과 선생님 연결, 첫 상담 무료.`.slice(
       0,
       158,
     );
   const intro =
-    `${regionName}에서 검정고시를 준비하는 이유는 저마다 다릅니다. 검정고시는 출제 범위가 정해져 있어 방향만 잡으면 혼자보다 빠르게 준비할 수 있습니다. ` +
+    `${regionName}에서 검정고시를 준비하는 이유는 저마다 다릅니다. 검정고시(검고)는 출제 범위가 정해져 있어 방향만 잡으면 혼자보다 빠르게 준비할 수 있습니다. ` +
     `상담에서 현재 상황과 목표 시기를 확인하고 맞는 선생님을 1:1로 연결해 드립니다.`;
+  // 시도 문맥 1줄 — 253장 지역 변별 강화(급별·과목 키워드 자연 포함).
+  const sidoContext = sidoLabel
+    ? `${sidoLabel} ${regionName}에서 고졸·중졸·초졸 검정고시를 급별로, 국어·수학·영어 등 필요한 과목부터 1:1로 안내합니다.`
+    : `${regionName}에서 고졸·중졸·초졸 검정고시를 급별로, 국어·수학·영어 등 필요한 과목부터 1:1로 안내합니다.`;
 
   const levelLinks: GumjungLevelLink[] = GUMJUNG_LEVELS.map((l) => ({
     label: `${l.name} 검정고시`,
@@ -129,7 +160,32 @@ export function buildGumjungRegionData(regionParam: string): GumjungRegionData |
     note: LEVEL_SUMMARY[l.slug] ?? "",
   }));
 
-  return { regionSlug, regionName, head, metaTitle, metaDescription, intro, levelLinks };
+  // 급별 앵커 섹션 — 과목명 1줄 + 요약(전문 복제 없음) + 급별 상세 링크.
+  const levelSections: GumjungLevelSection[] = GUMJUNG_LEVELS.map((l) => {
+    const subjectsLine = l.requiredSubjects.map((s) => s.label).join("·");
+    return {
+      slug: l.slug,
+      name: l.name,
+      subjectsLine,
+      summary:
+        `${regionName} ${l.name} 검정고시는 ${subjectsLine} ${l.requiredSubjects.length}과목을 준비합니다. ` +
+        `지금 막히는 과목부터 1:1로 짚어 준비 기간을 줄입니다. 시험 범위·응시 자격 등 자세한 정보는 급별 상세에서 확인하세요.`,
+      href: `/gumjung/${l.slug}`,
+    };
+  });
+
+  return {
+    regionSlug,
+    regionName,
+    sidoLabel,
+    sidoContext,
+    head,
+    metaTitle,
+    metaDescription,
+    intro,
+    levelLinks,
+    levelSections,
+  };
 }
 
 /** 지역 메타데이터 빌더. og 는 청록 동적 썸네일. */
