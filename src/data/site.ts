@@ -62,9 +62,9 @@ export const site = {
   gumjung: {
     name: "검고의참견",
     ogImage: {
-      url: "/api/power-thumb/gumjung-level/gojol/base?v=3",
-      width: 800,
-      height: 600,
+      url: "/api/power-thumb/gumjung-level/gojol/base?v=4",
+      width: 1200,
+      height: 630,
       alt: "검고의참견 — 직접 가르쳐 온 선생님이 1:1로 연결하는 검정고시 맞춤 과외",
     },
   },

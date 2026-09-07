@@ -32,7 +32,7 @@ export async function generateMetadata({
   const title = level.metaTitle;
   const description = level.metaDescription;
   const canonical = `/gumjung/${level.slug}`;
-  const thumb = `/api/power-thumb/gumjung-level/${level.slug}/base?v=3`;
+  const thumb = `/api/power-thumb/gumjung-level/${level.slug}/base?v=4`;
   return {
     title: { absolute: title },
     description,
@@ -49,7 +49,7 @@ export async function generateMetadata({
       type: "website",
       locale: "ko_KR",
       siteName: site.gumjung.name,
-      images: [{ url: thumb, width: 800, height: 600, alt: `${level.examName} 안내` }],
+      images: [{ url: thumb, width: 1200, height: 630, alt: `${level.examName} 안내` }],
     },
     twitter: {
       card: "summary_large_image",

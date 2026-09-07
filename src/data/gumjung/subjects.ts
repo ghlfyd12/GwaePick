@@ -176,7 +176,7 @@ export function buildGumjungSubjectMetadata(
   const data = buildGumjungSubjectData(levelSlug, subjectSlug);
   if (!data) return {};
   const canonical = `/gumjung/${data.levelSlug}/${data.subjectSlug}`;
-  const thumb = `/api/power-thumb/gumjung-subject/${data.levelSlug}/${data.subjectSlug}?v=3`;
+  const thumb = `/api/power-thumb/gumjung-subject/${data.levelSlug}/${data.subjectSlug}?v=4`;
   const thumbAlt = `${data.head} 과외 안내`;
   return {
     title: { absolute: data.metaTitle },
@@ -190,7 +190,7 @@ export function buildGumjungSubjectMetadata(
       type: "website",
       locale: "ko_KR",
       siteName: SITE_NAME,
-      images: [{ url: thumb, width: 800, height: 600, alt: thumbAlt }],
+      images: [{ url: thumb, width: 1200, height: 630, alt: thumbAlt }],
     },
     twitter: {
       card: "summary_large_image",
