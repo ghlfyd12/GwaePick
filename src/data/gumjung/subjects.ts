@@ -176,7 +176,7 @@ export function buildGumjungSubjectMetadata(
   const data = buildGumjungSubjectData(levelSlug, subjectSlug);
   if (!data) return {};
   const canonical = `/gumjung/${data.levelSlug}/${data.subjectSlug}`;
-  const thumb = `/api/power-thumb/gumjung-subject/${data.levelSlug}/${data.subjectSlug}`;
+  const thumb = `/api/power-thumb/gumjung-subject/${data.levelSlug}/${data.subjectSlug}?v=3`;
   const thumbAlt = `${data.head} 과외 안내`;
   return {
     title: { absolute: data.metaTitle },

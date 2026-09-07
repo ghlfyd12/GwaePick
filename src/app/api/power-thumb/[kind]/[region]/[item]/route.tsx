@@ -8,10 +8,11 @@
  *   - region: 지역 slug(한글) — 알려진 파워 지역/확장 지역만 허용, 그 외 404(스팸 생성 차단)
  *   - item: exam slug(examBySlug) 또는 회화 subject slug(POWER_SUBJECTS). 그 외 404.
  *
- * 구성: 성인 인물 배경(로고 크롭본 og-profiles/bg-exam·bg-conv) + 어두운 오버레이 위 4단 텍스트
- *   — 1줄 지역(흰), 2줄 "{시험/과목} 과외"(흰 볼드), 3줄 포인트(옐로), 하단 칩 3개(퍼플 #7D0096).
+ * 구성: 성인 인물 배경(로고 크롭본 og-profiles/bg-exam·bg-conv) + 어두운 오버레이 위 3단 텍스트
+ *   — 1줄 지역(흰), 2줄 "{시험/과목} 과외"(흰 볼드, 세이프존 폭 최대 fit), 칩 2개(#1:1맞춤·#첫상담무료,
+ *   퍼플 #7D0096 / 검고는 청록). 모든 텍스트를 중앙 600×600 정사각 크롭 세이프존 안에 배치.
  * 문구는 데이터 파생 + 고정 카피(느낌표 없음). 규격 800×600·폰트·immutable 캐시 유지.
- * og URL 은 메타에서 v=2 파라미터로 캐시 무효화(레이아웃 개편 배포).
+ * og URL 은 메타에서 v=3 파라미터로 캐시 무효화(정사각 크롭 대응·3단 개편 배포).
  *
  * 캐시: 조합 결정론적 → 장기 immutable(배포 단위 무효화). 유효 조합만 렌더, 그 외 404로 비용 상한.
  */
@@ -60,13 +61,17 @@ function loadBackground(kind: string): Promise<string> {
   return bgCache[file];
 }
 
-/* ── 텍스트 레이아웃(지식의참견 템플릿과 동일 알고리즘) ─────────────────────
- * 2줄(지역명 / 접미어) 모두 동일 폰트로, 더 넓은 줄이 폭 90%를 채우도록 자동 크기.
- * 지역명은 항상 표기(1줄)하므로 school 의 "5자→1:1" 폴백은 두지 않는다.
+/* ── 텍스트 레이아웃 — 정사각(600×600) 세이프 존 대응 ──────────────────────
+ * og:image 는 800×600 이지만 SNS·검색이 중앙 정사각(600×600)으로 크롭하는 경우가 많아,
+ * 모든 텍스트를 중앙 600 폭(좌우 여백 제외 560) 세이프 존 안에 배치하고 그 폭에 맞춰
+ * 최대 크기로 fit 한다(포인트 줄 제거로 확보한 세로 공간만큼 큰 제목 상한도 상향).
  */
-const TARGET_W = Math.round(W * 0.9); // 720px
-const MAX_FS = 180;
-const MIN_FS = 40;
+const SAFE_W = 600; // 중앙 정사각 크롭 세이프 존 폭
+const CONTENT_W = 560; // 세이프 존 내 텍스트 최대 폭(좌우 여백)
+const MAIN_MAX = 150; // 큰 제목 상한(세로 공간 확보분 반영)
+const MAIN_MIN = 44;
+const REGION_MAX = 60; // 지역 줄 상한(기존 44 → 확대, 동명 식별)
+const REGION_MIN = 32;
 
 /** 한글=1em, ASCII≈0.56em, 공백≈0.34em 근사 폭. */
 function estEm(str: string): number {
@@ -80,9 +85,9 @@ function estEm(str: string): number {
   return w;
 }
 
-function fitFontSize(lines: string[]): number {
-  const widest = Math.max(...lines.map(estEm));
-  return Math.max(MIN_FS, Math.min(MAX_FS, Math.floor(TARGET_W / widest)));
+/** 문자열이 targetW(px) 폭을 넘지 않는 최대 폰트 크기(min~max clamp). */
+function fitFontSize(str: string, targetW: number, minFs: number, maxFs: number): number {
+  return Math.max(minFs, Math.min(maxFs, Math.floor(targetW / estEm(str))));
 }
 
 function notFound(): Response {
@@ -179,9 +184,12 @@ export async function GET(
   // ── 검증 우선(렌더 전) — 무효 조합 404(페이지 빌더 기준으로 존재하는 조합만) ──
   const c = resolveContent(kind, regionParam, itemSlug);
   if (!c) return notFound();
-  const mainFs = Math.min(fitFontSize([c.main]), 116);
+  // 세이프 존(560px) 폭에 맞춰 각 줄 최대 크기로 fit — 포인트 줄 제거로 큰 제목 상한 상향.
+  const mainFs = fitFontSize(c.main, CONTENT_W, MAIN_MIN, MAIN_MAX);
+  const regionFs = fitFontSize(c.region, CONTENT_W, REGION_MIN, REGION_MAX);
+  // 칩 2개(각 kind 배열의 첫·끝 = #1:1맞춤 · #첫상담무료)로 통일.
+  const chips = [c.chips[0], c.chips[c.chips.length - 1]];
   const [fontData, bg] = await Promise.all([loadFont(), loadBackground(kind)]);
-  const YELLOW = "#FFD84D";
   // 칩색: 검고(청록) / 그 외(어학 퍼플). 기존 exam·conversation 은 PURPLE 유지 → 출력 무변경.
   const chipColor = kind.startsWith("gumjung") ? TEAL : PURPLE;
 
@@ -218,28 +226,26 @@ export async function GET(
             display: "flex",
           }}
         />
-        {/* 중앙 텍스트 구성(지역 / 주제 / 포인트 / 칩) */}
+        {/* 중앙 텍스트 3단(지역 / 큰 제목 / 칩 2개) — 중앙 600 세이프 존 안에 배치 */}
         <div
           style={{
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            gap: 18,
-            padding: "0 48px",
+            gap: 24,
+            width: SAFE_W,
+            padding: "0 20px",
           }}
         >
-          <div style={{ fontFamily: "Pretendard", fontWeight: 700, fontSize: 44, color: "#FFFFFF", letterSpacing: "-0.02em", display: "flex" }}>
+          <div style={{ fontFamily: "Pretendard", fontWeight: 700, fontSize: regionFs, color: "#FFFFFF", letterSpacing: "-0.02em", whiteSpace: "nowrap", display: "flex" }}>
             {c.region}
           </div>
           <div style={{ fontFamily: "Pretendard", fontWeight: 700, fontSize: mainFs, color: "#FFFFFF", letterSpacing: "-0.02em", whiteSpace: "nowrap", display: "flex" }}>
             {c.main}
           </div>
-          <div style={{ fontFamily: "Pretendard", fontWeight: 700, fontSize: 46, color: YELLOW, letterSpacing: "-0.02em", display: "flex" }}>
-            {c.point}
-          </div>
-          <div style={{ display: "flex", flexDirection: "row", gap: 14, marginTop: 8 }}>
-            {c.chips.map((chip, i) => (
+          <div style={{ display: "flex", flexDirection: "row", gap: 14, marginTop: 4 }}>
+            {chips.map((chip, i) => (
               <div
                 key={i}
                 style={{
