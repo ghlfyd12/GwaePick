@@ -1,4 +1,5 @@
 import type { SchoolContentVariant } from "@/data/schoolContent";
+import { site } from "@/data/site";
 import { CONSULT_PHONE } from "@/data/dongPageCopy";
 
 /*
@@ -51,7 +52,7 @@ export default function SchoolExamPrep({
             href="#consult"
             className="inline-flex min-h-14 w-full max-w-xs items-center justify-center rounded-full bg-accent px-7 py-3 text-base font-semibold text-white shadow-md transition-colors hover:bg-accent-dark sm:w-auto sm:text-lg"
           >
-            무료 상담 신청
+            {site.cta.label}
           </a>
           <a
             href={`tel:${CONSULT_PHONE}`}

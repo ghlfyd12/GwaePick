@@ -26,9 +26,9 @@ export const teacherCarousel = {
   /** 자동재생 간격(ms). 0 이면 끔(기본 — 사용자가 직접 넘김). */
   autoplayMs: 0,
 
-  /** 섹션 하단 공통 CTA — 전환 동선은 #consult(무료 상담 신청). */
+  /** 섹션 하단 공통 CTA — 전환 동선은 #consult(무료 시범수업 신청). */
   cta: {
-    label: "이런 선생님들과 만나보세요 — 무료 상담 신청",
+    label: "이런 선생님들과 만나보세요 — 무료 시범수업 신청",
     href: "#consult",
   },
 } as const;

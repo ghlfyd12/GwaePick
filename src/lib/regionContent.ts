@@ -61,7 +61,7 @@ export function buildRegionContent(input: RegionContentInput): RegionContent {
     },
     {
       h2: `상담부터 첫 수업까지`,
-      body: `1) 무료 상담 신청 → 2) 상담 선생님이 1:1로 아이 상황을 듣고 → 3) ${region}에 맞는 선생님을 소개 → 4) 첫 수업을 체험해 보고 결정하면 됩니다. 바로 상담을 원하시면 ${CONSULT_PHONE} 으로 전화 주세요.`,
+      body: `1) 무료 시범수업 신청 → 2) 상담 선생님이 1:1로 아이 상황을 듣고 → 3) ${region}에 맞는 선생님을 소개 → 4) 무료 시범수업으로 직접 확인하고 결정하면 됩니다. 바로 상담을 원하시면 ${CONSULT_PHONE} 으로 전화 주세요.`,
     },
   ];
 

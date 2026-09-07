@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { site } from "@/data/site";
 import Image from "next/image";
 import Link from "next/link";
 import ConsultForm from "@/components/ConsultForm";
@@ -88,7 +89,7 @@ export default function PseoLanding({
             href="#consult"
             className="inline-flex min-h-14 items-center justify-center rounded-full bg-accent px-7 py-3 text-base font-semibold text-white shadow-md transition-colors hover:bg-accent-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:text-lg"
           >
-            무료 상담 신청
+            {site.cta.label}
           </a>
         </div>
       </section>

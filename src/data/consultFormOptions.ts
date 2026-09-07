@@ -45,13 +45,13 @@ const mainConfig: ConsultFormConfig = {
   choiceLabel: "희망 과목",
   choicePlaceholder: "과목을 선택해주세요",
   nameLabel: "학생 이름",
-  submitLabel: "체험 수업 신청하기 →",
+  submitLabel: "무료 시범수업 신청하기 →",
   header: {
     eyebrow: "문의 및 신청",
-    titleTop: "체험 수업",
+    titleTop: "무료 시범수업",
     titleAccent: "신청하기",
     intro:
-      "데이터로 검증된 우리 학교 맞춤 전략, 지금 바로 확인 가능합니다. 상세한 상담을 원하신다면 아래 내용을 작성해 주세요.",
+      "데이터로 검증된 우리 학교 맞춤 전략, 지금 바로 확인 가능합니다. 상세한 상담을 원하신다면 아래 내용을 작성해 주세요. 신청해 주시면 상담을 통해 무료 시범수업 일정을 안내해 드립니다.",
   },
 };
 
@@ -63,13 +63,13 @@ const powerConfig: ConsultFormConfig = {
   choicePlaceholder: "언어를 선택해주세요",
   // 성인 회원도 신청하므로 "학생 이름" 대신 연령 중립 표기.
   nameLabel: "이름",
-  submitLabel: "무료 상담 신청하기 →",
+  submitLabel: "무료 시범수업 신청하기 →",
   header: {
     eyebrow: "어학 전문 1:1 상담",
-    titleTop: "무료 상담",
+    titleTop: "무료 시범수업",
     titleAccent: "신청하기",
     intro:
-      "지금 수준과 목표를 알려주시면, 직접 가르쳐 온 선생님이 어학 수업에 맞는 선생님을 연결해 드립니다.",
+      "지금 수준과 목표를 알려주시면, 직접 가르쳐 온 선생님이 어학 수업에 맞는 선생님을 연결해 드립니다. 신청해 주시면 상담을 통해 무료 시범수업 일정을 안내해 드립니다.",
   },
 };
 
@@ -90,13 +90,13 @@ const gumjungConfig: ConsultFormConfig = {
   choiceLabel: "준비 유형",
   choicePlaceholder: "준비 유형을 선택해주세요",
   nameLabel: "이름",
-  submitLabel: "무료 상담 신청하기 →",
+  submitLabel: "무료 시범수업 신청하기 →",
   header: {
     eyebrow: "검정고시 1:1 상담",
-    titleTop: "무료 상담",
+    titleTop: "무료 시범수업",
     titleAccent: "신청하기",
     intro:
-      "지금 상황과 목표 시기를 알려주시면, 직접 가르쳐 온 선생님이 검정고시 준비에 맞는 선생님을 연결해 드립니다.",
+      "지금 상황과 목표 시기를 알려주시면, 직접 가르쳐 온 선생님이 검정고시 준비에 맞는 선생님을 연결해 드립니다. 신청해 주시면 상담을 통해 무료 시범수업 일정을 안내해 드립니다.",
   },
 };
 

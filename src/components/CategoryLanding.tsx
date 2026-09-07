@@ -58,7 +58,7 @@ export default function CategoryLanding({
             const linkLabel = makeHref ? "자세히 보기" : "상담 신청";
             const aria = makeHref
               ? `${item.title} 과외 자세히 보기`
-              : `${item.title} — 무료 상담 신청`;
+              : `${item.title} — ${site.cta.label}`;
             return (
             <li key={item.id}>
               <a

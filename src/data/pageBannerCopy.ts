@@ -17,7 +17,7 @@ export interface PageBannerContent {
 export const PAGE_BANNER_IMAGE = "/images/power-school-banner.png";
 export const PAGE_BANNER_ALT = "교복을 입고 노트북으로 공부하는 학생";
 /** 링크 문구(화살표는 컴포넌트에서 문자로 표시). */
-export const PAGE_BANNER_LINK_LABEL = "무료 상담 신청";
+export const PAGE_BANNER_LINK_LABEL = "무료 시범수업 신청";
 export const PAGE_BANNER_HREF = "#consult";
 
 /** 학교×과목 — 학교급(라벨) 분기. levelLabel 예: "고등학교"·"중학교"·"초등학교". */

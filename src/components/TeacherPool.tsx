@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { teachers, type Subject } from "@/data/teacherPool";
+import { site } from "@/data/site";
 
 /*
  * TeacherPool(소속 선생님 소개) 섹션 — 실제 44명 카드 그리드 + 과목 필터.
@@ -105,7 +106,7 @@ export default function TeacherPool({
             {/* 카드 전체가 상담 폼(#consult) 링크 — 부드러운 스크롤(globals scroll-behavior) */}
             <a
               href="#consult"
-              aria-label={`${t.name} — 무료 상담 신청`}
+              aria-label={`${t.name} — ${site.cta.label}`}
               className="group flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             >
               {/* 사진 — 정사각형, object-cover, 둥근 상단 */}
@@ -164,7 +165,7 @@ export default function TeacherPool({
             href="#consult"
             className="inline-flex min-h-14 items-center justify-center rounded-full bg-accent px-7 py-3 text-base font-semibold text-white shadow-md transition-colors hover:bg-accent-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:text-lg"
           >
-            무료 상담 신청
+            {site.cta.label}
           </a>
         </div>
       </div>

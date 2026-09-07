@@ -79,7 +79,7 @@ const schoolLinks: FooterLink[] = [
 /** 바로가기: 홈·상담·후기 + 지식의참견 메인 교차 링크. */
 const shortcutLinks: FooterLink[] = [
   { label: "어학의참견 홈", href: "/power" },
-  { label: "무료 상담 신청", href: POWER_CONSULT_HREF },
+  { label: "무료 시범수업 신청", href: POWER_CONSULT_HREF },
   { label: "수업 후기", href: "/reviews" },
   { label: "지식의참견 메인", href: "/" },
 ];

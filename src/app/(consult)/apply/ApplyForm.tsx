@@ -54,7 +54,7 @@ const FIELD_MESSAGE: Record<string, string> = {
 export default function ApplyForm({
   regions,
   subjects,
-  successTitle = "신청이 접수되었습니다",
+  successTitle = "무료 시범수업 신청이 접수되었습니다",
   successBody = "상담 선생님이 신청 내용을 확인한 뒤 순서대로 연락드립니다. 통화가 편한 시간이 있다면 회신 문자로 알려 주세요.",
 }: {
   regions: SidoOption[];
@@ -634,7 +634,7 @@ export default function ApplyForm({
         disabled={status === "submitting"}
         className="inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-accent px-6 text-lg font-semibold text-white transition-colors hover:bg-accent-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-60"
       >
-        {status === "submitting" ? "접수하는 중" : "무료 상담 신청"}
+        {status === "submitting" ? "접수하는 중" : "무료 시범수업 신청"}
       </button>
 
       {/* 우편번호 검색 레이어 — 팝업 차단 없이 화면 안에서 검색한다. */}

@@ -95,7 +95,7 @@ export default function Home() {
         titleTop={consultFormConfig(SERVICE.main).header.titleTop}
         titleAccent={consultFormConfig(SERVICE.main).header.titleAccent}
         intro={consultFormConfig(SERVICE.main).header.intro}
-        successTitle="상담 신청이 접수되었습니다"
+        successTitle="무료 시범수업 신청이 접수되었습니다"
         successBody="상담 선생님이 곧 연락드립니다."
       />
     </>

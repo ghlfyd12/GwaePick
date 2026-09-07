@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { site } from "@/data/site";
 import Link from "next/link";
 import ConsultForm from "@/components/ConsultForm";
 import ReviewSection from "@/components/ReviewSection";
@@ -74,7 +75,7 @@ export default function SubjectDetail({ subject }: { subject: Subject }) {
             </p>
             <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row md:justify-start">
               <a href="#consult" className="inline-flex min-h-14 w-full max-w-xs items-center justify-center rounded-full bg-accent px-7 py-3 text-base font-semibold text-white shadow-md transition-colors hover:bg-accent-dark sm:w-auto sm:text-lg">
-                무료 상담 신청
+                {site.cta.label}
               </a>
               <a href={`tel:${CONSULT_PHONE}`} className="inline-flex min-h-14 w-full max-w-xs items-center justify-center rounded-full border-2 border-accent bg-white px-7 py-3 text-base font-bold text-accent transition-colors hover:bg-accent/5 sm:w-auto sm:text-lg">
                 {CONSULT_PHONE}
@@ -215,7 +216,7 @@ export default function SubjectDetail({ subject }: { subject: Subject }) {
             어떤 {subject.label} 선생님이 맞을지 막막하다면, 상담부터 시작하세요. 직접 가르쳐 온 선생님이 함께 찾아 드립니다.
           </p>
           <div className="mt-5 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <a href="#consult" className="inline-flex min-h-14 w-full max-w-xs items-center justify-center rounded-full bg-accent px-7 py-3 text-base font-semibold text-white shadow-md transition-colors hover:bg-accent-dark sm:w-auto sm:text-lg">무료 상담 신청</a>
+            <a href="#consult" className="inline-flex min-h-14 w-full max-w-xs items-center justify-center rounded-full bg-accent px-7 py-3 text-base font-semibold text-white shadow-md transition-colors hover:bg-accent-dark sm:w-auto sm:text-lg">{site.cta.label}</a>
             <a href={`tel:${CONSULT_PHONE}`} className="inline-flex min-h-14 w-full max-w-xs items-center justify-center rounded-full border-2 border-accent bg-white px-7 py-3 text-base font-bold text-accent transition-colors hover:bg-accent/5 sm:w-auto sm:text-lg">{CONSULT_PHONE}</a>
           </div>
         </section>

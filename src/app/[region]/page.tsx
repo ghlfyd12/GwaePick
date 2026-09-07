@@ -182,7 +182,7 @@ export default async function RegionPage({
         className="flex flex-col items-center justify-center gap-5 border-t border-line bg-primary px-4 py-20 text-center text-white"
       >
         <h2 className="text-2xl font-bold sm:text-3xl">
-          {r.name} 무료 상담 신청
+          {r.name} 무료 시범수업 신청
         </h2>
         <p className="max-w-xl text-white/80">
           {r.name}에서 우리 아이에게 가장 잘 맞는 선생님, 직접 가르쳐 온 선생님이

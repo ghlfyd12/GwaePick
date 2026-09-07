@@ -36,7 +36,7 @@ const guideLinks: FooterLink[] = GUMJUNG_GUIDES.map((g) => ({
 
 const shortcutLinks: FooterLink[] = [
   { label: "검고의참견 홈", href: "/gumjung" },
-  { label: "무료 상담 신청", href: GUMJUNG_CONSULT_HREF },
+  { label: "무료 시범수업 신청", href: GUMJUNG_CONSULT_HREF },
   { label: "지식의참견 메인", href: "/" },
 ];
 

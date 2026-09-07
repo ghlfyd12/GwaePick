@@ -46,7 +46,7 @@ export type StudentType = {
   text: string;
 };
 
-/** 히어로 오른쪽 보조 진입 배너(코랄 알약). 주 CTA(무료 상담 신청)보다 약간 작은 위계. */
+/** 히어로 오른쪽 보조 진입 배너(코랄 알약). 주 CTA(무료 시범수업 신청)보다 약간 작은 위계. */
 export type SideBanner = {
   label: string;
   href: string;
@@ -99,9 +99,9 @@ export const heroContent = {
     { text: " 수업할 수 있도록 해드립니다." },
   ] satisfies SubCopySegment[],
 
-  /** 전환 목표 = 무료 상담 신청. 폼 구현 전까지 #consult 앵커로 연결. */
+  /** 전환 목표 = 무료 시범수업 신청. 폼 구현 전까지 #consult 앵커로 연결. */
   cta: {
-    label: "무료 상담 신청",
+    label: "무료 시범수업 신청",
     href: "#consult",
   },
 

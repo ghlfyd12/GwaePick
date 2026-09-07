@@ -373,7 +373,7 @@ function SuccessMessage({ phone }: { phone: string }) {
         </svg>
       </div>
       <h2 className="mt-5 text-2xl font-bold text-ink sm:text-3xl">
-        신청이 접수되었습니다.
+        무료 시범수업 신청이 접수되었습니다.
       </h2>
       <p className="mt-3 text-base text-muted md:text-lg">
         담당선생님이 곧 연락드립니다.
