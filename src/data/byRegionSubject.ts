@@ -381,7 +381,10 @@ export function buildByRegionMetadata(
       type: "website",
       locale: "ko_KR",
       siteName: site.power.name,
-      images: [{ url: thumb, width: 1200, height: 630, alt: thumbAlt }],
+      images: [
+        { url: thumb, width: 1200, height: 630, alt: thumbAlt },
+        { url: `${thumb}&r=sq`, width: 1080, height: 1080, alt: thumbAlt },
+      ],
     },
     twitter: {
       card: "summary_large_image",

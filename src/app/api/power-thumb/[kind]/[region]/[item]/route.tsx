@@ -51,10 +51,16 @@ function loadFont(): Promise<Buffer> {
   return fontPromise;
 }
 
-// 로고 없는 인물 자산(public/og-people). 축별 배열 — 자산 도착 시 같은 파일명으로 교체만.
+// 로고 없는 인물 자산(public/og-people). 축별 배열 — 자산 교체 시 같은 파일명 유지.
+// 배정: power 1~5 = videocall·headset·phone·student·kid / gumjung 1~5 = young-m·young-f1·young-f2·adult-m·senior-f.
 const PEOPLE: Record<string, string[]> = {
-  power: ["power-1.jpg", "power-2.jpg"],
-  gumjung: ["gumjung-1.jpg", "gumjung-2.jpg"],
+  power: ["power-1.jpg", "power-2.jpg", "power-3.jpg", "power-4.jpg", "power-5.jpg"],
+  gumjung: ["gumjung-1.jpg", "gumjung-2.jpg", "gumjung-3.jpg", "gumjung-4.jpg", "gumjung-5.jpg"],
+};
+// 검고 가이드 유형별 인물 고정(권장 배정) — 성인 가이드 → 만학도 남(gumjung-4=adult-m).
+// (그 외 검고 kind·가이드는 hash 분배로 5종 순환.)
+const GUMJUNG_GUIDE_PEOPLE: Record<string, string> = {
+  adult: "gumjung-4.jpg",
 };
 const bgCache: Record<string, Promise<string>> = {};
 function loadBackground(file: string): Promise<string> {
@@ -149,7 +155,10 @@ export async function GET(
   const r: RatioKey = new URL(req.url).searchParams.get("r") === "sq" ? "sq" : "og";
   const { W, H } = RATIOS[r];
   const accent = c.axis === "gumjung" ? TEAL : PURPLE;
-  const bgFile = hashPick(regionParam + itemSlug, PEOPLE[c.axis]);
+  const bgFile =
+    kind === "gumjung-guide" && GUMJUNG_GUIDE_PEOPLE[regionParam]
+      ? GUMJUNG_GUIDE_PEOPLE[regionParam]
+      : hashPick(regionParam + itemSlug, PEOPLE[c.axis]);
   const [fontData, bg] = await Promise.all([loadFont(), loadBackground(bgFile)]);
 
   const padX = Math.round(W * 0.045);
