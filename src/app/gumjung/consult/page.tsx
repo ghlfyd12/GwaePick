@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ConsultForm from "@/components/ConsultForm";
+import GumjungEventNotice from "@/components/gumjung/GumjungEventNotice";
 import { site } from "@/data/site";
 
 /*
@@ -44,6 +45,9 @@ export default function GumjungConsultPage() {
         </div>
       </section>
 
+      <div className="px-5 pt-8 sm:px-6">
+        <GumjungEventNotice />
+      </div>
       <ConsultForm showHeader={false} />
     </>
   );

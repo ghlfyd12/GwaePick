@@ -4,6 +4,7 @@ import ConsultForm from "@/components/ConsultForm";
 import JsonLd from "@/components/JsonLd";
 import GumjungHero from "@/components/gumjung/GumjungHero";
 import { StepList, CompareTable, FaqList } from "@/components/gumjung/parts";
+import GumjungEventNotice from "@/components/gumjung/GumjungEventNotice";
 import { site } from "@/data/site";
 import { GUMJUNG_LEVELS, GUMJUNG_FAQ } from "@/data/gumjung/levels";
 import { GUMJUNG_GUIDES } from "@/data/gumjung/guides";
@@ -216,6 +217,9 @@ export default function GumjungHomePage() {
 
         {/* ⑧ FAQ */}
         <FaqList heading="자주 묻는 질문" items={GUMJUNG_FAQ} />
+
+        {/* 이벤트 안내(단일 소스) */}
+        <GumjungEventNotice />
       </div>
 
       <ConsultForm defaultMessage="검정고시 1:1 상담 문의드립니다." />
