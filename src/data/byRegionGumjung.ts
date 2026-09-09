@@ -167,14 +167,17 @@ export function buildGumjungRegionData(regionParam: string): GumjungRegionData |
   }));
 
   // 급별 앵커 섹션 — 과목명 1줄 + 요약(전문 복제 없음) + 급별 상세 링크.
+  // 급별 호칭 변형어(고등·중등·초등) 1회 병기(253장 일괄) — 키워드 흡수, 남발 없음.
+  const LEVEL_ALT: Record<string, string> = { gojol: "고등", jungjol: "중등", chojol: "초등" };
   const levelSections: GumjungLevelSection[] = GUMJUNG_LEVELS.map((l) => {
     const subjectsLine = l.requiredSubjects.map((s) => s.label).join("·");
+    const alt = LEVEL_ALT[l.slug];
     return {
       slug: l.slug,
       name: l.name,
       subjectsLine,
       summary:
-        `${regionName} ${l.name} 검정고시는 ${subjectsLine} ${l.requiredSubjects.length}과목을 준비합니다. ` +
+        `${regionName} ${l.name}${alt ? `(${alt})` : ""} 검정고시는 ${subjectsLine} ${l.requiredSubjects.length}과목을 준비합니다. ` +
         `지금 막히는 과목부터 1:1로 짚어 준비 기간을 줄입니다. 시험 범위·응시 자격 등 자세한 정보는 급별 상세에서 확인하세요.`,
       href: `/gumjung/${l.slug}`,
     };
