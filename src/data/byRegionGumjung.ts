@@ -11,6 +11,7 @@ import type { Metadata } from "next";
 import { site } from "@/data/site";
 import { examRegions, isExamRegionSlug } from "@/data/byRegionExam";
 import { GUMJUNG_LEVELS } from "@/data/gumjung/levels";
+import { gumjungScheduleSlugForSidoLabel } from "@/data/gumjung/schedule";
 import { GUMJUNG_MODIFIED } from "@/data/contentMeta";
 
 const SITE_NAME = site.gumjung.name;
@@ -67,15 +68,15 @@ export function gumjungNearbyRegions(regionParam: string, count = 5): GumjungReg
  * 지역 title(브랜드명 없음, 검색 롱테일). 길면 뒤에서부터 탈락: "시험 일정" → "초졸".
  * 표시 상한 40자(한글 기준) — 긴 복합 시군구 대응.
  */
-// title: "{지역} 검정고시" 를 앞 25자 내 고정, 대표 3과목(수학·영어·국어) 롱테일.
-// cap 40 — 길면 뒤에서부터 탈락: 국어 → 영어 → "1:1"(과목 전부 제거 후 "1:1 개인과외"로 대체).
+// title: "{지역} 검정고시" 앞머리 고정, "일정" 미포함. 급별(고졸·중졸) + 대상(자퇴생·성인) + 방식(화상).
+// cap 40 — 길면 뒤에서부터 탈락: 화상 앞 조합 → 성인 → 자퇴생. (후보안은 검증 보고 참조, 1안 적용.)
 function buildRegionTitle(regionName: string): string {
-  const base = `${regionName} 검정고시 과외 고졸 중졸 초졸`;
-  const full = `${base} 수학 영어 국어 1:1`;
+  const base = `${regionName} 검정고시 과외 - 고졸 중졸`;
+  const full = `${base} 자퇴생 성인 1:1 화상`;
   if ([...full].length <= 40) return full;
-  const drop1 = `${base} 수학 영어 1:1`;
+  const drop1 = `${base} 자퇴생 1:1 화상`;
   if ([...drop1].length <= 40) return drop1;
-  return `${base} 1:1 개인과외`;
+  return `${base} 1:1 화상`;
 }
 
 // 빌드 검증: 최장 지역명 기준 title ≤40자 + 앞머리 "{지역} 검정고시" 고정(네이버 앞 25자 노출).
@@ -121,6 +122,11 @@ export type GumjungRegionData = {
   levelLinks: GumjungLevelLink[];
   /** 급별 앵커 섹션(과목 키워드 자연 배치 + 상세 링크). */
   levelSections: GumjungLevelSection[];
+  /** 일정·접수 섹션(소속 시도 일정 축 위임). scheduleSlug 없으면 허브로 링크. */
+  scheduleBody: string;
+  scheduleHref: string;
+  /** Q&A 2문항(FAQPage 구조화 대상 — 실제 렌더). */
+  faq: { q: string; a: string }[];
 };
 
 /** 급별 요약 노트(지역 페이지 요약용 — 시험 전문은 급별 상세에). */
@@ -140,11 +146,11 @@ export function buildGumjungRegionData(regionParam: string): GumjungRegionData |
   const head = `${regionName} 검정고시`;
   // title 은 브랜드명 없이 검색 롱테일(길이 초과 시 뒤에서부터 탈락).
   const metaTitle = buildRegionTitle(regionName);
-  // desc: "검고" 1회 병기 + 급별 3 + 필수과목 + 첫 상담 무료(≤158, slice 는 안전망).
+  // desc: 급별 3 + 자퇴생·성인 + 전과목 1:1 + 방문·화상 + 일정·접수 안내(≤160, slice 안전망).
   const metaDescription =
-    `${regionName} 검정고시(검고) 1:1 개인과외. 고졸·중졸·초졸 필수과목(국어·수학·영어·사회·과학)을 지금 막히는 지점부터 준비합니다. ${regionName} 맞춤 공부법과 선생님 연결, 첫 상담 무료.`.slice(
+    `${regionName} 고졸·중졸·초졸 검정고시(검고) 과외. 자퇴생부터 성인까지 전과목 1:1 방문·화상 수업으로 준비합니다. ${sidoLabel || regionName} 검정고시 일정·접수 안내와 급별 공부법을 확인하고 무료 상담으로 시작하세요.`.slice(
       0,
-      158,
+      160,
     );
   const intro =
     `${regionName}에서 검정고시를 준비하는 이유는 저마다 다릅니다. 검정고시(검고)는 출제 범위가 정해져 있어 방향만 잡으면 혼자보다 빠르게 준비할 수 있습니다. ` +
@@ -174,6 +180,25 @@ export function buildGumjungRegionData(regionParam: string): GumjungRegionData |
     };
   });
 
+  // 일정·접수 섹션 — 소속 시도 일정 축으로 위임(전문 복제 없음). 시도 미해석 시 허브로.
+  const scheduleSlug = sidoLabel ? gumjungScheduleSlugForSidoLabel(sidoLabel) : null;
+  const scheduleHref = scheduleSlug ? `/gumjung/schedule/${scheduleSlug}` : "/gumjung/schedule";
+  const scheduleBody =
+    `검정고시는 ${sidoLabel || "해당 시도"} 교육청이 연 2회(상반기·하반기) 시행합니다. ` +
+    `회차마다 공고 → 원서접수 → 시험 → 합격 발표 순으로 진행되며, 구체적인 날짜는 해당 회차 공고에서 확인할 수 있습니다.`;
+
+  // Q&A 2문항(FAQPage 구조화 대상 — 자퇴 답변은 확인된 사실만).
+  const faq = [
+    {
+      q: `${regionName} 검정고시 시험 일정은 언제인가요?`,
+      a: `검정고시는 ${sidoLabel || "해당 시도"} 교육청 주관으로 연 2회 시행됩니다. 상반기·하반기 각 회차의 접수 기간과 시험일은 해당 회차 공고에서 확인할 수 있으며, ${sidoLabel || regionName} 일정 페이지에서 안내해 드립니다.`,
+    },
+    {
+      q: "자퇴 후 언제 시험을 볼 수 있나요?",
+      a: "고졸 검정고시는 학교에서 제적된 날로부터 공고일 기준 6개월 이상 지나야 응시할 수 있습니다(등록 장애인은 예외). 중졸·초졸 검정고시는 이러한 경과 기간 요건이 없습니다. 자세한 기준은 해당 회차 공고에서 확인하세요.",
+    },
+  ];
+
   return {
     regionSlug,
     regionName,
@@ -185,6 +210,9 @@ export function buildGumjungRegionData(regionParam: string): GumjungRegionData |
     intro,
     levelLinks,
     levelSections,
+    scheduleBody,
+    scheduleHref,
+    faq,
   };
 }
 
@@ -221,7 +249,8 @@ export function buildGumjungRegionMetadata(regionParam: string): Metadata {
       card: "summary_large_image",
       title: data.metaTitle,
       description: data.metaDescription,
-      images: [thumb],
+      // 네이버 썸네일 수집 안정 — twitter:image 치수·alt 명시(메인축과 동일 형식).
+      images: [{ url: thumb, width: 1200, height: 630, alt: thumbAlt }],
     },
   };
 }

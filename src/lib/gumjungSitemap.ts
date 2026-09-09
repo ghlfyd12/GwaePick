@@ -9,6 +9,8 @@ import { GUMJUNG_LEVELS } from "@/data/gumjung/levels";
 import { allGumjungSubjectPairs } from "@/data/gumjung/subjects";
 import { allGumjungRegionSlugs } from "@/data/byRegionGumjung";
 import { GUMJUNG_GUIDE_SLUGS } from "@/data/gumjung/guides";
+import { GUMJUNG_AGE_SLUGS } from "@/data/gumjung/ages";
+import { GUMJUNG_SIDO_SLUGS } from "@/data/gumjung/schedule";
 
 const enc = (s: string) => encodeURIComponent(s);
 
@@ -25,6 +27,11 @@ export const GUMJUNG_PATHS: string[] = (() => {
     out.push(`/gumjung/by-region/${enc(slug)}`);
   // 유형 가이드 7
   for (const g of GUMJUNG_GUIDE_SLUGS) out.push(`/gumjung/guide/${g}`);
+  // 연령 축 14(additive)
+  for (const a of GUMJUNG_AGE_SLUGS) out.push(`/gumjung/age/${a}`);
+  // 일정 축: 허브 1 + 시도 17(additive)
+  out.push(`/gumjung/schedule`);
+  for (const s of GUMJUNG_SIDO_SLUGS) out.push(`/gumjung/schedule/${s}`);
   return out;
 })();
 

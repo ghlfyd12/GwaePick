@@ -14,6 +14,7 @@ import {
   gumjungRegionTags,
 } from "@/data/gumjung/detailContent";
 import { StepList, FaqList, TagCloud, LinkChips } from "@/components/gumjung/parts";
+import { faqJsonLd } from "@/lib/seo";
 
 /*
  * GumjungRegionDetail — /gumjung/by-region/[region] 지역×검정고시(253장) 보강 템플릿.
@@ -36,6 +37,8 @@ export default function GumjungRegionDetail({ regionParam }: { regionParam: stri
 
   const canonical = `/gumjung/by-region/${encodeURIComponent(data.regionSlug)}`;
   const nearby = gumjungNearbyRegions(data.regionSlug, 6);
+  // 렌더되는 Q&A(기존 지역 FAQ + 일정·자퇴 2문항) 전체로만 FAQPage 구성.
+  const allFaq = [...gumjungRegionFaq(data.regionName), ...data.faq];
   const jsonLd = [
     {
       "@context": "https://schema.org",
@@ -45,6 +48,7 @@ export default function GumjungRegionDetail({ regionParam }: { regionParam: stri
         { "@type": "ListItem", position: 2, name: `${data.head} 과외`, item: abs(canonical) },
       ],
     },
+    faqJsonLd(allFaq),
   ];
 
   return (
@@ -110,8 +114,24 @@ export default function GumjungRegionDetail({ regionParam }: { regionParam: stri
           </p>
         </section>
 
-        {/* FAQ 3 */}
-        <FaqList heading="자주 묻는 질문" items={gumjungRegionFaq(data.regionName)} />
+        {/* 일정·접수 (소속 시도 일정 축 위임) */}
+        <section aria-labelledby="schedule-heading">
+          <h2 id="schedule-heading" className="break-keep text-2xl font-bold text-ink sm:text-3xl">
+            {data.regionName} 검정고시 일정·접수
+          </h2>
+          <p className="mt-4 break-keep text-base leading-relaxed text-muted sm:text-lg">
+            {data.scheduleBody}
+          </p>
+          <a
+            href={data.scheduleHref}
+            className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-accent hover:text-accent-dark"
+          >
+            {data.sidoLabel || "시도"} 검정고시 일정 보기 →
+          </a>
+        </section>
+
+        {/* FAQ (지역 FAQ + 일정·자퇴 2문항 = FAQPage 대상) */}
+        <FaqList heading="자주 묻는 질문" items={allFaq} />
 
         {/* 관련 검색어 */}
         <TagCloud tags={gumjungRegionTags(data.regionName)} />

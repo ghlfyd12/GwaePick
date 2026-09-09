@@ -24,6 +24,8 @@ import { buildGumjungSubjectData } from "@/data/gumjung/subjects";
 import { buildGumjungRegionData } from "@/data/byRegionGumjung";
 import { getGumjungLevel } from "@/data/gumjung/levels";
 import { getGumjungGuide } from "@/data/gumjung/guides";
+import { getGumjungAge } from "@/data/gumjung/ages";
+import { getGumjungSido } from "@/data/gumjung/schedule";
 
 export const runtime = "nodejs";
 // 비율(?r=og|sq)을 쿼리로 가르므로 dynamic — force-static 은 쿼리를 무시해 두 비율이 한 이미지로 합쳐진다.
@@ -137,6 +139,18 @@ function resolveContent(kind: string, regionParam: string, itemSlug: string): Co
     const guide = getGumjungGuide(regionParam);
     if (!guide) return null;
     return { axis: "gumjung", l1: `검정고시 ${guide.navLabel}`, l2: "1:1 맞춤 상담", badges: GJ_BADGES };
+  }
+  if (kind === "gumjung-age") {
+    const age = getGumjungAge(regionParam);
+    if (!age) return null;
+    return { axis: "gumjung", l1: `${age.ageLabel} 검정고시`, l2: "1:1 맞춤 준비", badges: age.badges };
+  }
+  if (kind === "gumjung-schedule") {
+    if (regionParam === "hub")
+      return { axis: "gumjung", l1: "검정고시 일정", l2: "접수·시험 안내", badges: ["급별 1:1", "일정 안내"] };
+    const sido = getGumjungSido(regionParam);
+    if (!sido) return null;
+    return { axis: "gumjung", l1: `${sido.short} 검정고시 일정`, l2: "접수·시험 안내", badges: ["급별 1:1", "일정 안내"] };
   }
   return null;
 }
