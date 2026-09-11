@@ -1,16 +1,20 @@
 /**
- * 어학의참견(/power) 지역×시험·회화 + 검고의참견(gumjung) 페이지별 동적 썸네일 (v4 사진형).
+ * 어학의참견(/power) 지역×시험·회화 + 검고의참견(gumjung) 페이지별 동적 썸네일 (v5 세이프 존).
  *
  * GET /api/power-thumb/{kind}/{region}/{item}[?r=og|sq] → PNG
- *   - kind: "exam" | "conversation"(어학) | "gumjung-subject|region|level|guide"(검고)
+ *   - kind: "exam" | "conversation"(어학) | "gumjung-subject|region|level|guide|age|schedule"(검고)
  *   - region/item: 페이지 데이터 빌더로 유효 조합만 렌더, 그 외 404(스팸 생성 차단)
  *   - r: "og"(기본, 1.91:1 = 1200×630) | "sq"(1:1 = 1080×1080). 하단 앵커 디자인이라 비율별 개별 렌더.
  *
- * v4 구성: 로고 없는 인물 사진 배경(public/og-people) + 하단 다크 그라데이션 오버레이 위에
- *   ─ 좌하단 2줄(대형 키워드 / 보조), 우상단 뱃지 2개, 최하단 화이트 CTA바
+ * v5 구성: 로고 없는 인물 사진 배경(public/og-people) + 하단 다크 그라데이션 오버레이 위에
+ *   ─ 중앙 하단 텍스트 블록(뱃지 2개 / 지역줄 / 대형 키워드줄), 최하단 화이트 CTA바
  *   ("010-2177-2720 무료 시범수업 신청", 전화번호는 축 포인트색). 어학 퍼플·검고 청록.
+ *
+ * v4(좌측 앵커·우상단 뱃지)는 네이버 등이 og 를 중앙 정사각으로 크롭할 때 좌측 231px 이 잘려
+ * "대구 서구 검정고시" → "구 검정고시" 로 깨졌다. v5 는 v3 의 세이프 존 원칙을 사진형 레이아웃에
+ * 복원해 텍스트·뱃지를 모두 중앙 정사각 크롭 안에 배치한다(어학·검고 공통, 같은 결함이었음).
  * 문구는 페이지 데이터 파생 + 고정 카피(느낌표·보장·수치 없음, "무료 시범수업" 고정 표현).
- * 폰트·immutable 캐시 유지. og URL 은 메타에서 v=4 로 캐시 무효화. 본체 코랄(/api/thumb) 무관.
+ * 폰트·immutable 캐시 유지. og URL 은 메타에서 v=5 로 캐시 무효화. 본체 코랄(/api/thumb) 무관.
  *
  * 인물 자산 규약(교체 시 파일만 교체): public/og-people/{power|gumjung}-{n}.jpg,
  *   축별 배열에서 hash(region+item)%N 로 분배. 현재는 로고-free 크롭 플레이스홀더.
@@ -102,10 +106,13 @@ function notFound(): Response {
 }
 
 /**
- * kind·region·item → {axis, l1(대형), l2(보조), badges[2]}. 페이지 데이터 빌더를 재사용해
- * 지역/급별/과목 표기가 실제 페이지와 일치. 빌더 null(무효 조합)이면 null → 404.
+ * kind·region·item → {axis, region(보조 상단줄), keyword(대형 하단줄), badges[2]}. 페이지 데이터
+ * 빌더를 재사용해 지역/급별/과목 표기가 실제 페이지와 일치. 빌더 null(무효 조합)이면 null → 404.
+ *
+ * v5: 한 줄("{지역} {키워드}")을 지역줄·키워드줄 2줄로 분리한다. 좁은 세이프 존(og 554px) 안에서도
+ * 키워드가 충분히 커지고, 긴 지역명(고양시 일산동구 등)이 폰트 축소를 유발하지 않는다.
  */
-type Content = { axis: "power" | "gumjung"; l1: string; l2: string; badges: [string, string] };
+type Content = { axis: "power" | "gumjung"; region: string; keyword: string; badges: [string, string] };
 const GJ_BADGES: [string, string] = ["급별 1:1", "기초부터 준비"];
 const LANG_BADGES: [string, string] = ["왕초보 1:1", "전화·화상 수업"];
 
@@ -113,44 +120,44 @@ function resolveContent(kind: string, regionParam: string, itemSlug: string): Co
   if (kind === "exam") {
     const d = buildByExamData(regionParam, itemSlug);
     if (!d) return null;
-    return { axis: "power", l1: `${d.regionName} ${d.exam.name}`, l2: "1:1 개인과외", badges: LANG_BADGES };
+    return { axis: "power", region: d.regionName, keyword: `${d.exam.name} 과외`, badges: LANG_BADGES };
   }
   if (kind === "conversation") {
     const d = buildByRegionData(regionParam, itemSlug);
     if (!d) return null;
-    return { axis: "power", l1: `${d.regionName} ${d.label}`, l2: "1:1 개인과외", badges: LANG_BADGES };
+    return { axis: "power", region: d.regionName, keyword: `${d.label} 과외`, badges: LANG_BADGES };
   }
   if (kind === "gumjung-subject") {
     const d = buildGumjungSubjectData(regionParam, itemSlug);
     if (!d) return null;
-    return { axis: "gumjung", l1: `${d.subjectLabel} 검정고시`, l2: "1:1 맞춤 준비", badges: GJ_BADGES };
+    return { axis: "gumjung", region: d.subjectLabel, keyword: "검정고시 과외", badges: GJ_BADGES };
   }
   if (kind === "gumjung-region") {
     const d = buildGumjungRegionData(regionParam);
     if (!d) return null;
-    return { axis: "gumjung", l1: `${d.regionName} 검정고시`, l2: "1:1 개인과외", badges: GJ_BADGES };
+    return { axis: "gumjung", region: d.regionName, keyword: "검정고시 과외", badges: GJ_BADGES };
   }
   if (kind === "gumjung-level") {
     const level = getGumjungLevel(regionParam);
     if (!level) return null;
-    return { axis: "gumjung", l1: `${level.name} 검정고시`, l2: "1:1 맞춤 준비", badges: GJ_BADGES };
+    return { axis: "gumjung", region: level.name, keyword: "검정고시 과외", badges: GJ_BADGES };
   }
   if (kind === "gumjung-guide") {
     const guide = getGumjungGuide(regionParam);
     if (!guide) return null;
-    return { axis: "gumjung", l1: `검정고시 ${guide.navLabel}`, l2: "1:1 맞춤 상담", badges: GJ_BADGES };
+    return { axis: "gumjung", region: guide.navLabel, keyword: "검정고시 과외", badges: GJ_BADGES };
   }
   if (kind === "gumjung-age") {
     const age = getGumjungAge(regionParam);
     if (!age) return null;
-    return { axis: "gumjung", l1: `${age.ageLabel} 검정고시`, l2: "1:1 맞춤 준비", badges: age.badges };
+    return { axis: "gumjung", region: age.ageLabel, keyword: "검정고시 과외", badges: age.badges };
   }
   if (kind === "gumjung-schedule") {
     if (regionParam === "hub")
-      return { axis: "gumjung", l1: "검정고시 일정", l2: "접수·시험 안내", badges: ["급별 1:1", "일정 안내"] };
+      return { axis: "gumjung", region: "접수·시험 안내", keyword: "검정고시 일정", badges: ["급별 1:1", "일정 안내"] };
     const sido = getGumjungSido(regionParam);
     if (!sido) return null;
-    return { axis: "gumjung", l1: `${sido.short} 검정고시 일정`, l2: "접수·시험 안내", badges: ["급별 1:1", "일정 안내"] };
+    return { axis: "gumjung", region: sido.short, keyword: "검정고시 일정", badges: ["급별 1:1", "일정 안내"] };
   }
   return null;
 }
@@ -175,13 +182,17 @@ export async function GET(
       : hashPick(regionParam + itemSlug, PEOPLE[c.axis]);
   const [fontData, bg] = await Promise.all([loadFont(), loadBackground(bgFile)]);
 
-  const padX = Math.round(W * 0.045);
   const ctaH = Math.max(64, Math.round(H * 0.12));
   const ctaFs = Math.round(ctaH * 0.4);
-  const l1Fs = fitFontSize(c.l1, W - 2 * padX, 44, Math.round(H * 0.135));
-  const l2Fs = Math.round(l1Fs * 0.42);
-  const badgeFs = Math.round(H * 0.042);
-  const textBottom = ctaH + Math.round(H * 0.06);
+  // v5 세이프 존 — SNS·검색이 og(1200×630)를 중앙 정사각(630×630)으로 크롭해도 모든 텍스트가 남도록,
+  // 텍스트·뱃지를 캔버스 가로 중앙의 세이프 존(정사각 변 − 좌우 6%) 안에만 배치하고 그 폭에 맞춰 fit 한다.
+  const SQ = Math.min(W, H);
+  const safePad = Math.round(SQ * 0.06);
+  const SAFE_W = SQ - 2 * safePad; // og 554 / sq 950
+  const kwFs = fitFontSize(c.keyword, SAFE_W, 44, Math.round(H * 0.16));
+  const rgFs = fitFontSize(c.region, SAFE_W, 30, Math.round(kwFs * 0.62));
+  const badgeFs = Math.round(H * 0.038);
+  const textBottom = ctaH + Math.round(H * 0.05);
 
   return new ImageResponse(
     (
@@ -206,53 +217,43 @@ export async function GET(
             background: "linear-gradient(to bottom, rgba(0,0,0,0) 34%, rgba(0,0,0,0.42) 62%, rgba(0,0,0,0.86) 100%)",
           }}
         />
-        {/* 우상단 뱃지 2개 */}
+        {/* 세이프 존 텍스트 블록 — 뱃지 2개 / 지역줄 / 키워드줄(대형). 전부 중앙 정사각 크롭 안. */}
         <div
           style={{
             position: "absolute",
-            top: padX,
-            right: padX,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-end",
-            gap: Math.round(H * 0.022),
-          }}
-        >
-          {c.badges.map((b, i) => (
-            <div
-              key={i}
-              style={{
-                display: "flex",
-                fontFamily: "Pretendard",
-                fontWeight: 700,
-                fontSize: badgeFs,
-                color: "#FFFFFF",
-                background: accent,
-                borderRadius: 999,
-                padding: `${Math.round(badgeFs * 0.4)}px ${Math.round(badgeFs * 0.85)}px`,
-                letterSpacing: "-0.02em",
-              }}
-            >
-              #{b}
-            </div>
-          ))}
-        </div>
-        {/* 좌하단 2줄 */}
-        <div
-          style={{
-            position: "absolute",
-            left: padX,
-            right: padX,
+            left: Math.round((W - SAFE_W) / 2),
+            width: SAFE_W,
             bottom: textBottom,
             display: "flex",
             flexDirection: "column",
+            alignItems: "center",
           }}
         >
-          <div style={{ display: "flex", fontFamily: "Pretendard", fontWeight: 700, fontSize: l1Fs, color: "#FFFFFF", letterSpacing: "-0.03em", whiteSpace: "nowrap" }}>
-            {c.l1}
+          <div style={{ display: "flex", gap: Math.round(badgeFs * 0.5), marginBottom: Math.round(H * 0.025) }}>
+            {c.badges.map((b, i) => (
+              <div
+                key={i}
+                style={{
+                  display: "flex",
+                  fontFamily: "Pretendard",
+                  fontWeight: 700,
+                  fontSize: badgeFs,
+                  color: "#FFFFFF",
+                  background: accent,
+                  borderRadius: 999,
+                  padding: `${Math.round(badgeFs * 0.36)}px ${Math.round(badgeFs * 0.8)}px`,
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                #{b}
+              </div>
+            ))}
           </div>
-          <div style={{ display: "flex", fontFamily: "Pretendard", fontWeight: 700, fontSize: l2Fs, color: "#FFFFFF", letterSpacing: "-0.02em", marginTop: Math.round(H * 0.012), opacity: 0.95 }}>
-            {c.l2}
+          <div style={{ display: "flex", fontFamily: "Pretendard", fontWeight: 700, fontSize: rgFs, color: "#FFFFFF", letterSpacing: "-0.02em", whiteSpace: "nowrap", opacity: 0.97 }}>
+            {c.region}
+          </div>
+          <div style={{ display: "flex", fontFamily: "Pretendard", fontWeight: 700, fontSize: kwFs, color: "#FFFFFF", letterSpacing: "-0.03em", whiteSpace: "nowrap", marginTop: Math.round(H * 0.008) }}>
+            {c.keyword}
           </div>
         </div>
         {/* 최하단 화이트 CTA 바 */}
