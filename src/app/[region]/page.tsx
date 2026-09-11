@@ -4,7 +4,7 @@ import Link from "next/link";
 import { regions, type Region } from "@/data/regions";
 import { allLandingRegions, getLandingRegion } from "@/data/mainDistricts";
 import { REGION_LANDMARKS } from "@/data/regionLandmarks";
-import { getRegionStats } from "@/data/regionStats";
+import { getRegionStats, getRepresentativeDong } from "@/data/regionStats";
 import { site } from "@/data/site";
 import CTAButton from "@/components/ui/CTAButton";
 import ReviewSection from "@/components/ReviewSection";
@@ -58,15 +58,16 @@ export async function generateMetadata({
   // 광역시 구·군 50장: 자기 데이터 집계(고교·중학교 수)를 title·desc 에 넣는다.
   // 서울·경기 118장은 관찰 후 확대 대상 → getRegionStats 가 null 이라 기존 카피 그대로 유지.
   const stats = getRegionStats(r.id);
+  const repDong = getRepresentativeDong(r.id);
   const title = stats
-    ? `${r.name} 수학과외 - 고교 ${stats.high}곳·중학교 ${stats.middle}곳 내신 기준 1:1`
+    ? `${r.name} 수학과외 - 국어 영어 사회 과학 내신 수행평가 1:1`
     : `${r.name} 수학·영어 과외 추천 - 직접 가르쳐 본 ${r.name} 선생님 1:1 매칭`;
   // 신도시 키워드 보강 대상(regionLandmarks)만 지명 포함 description, 나머지는 기존 템플릿 유지.
   const landmarks = REGION_LANDMARKS[r.id];
   // 지명이 있으면 "{시도} {지역명} {지명}", 없으면(예: 동탄 — 지역명에 이미 포함) name-only.
   // 비어있지 않은 경우 출력은 기존과 동일(광역시 완료분 무변경).
   const description = stats
-    ? `${r.name} 수학·영어 과외를 찾고 계신가요? ${r.name} 고교 ${stats.high}곳·중학교 ${stats.middle}곳의 내신 범위와 기출 유형을 기준으로, 직접 가르쳐 본 선생님이 1:1 로 맞춰 드립니다. 시험 대비 상담은 무료입니다.`
+    ? `${r.name}${repDong ? ` ${repDong}` : ""} 등 고교 ${stats.high}곳·중학교 ${stats.middle}곳의 내신과 수행평가 기준 1:1 과외. 국어 영어 수학 사회 과학 전 과목을 초3 초4 초5 초6, 중1 중2 중3, 고1 고2 고3 학년별 맞춤으로, 기초부터 하위권 성적 올리기까지 직접 가르쳐 본 선생님이 지도합니다. 상담은 무료입니다.`
     : landmarks
       ? `${r.province} ${r.name}${landmarks.length ? " " + landmarks.join("·") : ""}에서 과외 선생님을 찾고 계신가요? 2028 대입 개편·내신 5등급제 대비, 아이의 성향과 호흡까지 맞춰 줄 전담 선생님을 직접 상담으로 연결해 드립니다.`
       : `학원에 다녀도 성적이 그대로라면 문제는 맞는 선생님을 만나지 못한 것입니다. 2028 대입 개편 및 내신 5등급제 대비, ${r.name} 학생들의 성향과 호흡까지 맞춰줄 전담 선생님 무료 상담 신청해보세요.`;
