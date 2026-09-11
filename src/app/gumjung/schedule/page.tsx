@@ -11,7 +11,7 @@ export const dynamic = "force-static";
 
 export function generateMetadata(): Metadata {
   const canonical = "/gumjung/schedule";
-  const thumb = "/api/power-thumb/gumjung-schedule/hub/base?v=7";
+  const thumb = "/api/power-thumb/gumjung-schedule/hub/base?v=8";
   const alt = "검정고시 일정 안내";
   return {
     title: { absolute: GUMJUNG_SCHEDULE_HUB.metaTitle },

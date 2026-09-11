@@ -1,14 +1,15 @@
 /**
- * 어학의참견(/power) 지역×시험·회화 + 검고의참견(gumjung) 페이지별 동적 썸네일 (v7 세이프 존·좌측 정렬·확대).
+ * 어학의참견(/power) 지역×시험·회화 + 검고의참견(gumjung) 페이지별 동적 썸네일 (v8 세이프 존·좌측 정렬·풀블리드).
  *
  * GET /api/power-thumb/{kind}/{region}/{item}[?r=og|sq] → PNG
  *   - kind: "exam" | "conversation"(어학) | "gumjung-subject|region|level|guide|age|schedule"(검고)
  *   - region/item: 페이지 데이터 빌더로 유효 조합만 렌더, 그 외 404(스팸 생성 차단)
  *   - r: "og"(기본, 1.91:1 = 1200×630) | "sq"(1:1 = 1080×1080). 하단 앵커 디자인이라 비율별 개별 렌더.
  *
- * v7 구성: 로고 없는 인물 사진 배경(public/og-people) + 하단 다크 그라데이션 오버레이 위에
- *   ─ 세이프 존 하단 블록(뱃지 2개 우측 세로 스택 / 지역줄 / 대형 키워드줄, 전부 좌측 정렬), 최하단 화이트 CTA바
- *   ("010-2177-2720 무료 시범수업 신청", 전화번호는 축 포인트색). 어학 퍼플·검고 청록.
+ * v8 구성: 로고 없는 인물 사진 배경(public/og-people)이 캔버스 하단 끝까지 풀블리드 +
+ *   하단 다크 그라데이션 오버레이 위에 세이프 존 하단 블록(뱃지 2개 우측 세로 스택 /
+ *   지역줄 / 대형 키워드줄, 전부 좌측 정렬). 어학 퍼플·검고 청록.
+ *   v7 까지 있던 최하단 화이트 CTA바(전화번호·"무료 시범수업 신청")는 v8 에서 삭제했다.
  *
  * v4(좌측 앵커·우상단 뱃지)는 네이버 등이 og 를 중앙 정사각으로 크롭할 때 좌측 231px 이 잘려
  * "대구 서구 검정고시" → "구 검정고시" 로 깨졌다. v5 는 v3 의 세이프 존 원칙을 사진형 레이아웃에
@@ -17,8 +18,8 @@
  * v7 은 v6 의 배치를 유지한 채 글자 상한만 키운 것이다(키워드 H×0.16→0.21, 지역 ×0.62→0.68,
  * 뱃지 H×0.038→0.049). fit 기준폭이 SAFE_W 라서 라벨이 길면 자동으로 작아진다 —
  * 즉 상한 상향은 짧은 라벨만 키우고 세이프 존 밖으로 나가지 않는다.
- * 문구는 페이지 데이터 파생 + 고정 카피(느낌표·보장·수치 없음, "무료 시범수업" 고정 표현).
- * 폰트·immutable 캐시 유지. og URL 은 메타에서 v=7 로 캐시 무효화. 본체 코랄(/api/thumb) 무관.
+ * 문구는 페이지 데이터 파생 + 고정 뱃지 카피(느낌표·보장·수치 없음).
+ * 폰트·immutable 캐시 유지. og URL 은 메타에서 v=8 로 캐시 무효화. 본체 코랄(/api/thumb) 무관.
  *
  * 인물 자산 규약(교체 시 파일만 교체): public/og-people/{power|gumjung}-{n}.jpg,
  *   축별 배열에서 hash(region+item)%N 로 분배. 현재는 로고-free 크롭 플레이스홀더.
@@ -43,10 +44,8 @@ export const revalidate = false;
 
 const PURPLE = "#7D0096"; // 어학 포인트색
 const TEAL = "#0F766E"; // 검고 포인트색
-const CTA_PHONE = "010-2177-2720";
-const CTA_TEXT = "무료 시범수업 신청";
 
-// 비율: og(1.91:1) 기본, sq(1:1). 하단 CTA바가 각 비율 실제 하단에 오도록 개별 렌더.
+// 비율: og(1.91:1) 기본, sq(1:1). 하단 앵커 텍스트 블록이 각 비율 실제 하단에 오도록 개별 렌더.
 const RATIOS = { og: { W: 1200, H: 630 }, sq: { W: 1080, H: 1080 } } as const;
 type RatioKey = keyof typeof RATIOS;
 
@@ -186,8 +185,6 @@ export async function GET(
       : hashPick(regionParam + itemSlug, PEOPLE[c.axis]);
   const [fontData, bg] = await Promise.all([loadFont(), loadBackground(bgFile)]);
 
-  const ctaH = Math.max(64, Math.round(H * 0.12));
-  const ctaFs = Math.round(ctaH * 0.4);
   // v5 세이프 존 — SNS·검색이 og(1200×630)를 중앙 정사각(630×630)으로 크롭해도 모든 텍스트가 남도록,
   // 텍스트·뱃지를 캔버스 가로 중앙의 세이프 존(정사각 변 − 좌우 6%) 안에만 배치하고 그 폭에 맞춰 fit 한다.
   const SQ = Math.min(W, H);
@@ -197,7 +194,8 @@ export async function GET(
   const kwFs = fitFontSize(c.keyword, SAFE_W, 44, Math.round(H * 0.21));
   const rgFs = fitFontSize(c.region, SAFE_W, 30, Math.round(kwFs * 0.68));
   const badgeFs = Math.round(H * 0.049);
-  const textBottom = ctaH + Math.round(H * 0.05);
+  // v8: CTA바 삭제 → 텍스트 블록을 캔버스 하단으로 내린다(기존 ctaH 오프셋 제거).
+  const textBottom = Math.round(H * 0.05);
 
   return new ImageResponse(
     (
@@ -219,7 +217,8 @@ export async function GET(
             width: W,
             height: H,
             display: "flex",
-            background: "linear-gradient(to bottom, rgba(0,0,0,0) 34%, rgba(0,0,0,0.42) 62%, rgba(0,0,0,0.86) 100%)",
+            // v8: 텍스트가 캔버스 맨 아래까지 내려오므로 그라데이션을 위로 넓히고 하단을 더 어둡게.
+            background: "linear-gradient(to bottom, rgba(0,0,0,0) 20%, rgba(0,0,0,0.38) 48%, rgba(0,0,0,0.72) 74%, rgba(0,0,0,0.94) 100%)",
           }}
         />
         {/* 세이프 존 블록 — 뱃지 2개(우측 세로 스택) / 지역줄 / 키워드줄(대형). 전부 중앙 정사각 크롭 안.
@@ -271,28 +270,6 @@ export async function GET(
           <div style={{ display: "flex", fontFamily: "Pretendard", fontWeight: 700, fontSize: kwFs, color: "#FFFFFF", letterSpacing: "-0.03em", whiteSpace: "nowrap", marginTop: Math.round(H * 0.008) }}>
             {c.keyword}
           </div>
-        </div>
-        {/* 최하단 화이트 CTA 바 */}
-        <div
-          style={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            bottom: 0,
-            height: ctaH,
-            background: "#FFFFFF",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontFamily: "Pretendard",
-            fontWeight: 700,
-            fontSize: ctaFs,
-            color: "#1F2937",
-            letterSpacing: "-0.02em",
-          }}
-        >
-          <span style={{ display: "flex", color: accent }}>{CTA_PHONE}</span>
-          <span style={{ display: "flex", marginLeft: Math.round(ctaFs * 0.5) }}>{CTA_TEXT}</span>
         </div>
       </div>
     ),

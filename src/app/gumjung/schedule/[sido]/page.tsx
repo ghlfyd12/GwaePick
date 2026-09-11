@@ -27,7 +27,7 @@ export async function generateMetadata({
   if (!sido) return {};
   const meta = gumjungSidoMeta(sido);
   const canonical = `/gumjung/schedule/${sido.slug}`;
-  const thumb = `/api/power-thumb/gumjung-schedule/${sido.slug}/base?v=7`;
+  const thumb = `/api/power-thumb/gumjung-schedule/${sido.slug}/base?v=8`;
   const alt = `${sido.short} 검정고시 일정 안내`;
   return {
     title: { absolute: meta.title },

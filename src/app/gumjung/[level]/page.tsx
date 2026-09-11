@@ -32,7 +32,7 @@ export async function generateMetadata({
   const title = level.metaTitle;
   const description = level.metaDescription;
   const canonical = `/gumjung/${level.slug}`;
-  const thumb = `/api/power-thumb/gumjung-level/${level.slug}/base?v=7`;
+  const thumb = `/api/power-thumb/gumjung-level/${level.slug}/base?v=8`;
   return {
     title: { absolute: title },
     description,

@@ -26,7 +26,7 @@ export async function generateMetadata({
   const age = getGumjungAge(slug);
   if (!age) return {};
   const canonical = `/gumjung/age/${age.slug}`;
-  const thumb = `/api/power-thumb/gumjung-age/${age.slug}/base?v=7`;
+  const thumb = `/api/power-thumb/gumjung-age/${age.slug}/base?v=8`;
   const alt = `${age.h1} 과외 안내`;
   return {
     title: { absolute: age.metaTitle },
