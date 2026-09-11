@@ -29,7 +29,7 @@ export async function generateMetadata({
   const guide = getGumjungGuide(type);
   if (!guide) return {};
   const canonical = `/gumjung/guide/${guide.slug}`;
-  const thumb = `/api/power-thumb/gumjung-guide/${guide.slug}/base?v=6`;
+  const thumb = `/api/power-thumb/gumjung-guide/${guide.slug}/base?v=7`;
   return {
     title: { absolute: guide.metaTitle },
     description: guide.metaDescription,

@@ -1,21 +1,24 @@
 /**
- * 어학의참견(/power) 지역×시험·회화 + 검고의참견(gumjung) 페이지별 동적 썸네일 (v6 세이프 존·좌측 정렬).
+ * 어학의참견(/power) 지역×시험·회화 + 검고의참견(gumjung) 페이지별 동적 썸네일 (v7 세이프 존·좌측 정렬·확대).
  *
  * GET /api/power-thumb/{kind}/{region}/{item}[?r=og|sq] → PNG
  *   - kind: "exam" | "conversation"(어학) | "gumjung-subject|region|level|guide|age|schedule"(검고)
  *   - region/item: 페이지 데이터 빌더로 유효 조합만 렌더, 그 외 404(스팸 생성 차단)
  *   - r: "og"(기본, 1.91:1 = 1200×630) | "sq"(1:1 = 1080×1080). 하단 앵커 디자인이라 비율별 개별 렌더.
  *
- * v6 구성: 로고 없는 인물 사진 배경(public/og-people) + 하단 다크 그라데이션 오버레이 위에
+ * v7 구성: 로고 없는 인물 사진 배경(public/og-people) + 하단 다크 그라데이션 오버레이 위에
  *   ─ 세이프 존 하단 블록(뱃지 2개 우측 세로 스택 / 지역줄 / 대형 키워드줄, 전부 좌측 정렬), 최하단 화이트 CTA바
  *   ("010-2177-2720 무료 시범수업 신청", 전화번호는 축 포인트색). 어학 퍼플·검고 청록.
  *
  * v4(좌측 앵커·우상단 뱃지)는 네이버 등이 og 를 중앙 정사각으로 크롭할 때 좌측 231px 이 잘려
  * "대구 서구 검정고시" → "구 검정고시" 로 깨졌다. v5 는 v3 의 세이프 존 원칙을 사진형 레이아웃에
  * 복원해 텍스트·뱃지를 모두 중앙 정사각 크롭 안에 배치한다(어학·검고 공통, 같은 결함이었음).
- * v6 은 v5(가운데 정렬)의 치수를 그대로 두고 정렬 기준만 "세이프 존 좌측 경계"로 옮긴 것이다.
+ * v6 은 v5(가운데 정렬)의 치수를 그대로 두고 정렬 기준만 "세이프 존 좌측 경계"로 옮긴 것이고,
+ * v7 은 v6 의 배치를 유지한 채 글자 상한만 키운 것이다(키워드 H×0.16→0.21, 지역 ×0.62→0.68,
+ * 뱃지 H×0.038→0.049). fit 기준폭이 SAFE_W 라서 라벨이 길면 자동으로 작아진다 —
+ * 즉 상한 상향은 짧은 라벨만 키우고 세이프 존 밖으로 나가지 않는다.
  * 문구는 페이지 데이터 파생 + 고정 카피(느낌표·보장·수치 없음, "무료 시범수업" 고정 표현).
- * 폰트·immutable 캐시 유지. og URL 은 메타에서 v=6 으로 캐시 무효화. 본체 코랄(/api/thumb) 무관.
+ * 폰트·immutable 캐시 유지. og URL 은 메타에서 v=7 로 캐시 무효화. 본체 코랄(/api/thumb) 무관.
  *
  * 인물 자산 규약(교체 시 파일만 교체): public/og-people/{power|gumjung}-{n}.jpg,
  *   축별 배열에서 hash(region+item)%N 로 분배. 현재는 로고-free 크롭 플레이스홀더.
@@ -190,9 +193,10 @@ export async function GET(
   const SQ = Math.min(W, H);
   const safePad = Math.round(SQ * 0.06);
   const SAFE_W = SQ - 2 * safePad; // og 554 / sq 950
-  const kwFs = fitFontSize(c.keyword, SAFE_W, 44, Math.round(H * 0.16));
-  const rgFs = fitFontSize(c.region, SAFE_W, 30, Math.round(kwFs * 0.62));
-  const badgeFs = Math.round(H * 0.038);
+  // v7: 상한만 올린다(fit 기준폭은 SAFE_W 그대로 → 긴 라벨은 자동 축소, 잘림 리스크 없음).
+  const kwFs = fitFontSize(c.keyword, SAFE_W, 44, Math.round(H * 0.21));
+  const rgFs = fitFontSize(c.region, SAFE_W, 30, Math.round(kwFs * 0.68));
+  const badgeFs = Math.round(H * 0.049);
   const textBottom = ctaH + Math.round(H * 0.05);
 
   return new ImageResponse(
