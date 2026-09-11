@@ -224,7 +224,7 @@ export function buildGumjungRegionMetadata(regionParam: string): Metadata {
   const data = buildGumjungRegionData(regionParam);
   if (!data) return {};
   const canonical = `/gumjung/by-region/${encodeURIComponent(data.regionSlug)}`;
-  const thumb = `/api/power-thumb/gumjung-region/${encodeURIComponent(data.regionSlug)}/base?v=5`;
+  const thumb = `/api/power-thumb/gumjung-region/${encodeURIComponent(data.regionSlug)}/base?v=6`;
   const thumbAlt = `${data.head} 과외 안내`;
   return {
     title: { absolute: data.metaTitle },

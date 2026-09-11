@@ -1,20 +1,21 @@
 /**
- * 어학의참견(/power) 지역×시험·회화 + 검고의참견(gumjung) 페이지별 동적 썸네일 (v5 세이프 존).
+ * 어학의참견(/power) 지역×시험·회화 + 검고의참견(gumjung) 페이지별 동적 썸네일 (v6 세이프 존·좌측 정렬).
  *
  * GET /api/power-thumb/{kind}/{region}/{item}[?r=og|sq] → PNG
  *   - kind: "exam" | "conversation"(어학) | "gumjung-subject|region|level|guide|age|schedule"(검고)
  *   - region/item: 페이지 데이터 빌더로 유효 조합만 렌더, 그 외 404(스팸 생성 차단)
  *   - r: "og"(기본, 1.91:1 = 1200×630) | "sq"(1:1 = 1080×1080). 하단 앵커 디자인이라 비율별 개별 렌더.
  *
- * v5 구성: 로고 없는 인물 사진 배경(public/og-people) + 하단 다크 그라데이션 오버레이 위에
- *   ─ 중앙 하단 텍스트 블록(뱃지 2개 / 지역줄 / 대형 키워드줄), 최하단 화이트 CTA바
+ * v6 구성: 로고 없는 인물 사진 배경(public/og-people) + 하단 다크 그라데이션 오버레이 위에
+ *   ─ 세이프 존 하단 블록(뱃지 2개 우측 세로 스택 / 지역줄 / 대형 키워드줄, 전부 좌측 정렬), 최하단 화이트 CTA바
  *   ("010-2177-2720 무료 시범수업 신청", 전화번호는 축 포인트색). 어학 퍼플·검고 청록.
  *
  * v4(좌측 앵커·우상단 뱃지)는 네이버 등이 og 를 중앙 정사각으로 크롭할 때 좌측 231px 이 잘려
  * "대구 서구 검정고시" → "구 검정고시" 로 깨졌다. v5 는 v3 의 세이프 존 원칙을 사진형 레이아웃에
  * 복원해 텍스트·뱃지를 모두 중앙 정사각 크롭 안에 배치한다(어학·검고 공통, 같은 결함이었음).
+ * v6 은 v5(가운데 정렬)의 치수를 그대로 두고 정렬 기준만 "세이프 존 좌측 경계"로 옮긴 것이다.
  * 문구는 페이지 데이터 파생 + 고정 카피(느낌표·보장·수치 없음, "무료 시범수업" 고정 표현).
- * 폰트·immutable 캐시 유지. og URL 은 메타에서 v=5 로 캐시 무효화. 본체 코랄(/api/thumb) 무관.
+ * 폰트·immutable 캐시 유지. og URL 은 메타에서 v=6 으로 캐시 무효화. 본체 코랄(/api/thumb) 무관.
  *
  * 인물 자산 규약(교체 시 파일만 교체): public/og-people/{power|gumjung}-{n}.jpg,
  *   축별 배열에서 hash(region+item)%N 로 분배. 현재는 로고-free 크롭 플레이스홀더.
@@ -217,7 +218,9 @@ export async function GET(
             background: "linear-gradient(to bottom, rgba(0,0,0,0) 34%, rgba(0,0,0,0.42) 62%, rgba(0,0,0,0.86) 100%)",
           }}
         />
-        {/* 세이프 존 텍스트 블록 — 뱃지 2개 / 지역줄 / 키워드줄(대형). 전부 중앙 정사각 크롭 안. */}
+        {/* 세이프 존 블록 — 뱃지 2개(우측 세로 스택) / 지역줄 / 키워드줄(대형). 전부 중앙 정사각 크롭 안.
+            v6: 정렬 기준을 캔버스 좌측이 아니라 "세이프 존 좌측 경계"로 둔다 → 크롭에서 좌측 정렬로
+            보이면서 잘림은 0. fit 기준폭은 SAFE_W 그대로라 폰트 크기·안전 여백 변화 없음. */}
         <div
           style={{
             position: "absolute",
@@ -226,10 +229,19 @@ export async function GET(
             bottom: textBottom,
             display: "flex",
             flexDirection: "column",
-            alignItems: "center",
+            alignItems: "flex-start",
           }}
         >
-          <div style={{ display: "flex", gap: Math.round(badgeFs * 0.5), marginBottom: Math.round(H * 0.025) }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-end",
+              width: SAFE_W,
+              gap: Math.round(badgeFs * 0.4),
+              marginBottom: Math.round(H * 0.025),
+            }}
+          >
             {c.badges.map((b, i) => (
               <div
                 key={i}
