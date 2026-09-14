@@ -17,7 +17,7 @@ import { reviewItems, type ReviewItem } from "@/data/reviewItems";
 
 /**
  * 리뷰 region → 소재 시군구(regions.ts cityQuery 표기) + province(짧은 표기).
- * 19개(지역 15 + 학교 4). 동은 소속 시군구로, 모호값(서구=대전, 대전시=대전 대표 서구)은 명시 해석.
+ * 20개(지역 15 + 학교 5). 동은 소속 시군구로, 모호값(서구=대전, 대전시=대전 대표 서구)은 명시 해석.
  */
 const REGION_TO_AREA: Record<string, { cityQuery: string; province: string }> = {
   // 서울 노원구(동 포함)
@@ -43,6 +43,7 @@ const REGION_TO_AREA: Record<string, { cityQuery: string; province: string }> = 
   발곡고: { cityQuery: "의정부시", province: "경기" },
   풍생고: { cityQuery: "성남시 분당구", province: "경기" },
   고양외고: { cityQuery: "고양시 일산동구", province: "경기" },
+  오성고: { cityQuery: "수성구", province: "대구" }, // 동명 2곳(대구 수성구·천안 서북구) 중 대구 수성구 소재 기준
 };
 
 /** 날짜 있는 후기 우선(최신순), 없는 후기는 배열 순서 유지. */
