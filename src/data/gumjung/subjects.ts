@@ -6,6 +6,7 @@
  */
 import type { Metadata } from "next";
 import { site } from "@/data/site";
+import { powerThumbPath, powerThumbSq } from "@/lib/powerThumb";
 import {
   GUMJUNG_LEVELS,
   getGumjungLevel,
@@ -176,7 +177,7 @@ export function buildGumjungSubjectMetadata(
   const data = buildGumjungSubjectData(levelSlug, subjectSlug);
   if (!data) return {};
   const canonical = `/gumjung/${data.levelSlug}/${data.subjectSlug}`;
-  const thumb = `/api/power-thumb/gumjung-subject/${data.levelSlug}/${data.subjectSlug}?v=8`;
+  const thumb = powerThumbPath("gumjung-subject", data.levelSlug, data.subjectSlug);
   const thumbAlt = `${data.head} 과외 안내`;
   return {
     title: { absolute: data.metaTitle },
@@ -192,7 +193,7 @@ export function buildGumjungSubjectMetadata(
       siteName: SITE_NAME,
       images: [
         { url: thumb, width: 1200, height: 630, alt: thumbAlt },
-        { url: `${thumb}&r=sq`, width: 1080, height: 1080, alt: thumbAlt },
+        { url: powerThumbSq(thumb), width: 1080, height: 1080, alt: thumbAlt },
       ],
     },
     twitter: {

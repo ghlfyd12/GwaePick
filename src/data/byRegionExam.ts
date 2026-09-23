@@ -18,6 +18,14 @@ import {
   isExpansionRegionSlug,
 } from "@/data/powerRegionsExpansion";
 import { isKnownPowerRegion } from "@/data/byRegionSubject";
+import { powerThumbPath, powerThumbSq } from "@/lib/powerThumb";
+import {
+  POWER_REGION_THUMB_MODIFIED,
+  POWER_REGION_THUMB_PATH_MODIFIED,
+} from "@/data/contentMeta";
+
+/** OG article 시각(KST 자정 고정) — 검고 축과 같은 표기. */
+const isoKST = (d: string) => `${d}T00:00:00+09:00`;
 import {
   examBySlug,
   isExamSlug,
@@ -236,13 +244,18 @@ export function buildByExamMetadata(
   const canonical = `/power/by-region/${encodeURIComponent(data.regionSlug)}/${examSlug}`;
   // 페이지별 동적 썸네일(보라 텍스트). 데이터가 유효(=페이지 존재)하면 썸네일도 동일 빌더로 렌더된다.
   // v=2: 썸네일 레이아웃 개편(인물 배경·4단 텍스트) 배포로 immutable 캐시 무효화.
-  const thumb = `/api/power-thumb/exam/${encodeURIComponent(data.regionSlug)}/${examSlug}?v=8`;
+  const thumb = powerThumbPath("exam", data.regionSlug, examSlug);
   const thumbAlt = `${data.regionName} ${data.exam.name} 과외 안내`;
   return {
     title: { absolute: data.metaTitle },
     description: data.metaDescription,
     alternates: { canonical },
     robots: { index: true, follow: true },
+    // 검고 축과 동일한 문서 시각 메타(9/16 진단에서 확인된 격차 해소).
+    other: {
+      "article:published_time": isoKST(POWER_REGION_THUMB_MODIFIED),
+      "article:modified_time": isoKST(POWER_REGION_THUMB_PATH_MODIFIED),
+    },
     openGraph: {
       title: data.metaTitle,
       description: data.metaDescription,
@@ -252,14 +265,14 @@ export function buildByExamMetadata(
       siteName: site.power.name,
       images: [
         { url: thumb, width: 1200, height: 630, alt: thumbAlt },
-        { url: `${thumb}&r=sq`, width: 1080, height: 1080, alt: thumbAlt },
+        { url: powerThumbSq(thumb), width: 1080, height: 1080, alt: thumbAlt },
       ],
     },
     twitter: {
       card: "summary_large_image",
       title: data.metaTitle,
       description: data.metaDescription,
-      images: [thumb],
+      images: [{ url: thumb, width: 1200, height: 630, alt: thumbAlt }],
     },
   };
 }

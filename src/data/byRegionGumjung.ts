@@ -13,6 +13,7 @@ import { examRegions, isExamRegionSlug } from "@/data/byRegionExam";
 import { GUMJUNG_LEVELS } from "@/data/gumjung/levels";
 import { gumjungScheduleSlugForSidoLabel } from "@/data/gumjung/schedule";
 import { GUMJUNG_MODIFIED } from "@/data/contentMeta";
+import { powerThumbPath, powerThumbSq } from "@/lib/powerThumb";
 
 const SITE_NAME = site.gumjung.name;
 const isoKST = (d: string) => `${d}T00:00:00+09:00`;
@@ -224,7 +225,7 @@ export function buildGumjungRegionMetadata(regionParam: string): Metadata {
   const data = buildGumjungRegionData(regionParam);
   if (!data) return {};
   const canonical = `/gumjung/by-region/${encodeURIComponent(data.regionSlug)}`;
-  const thumb = `/api/power-thumb/gumjung-region/${encodeURIComponent(data.regionSlug)}/base?v=8`;
+  const thumb = powerThumbPath("gumjung-region", data.regionSlug, "base");
   const thumbAlt = `${data.head} 과외 안내`;
   return {
     title: { absolute: data.metaTitle },
@@ -245,7 +246,7 @@ export function buildGumjungRegionMetadata(regionParam: string): Metadata {
       siteName: SITE_NAME,
       images: [
         { url: thumb, width: 1200, height: 630, alt: thumbAlt },
-        { url: `${thumb}&r=sq`, width: 1080, height: 1080, alt: thumbAlt },
+        { url: powerThumbSq(thumb), width: 1080, height: 1080, alt: thumbAlt },
       ],
     },
     twitter: {

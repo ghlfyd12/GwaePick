@@ -80,6 +80,13 @@ export const POWER_REGION_THUMB_MODIFIED = "2026-08-26"; // @indexnow-group: pow
 export const POWER_REGION_META_MODIFIED = "2026-08-28"; // @indexnow-group: power-region-meta
 
 /**
+ * /power 지역축(시험·회화) og:image URL 을 쿼리 버전(?v=8) → **경로 버전**(/v9)으로 옮기고
+ * 본문 히어로 <img> 를 추가한 배포일. 산출물 디자인은 v8 그대로지만 og URL 과 본문이 실제로
+ * 바뀐 실변경이라 별도 그룹으로 둔다(2026-09 네이버 썸네일 구버전 고착 대응).
+ */
+export const POWER_REGION_THUMB_PATH_MODIFIED = "2026-09-23"; // @indexnow-group: power-region-thumb-path
+
+/**
  * 검고의참견(/gumjung) 전 유형 — 급별 상세·급별×과목·지역×검정고시·유형 가이드.
  * 신규 축이라 최초 발행일=수정일(배포일). 콘텐츠 실변경 시에만 손으로 갱신(가짜 갱신 금지).
  */

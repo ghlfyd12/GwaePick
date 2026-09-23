@@ -7,6 +7,7 @@ import {
   getGumjungGuide,
 } from "@/data/gumjung/guides";
 import { GUMJUNG_MODIFIED } from "@/data/contentMeta";
+import { powerThumbPath, powerThumbSq } from "@/lib/powerThumb";
 
 const isoKST = (d: string) => `${d}T00:00:00+09:00`;
 
@@ -29,7 +30,7 @@ export async function generateMetadata({
   const guide = getGumjungGuide(type);
   if (!guide) return {};
   const canonical = `/gumjung/guide/${guide.slug}`;
-  const thumb = `/api/power-thumb/gumjung-guide/${guide.slug}/base?v=8`;
+  const thumb = powerThumbPath("gumjung-guide", guide.slug, "base");
   return {
     title: { absolute: guide.metaTitle },
     description: guide.metaDescription,
@@ -48,7 +49,7 @@ export async function generateMetadata({
       siteName: site.gumjung.name,
       images: [
         { url: thumb, width: 1200, height: 630, alt: `${guide.navLabel} 안내` },
-        { url: `${thumb}&r=sq`, width: 1080, height: 1080, alt: `${guide.navLabel} 안내` },
+        { url: powerThumbSq(thumb), width: 1080, height: 1080, alt: `${guide.navLabel} 안내` },
       ],
     },
     twitter: {

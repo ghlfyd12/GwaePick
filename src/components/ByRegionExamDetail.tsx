@@ -2,6 +2,7 @@ import Link from "next/link";
 import ConsultForm from "@/components/ConsultForm";
 import JsonLd from "@/components/JsonLd";
 import { site } from "@/data/site";
+import { powerThumbPath } from "@/lib/powerThumb";
 import { buildByExamData } from "@/data/byRegionExam";
 import { buildExamBookSection } from "@/data/power/examBooks";
 import { buildCompareSection } from "@/data/power/studyModeCompare";
@@ -35,6 +36,9 @@ export default function ByRegionExamDetail({
   // 학원 vs 1:1 과외 비교 섹션(본문만). 시험 언어로 "{언어} 학원" 조합 커버.
   const compareSection = buildCompareSection(data.exam.language, data.regionName);
 
+  // og 와 같은 썸네일을 본문 히어로로도 쓴다(경로 버전 — powerThumb 단일 소스).
+  const thumb = powerThumbPath("exam", data.regionSlug, examSlug);
+  const thumbAlt = `${data.regionName} ${data.exam.name} 과외 안내`;
   const canonical = `/power/by-region/${encodeURIComponent(data.regionSlug)}/${examSlug}`;
   const jsonLd = [
     {
@@ -70,6 +74,17 @@ export default function ByRegionExamDetail({
             >
               {site.cta.label}
             </a>
+          </div>
+          {/* 본문 히어로 — og 와 같은 썸네일(신 경로). 검색 결과 대표이미지 후보를 본문에도 노출한다. */}
+          <div className="mx-auto mt-8 max-w-2xl overflow-hidden rounded-3xl border border-line bg-white shadow-sm">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={thumb}
+              alt={thumbAlt}
+              width={1200}
+              height={630}
+              className="h-auto w-full"
+            />
           </div>
         </div>
       </section>

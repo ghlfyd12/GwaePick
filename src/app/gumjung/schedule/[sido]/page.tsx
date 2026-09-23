@@ -4,6 +4,7 @@ import GumjungScheduleDetail from "@/components/gumjung/GumjungScheduleDetail";
 import { site } from "@/data/site";
 import { GUMJUNG_SIDO_SLUGS, getGumjungSido, gumjungSidoMeta } from "@/data/gumjung/schedule";
 import { GUMJUNG_MODIFIED } from "@/data/contentMeta";
+import { powerThumbPath, powerThumbSq } from "@/lib/powerThumb";
 
 const isoKST = (d: string) => `${d}T00:00:00+09:00`;
 
@@ -27,7 +28,7 @@ export async function generateMetadata({
   if (!sido) return {};
   const meta = gumjungSidoMeta(sido);
   const canonical = `/gumjung/schedule/${sido.slug}`;
-  const thumb = `/api/power-thumb/gumjung-schedule/${sido.slug}/base?v=8`;
+  const thumb = powerThumbPath("gumjung-schedule", sido.slug, "base");
   const alt = `${sido.short} 검정고시 일정 안내`;
   return {
     title: { absolute: meta.title },
@@ -47,7 +48,7 @@ export async function generateMetadata({
       siteName: site.gumjung.name,
       images: [
         { url: thumb, width: 1200, height: 630, alt },
-        { url: `${thumb}&r=sq`, width: 1080, height: 1080, alt },
+        { url: powerThumbSq(thumb), width: 1080, height: 1080, alt },
       ],
     },
     twitter: {

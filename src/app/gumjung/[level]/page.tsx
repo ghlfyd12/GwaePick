@@ -7,6 +7,7 @@ import {
   getGumjungLevel,
 } from "@/data/gumjung/levels";
 import { GUMJUNG_MODIFIED } from "@/data/contentMeta";
+import { powerThumbPath, powerThumbSq } from "@/lib/powerThumb";
 
 const isoKST = (d: string) => `${d}T00:00:00+09:00`;
 
@@ -32,7 +33,7 @@ export async function generateMetadata({
   const title = level.metaTitle;
   const description = level.metaDescription;
   const canonical = `/gumjung/${level.slug}`;
-  const thumb = `/api/power-thumb/gumjung-level/${level.slug}/base?v=8`;
+  const thumb = powerThumbPath("gumjung-level", level.slug, "base");
   return {
     title: { absolute: title },
     description,
@@ -51,7 +52,7 @@ export async function generateMetadata({
       siteName: site.gumjung.name,
       images: [
         { url: thumb, width: 1200, height: 630, alt: `${level.examName} 안내` },
-        { url: `${thumb}&r=sq`, width: 1080, height: 1080, alt: `${level.examName} 안내` },
+        { url: powerThumbSq(thumb), width: 1080, height: 1080, alt: `${level.examName} 안내` },
       ],
     },
     twitter: {

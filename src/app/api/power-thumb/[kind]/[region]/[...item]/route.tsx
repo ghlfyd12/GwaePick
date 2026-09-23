@@ -1,10 +1,13 @@
 /**
  * 어학의참견(/power) 지역×시험·회화 + 검고의참견(gumjung) 페이지별 동적 썸네일 (v8 세이프 존·좌측 정렬·풀블리드).
  *
- * GET /api/power-thumb/{kind}/{region}/{item}[?r=og|sq] → PNG
+ * GET /api/power-thumb/{kind}/{region}/{item}[/{버전}][?r=og|sq] → PNG
  *   - kind: "exam" | "conversation"(어학) | "gumjung-subject|region|level|guide|age|schedule"(검고)
  *   - region/item: 페이지 데이터 빌더로 유효 조합만 렌더, 그 외 404(스팸 생성 차단)
  *   - r: "og"(기본, 1.91:1 = 1200×630) | "sq"(1:1 = 1080×1080). 하단 앵커 디자인이라 비율별 개별 렌더.
+ *   - {버전}: 선택 세그먼트(예 "v9"). 렌더에는 쓰지 않고 **캐시 키**로만 쓴다 — 쿼리(?v=) 는 일부
+ *     크롤러·CDN 이 무시하거나 구 이미지를 붙잡아 썸네일이 갱신되지 않는 사례가 있어(2026-09 어학 축
+ *     실측) 버전을 경로로 올렸다. 버전 없는 구 URL 도 그대로 200 을 유지한다(기존 색인 보호).
  *
  * v8 구성: 로고 없는 인물 사진 배경(public/og-people)이 캔버스 하단 끝까지 풀블리드 +
  *   하단 다크 그라데이션 오버레이 위에 세이프 존 하단 블록(뱃지 2개 우측 세로 스택 /
@@ -167,11 +170,13 @@ function resolveContent(kind: string, regionParam: string, itemSlug: string): Co
 
 export async function GET(
   req: Request,
-  { params }: { params: Promise<{ kind: string; region: string; item: string }> },
+  { params }: { params: Promise<{ kind: string; region: string; item: string[] }> },
 ) {
   const { kind, region, item } = await params;
+  // item = [슬러그] 또는 [슬러그, 버전]. 버전 세그먼트는 캐시 키일 뿐이라 렌더에 쓰지 않는다.
+  if (!item?.length || item.length > 2) return notFound();
   const regionParam = slugKey(region);
-  const itemSlug = slugKey(item);
+  const itemSlug = slugKey(item[0]);
 
   const c = resolveContent(kind, regionParam, itemSlug);
   if (!c) return notFound();

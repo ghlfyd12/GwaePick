@@ -4,6 +4,7 @@ import GumjungAgeDetail from "@/components/gumjung/GumjungAgeDetail";
 import { site } from "@/data/site";
 import { GUMJUNG_AGE_SLUGS, getGumjungAge } from "@/data/gumjung/ages";
 import { GUMJUNG_MODIFIED } from "@/data/contentMeta";
+import { powerThumbPath, powerThumbSq } from "@/lib/powerThumb";
 
 const isoKST = (d: string) => `${d}T00:00:00+09:00`;
 
@@ -26,7 +27,7 @@ export async function generateMetadata({
   const age = getGumjungAge(slug);
   if (!age) return {};
   const canonical = `/gumjung/age/${age.slug}`;
-  const thumb = `/api/power-thumb/gumjung-age/${age.slug}/base?v=8`;
+  const thumb = powerThumbPath("gumjung-age", age.slug, "base");
   const alt = `${age.h1} 과외 안내`;
   return {
     title: { absolute: age.metaTitle },
@@ -46,7 +47,7 @@ export async function generateMetadata({
       siteName: site.gumjung.name,
       images: [
         { url: thumb, width: 1200, height: 630, alt },
-        { url: `${thumb}&r=sq`, width: 1080, height: 1080, alt },
+        { url: powerThumbSq(thumb), width: 1080, height: 1080, alt },
       ],
     },
     twitter: {
