@@ -82,6 +82,12 @@ export type HeadlineVariant = keyof typeof headlineVariants;
 
 export const heroContent = {
   /**
+   * 헤드라인 위 아이브로우 — 브랜드명 1회 노출. 어학·검고 상세가 쓰는
+   * "{축 브랜드} · {대상}" 패턴을 메인축 홈에도 맞춘 것이다(h1 문구는 무변경).
+   */
+  eyebrow: "지식의참견",
+
+  /**
    * 현재 노출 중인 헤드라인 변이.
    * 'A' ↔ 'B' 로만 바꾸면 헤드라인이 전환된다(기본값 'A').
    * 실제 A/B 트래픽 분배 로직은 이번 범위 밖.

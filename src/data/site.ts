@@ -112,6 +112,16 @@ export const site = {
     kakaoChannelUrl: "https://open.kakao.com/o/sOxzonXg",
   },
 
+  /**
+   * 공식 채널 — 홈 JSON-LD 의 sameAs 소스(브랜드 동일성 신호).
+   * naverBlog 는 NAVER_BLOG_RSS_URL(서버 전용 env)에서 유도되는 블로그 홈과 같은 곳인데,
+   * env 는 빌드 환경에 따라 비어 있을 수 있어 sameAs 가 조용히 사라지지 않도록 여기에 고정한다.
+   * 블로그를 옮기면 이 값과 NAVER_BLOG_RSS_URL 을 함께 교체한다.
+   */
+  channels: {
+    naverBlog: "https://blog.naver.com/smart-is-well",
+  },
+
   /** 푸터 저작권 표기 연도 */
   copyrightYear: 2026,
 } as const;

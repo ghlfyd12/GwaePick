@@ -87,7 +87,8 @@ export async function generateSitemaps() {
  */
 function coreSitemap(): MetadataRoute.Sitemap {
   const home: MetadataRoute.Sitemap = [
-    { url: `${base}/`, lastModified: CORE_MODIFIED, changeFrequency: "weekly", priority: 1 },
+    // 홈 loc 은 canonical 과 같은 표기(슬래시 없음)로 둔다 — 사이트맵이 비-canonical 변형을 광고하지 않도록.
+    { url: base, lastModified: CORE_MODIFIED, changeFrequency: "weekly", priority: 1 },
   ];
 
   // 신청폼·개인정보처리방침(2-B 공개 전환) — 코어 사이트맵에 포함.

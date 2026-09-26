@@ -17,7 +17,7 @@ import styles from "./Hero.module.css";
  * 페이지 유일의 <h1> 은 이 섹션의 헤드라인.
  */
 export default function Hero() {
-  const { activeVariant, headlines, cta, heroBackground } = heroContent;
+  const { activeVariant, headlines, cta, heroBackground, eyebrow } = heroContent;
   const headline = headlines[activeVariant];
 
   return (
@@ -46,6 +46,13 @@ export default function Hero() {
         {/* 전경 콘텐츠 — 상단·좌측, 폭 제한으로 중앙/우측 인물 회피. */}
         <div className="relative z-20 mx-auto w-full max-w-6xl px-5 pt-8 sm:px-6 md:pt-20">
           <div className="max-w-md">
+            {/* 아이브로우 — 브랜드명. h1 위 한 줄(다른 축 상세와 같은 패턴). */}
+            <p
+              className={`${styles.fadeUp} mb-2 text-xs font-semibold uppercase tracking-widest text-white/85 [text-shadow:0_1px_8px_rgba(0,0,0,0.45)] md:mb-3 md:text-sm`}
+              style={{ animationDelay: "0s" }}
+            >
+              {eyebrow}
+            </p>
             <h1
               id="hero-heading"
               className={`${styles.fadeUp} text-[1.3rem] font-bold leading-snug text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.45)] md:text-[2.5rem] md:leading-[1.3] lg:text-5xl lg:leading-[1.25]`}

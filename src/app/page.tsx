@@ -32,6 +32,37 @@ const organizationJsonLd = {
   description: site.description,
   // 서비스 제공 지역 — 국내 전역.
   areaServed: "KR",
+  // 같은 주체가 운영하는 공식 채널 — 브랜드 동일성 신호(site.ts 단일 소스).
+  sameAs: [site.channels.naverBlog, site.contact.kakaoChannelUrl],
+  // 상담 연락 수단 — 전화·이메일 모두 site.ts 실제 값.
+  contactPoint: {
+    "@type": "ContactPoint",
+    contactType: "customer service",
+    telephone: site.contact.phone,
+    email: site.contact.email,
+    areaServed: "KR",
+    availableLanguage: ["ko"],
+  },
+};
+
+/*
+ * WebSite 스키마 — "지식의참견" 브랜드 쿼리에서 홈이 사이트 대표 문서로 묶이도록 하는 신호.
+ * Organization(운영 주체)과 별개로 사이트 자체를 기술하고, alternateName 으로 띄어쓴 표기·영문
+ * 표기를 같은 사이트로 묶는다.
+ *
+ * potentialAction(SearchAction)은 **의도적으로 넣지 않는다** — 이 사이트에는 `?q=` 로 결과를
+ * 돌려주는 검색 페이지가 없다(QuickSearch 는 클라이언트 콤보박스로 고른 항목의 상세로 바로 이동).
+ * 없는 엔드포인트를 선언하면 허위 구조화 데이터가 되므로, URL 기반 검색 결과 페이지가 생기면
+ * 그때 추가한다.
+ */
+const webSiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: site.name,
+  alternateName: ["지식의 참견", "gwae-pick"],
+  url: site.url,
+  inLanguage: "ko-KR",
+  publisher: { "@type": "EducationalOrganization", name: site.name, url: site.url },
 };
 
 /*
@@ -44,7 +75,11 @@ const organizationJsonLd = {
 export default function Home() {
   return (
     <>
-      {/* 구조화 데이터(Organization) — 검색 로봇용. 화면에는 보이지 않는다. */}
+      {/* 구조화 데이터(WebSite + Organization) — 검색 로봇용. 화면에는 보이지 않는다. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}

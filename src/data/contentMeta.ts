@@ -52,7 +52,7 @@ export const SCHOOL_HUB_MODIFIED = "2026-08-24"; // @indexnow-group: school-hub
  *    신규 페이지 유형을 sitemap 에 편입하면 그 유형 상수를 새로 추가해 해당 그룹에만 적용한다.
  */
 /** 홈·신청(/apply)·개인정보처리방침(/privacy) 본문. */
-export const CORE_MODIFIED = "2026-07-29"; // @indexnow-group: core
+export const CORE_MODIFIED = "2026-09-07"; // @indexnow-group: core
 /** 지역 랜딩 /[region] (템플릿·regions.ts 데이터). 2026-08-28 og:image 텍스트 썸네일 신규 연결(전 랜딩). */
 export const REGION_MODIFIED = "2026-08-28"; // @indexnow-group: region
 /** 신도시 키워드 보강된 시군구 랜딩(regionLandmarks 대상)만. 2026-08-28 랜딩 썸네일 og 연결로 갱신. */
