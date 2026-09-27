@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
     ],
     // /power 동적 썸네일 라우트(v4 사진형) — 폰트 + 로고 없는 인물 배경(og-people)을 함수 번들에
     // 포함(ENOENT 방지). 자산 교체 시 같은 파일명 유지 → config 무수정.
-    "/api/power-thumb/[kind]/[region]/[item]": [
+    "/api/power-thumb/[kind]/[region]/[...item]": [
       "./src/fonts/Pretendard-Bold-subset.ttf",
       "./public/og-people/power-1.jpg",
       "./public/og-people/power-2.jpg",
@@ -42,6 +42,12 @@ const nextConfig: NextConfig = {
       // [region] 동적 라우트(dynamicParams)가 /power/reviews 를 지역 페이지로 오인 렌더하지 않도록
       // 명시적으로 학습사례 앵커로 영구 리다이렉트한다(기존 유입·색인 URL 보존).
       { source: "/power/reviews", destination: "/power#cases", permanent: true },
+      // 블로그 페이지 폐지(운영자 결정, 2026-09-27) — 네이버 블로그 RSS 연계 페이지였다.
+      // 기존 색인·외부 유입이 끊기지 않도록 홈으로 영구 이전한다. 외부 블로그 자체는 유지되며
+      // 홈 JSON-LD 의 sameAs 로 계속 연결된다(site.channels.naverBlog).
+      // statusCode:301 을 쓴다 — permanent:true 는 308(Permanent Redirect)을 내보내는데,
+      // 검색엔진 호환을 넓게 잡으려고 고전적인 301 로 고정한다.
+      { source: "/blog", destination: "/", statusCode: 301 },
     ];
   },
   async rewrites() {

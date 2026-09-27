@@ -1,9 +1,10 @@
-import Link from "next/link";
 import { getBlogPosts } from "@/lib/blogFeed";
+import { site } from "@/data/site";
 import BlogCard from "@/components/blog/BlogCard";
 
 /*
  * BlogSection — 홈 하단 네이버 블로그 최신글 연계 섹션(서버 컴포넌트).
+ * 사내 /blog 목록 페이지는 2026-09-27 폐지 — 더보기는 네이버 블로그 원본으로 나간다.
  * 최신 6개를 카드로. RSS 수집 실패/미설정이면 섹션 자체를 숨긴다(홈이 깨지지 않게).
  * 데스크톱 3열·태블릿 2열·모바일 1열. 코랄 포인트, 보라 없음, 느낌표 없음.
  */
@@ -34,12 +35,15 @@ export default async function BlogSection() {
         </div>
 
         <div className="mt-8 text-center">
-          <Link
-            href="/blog"
+          {/* 사내 /blog 페이지는 폐지됨(2026-09-27) — 네이버 블로그 원본으로 바로 보낸다. */}
+          <a
+            href={site.channels.naverBlog}
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-accent px-6 text-sm font-bold text-accent transition-colors hover:bg-accent/5 sm:text-base"
           >
-            블로그 더보기 →
-          </Link>
+            네이버 블로그에서 더 보기 →
+          </a>
         </div>
       </div>
     </section>
