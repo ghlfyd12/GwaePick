@@ -5,6 +5,11 @@
 // 같은 URL 목록을 반복 전송하는 것은 검색엔진 남용이며 rate limit·신뢰도
 // 하락을 부른다. 이 스크립트는 배포로 페이지가 실제 변경된 직후 1회만 실행한다.
 // 상주/폴링/데몬/크론 금지 — 포그라운드에서 한 번 실행하고 종료한다.
+//
+// 루트 URL 금지: 네이버 IndexNow 는 경로 없는 오리진(`https://<host>` / `https://<host>/`)을
+// HTTP 422 "Invalid urls" 로 거부하고, 그 URL 이 섞인 chunk 는 통째로 실패한다(2026-09-27 실측 —
+// 슬래시 유무 무관). 홈 재크롤은 IndexNow 가 아니라 서치어드바이저 수집요청으로 처리한다.
+// 아래 가드가 전송 전에 목록을 검사해 루트가 있으면 요청을 보내지 않고 거부한다.
 // ────────────────────────────────────────────────────────────────────────
 //
 // 네이버 IndexNow 배치 전송 (POST). 요청당 최대 10,000 URL(표준) 이지만
@@ -74,6 +79,25 @@ if (urls.length > LARGE_THRESHOLD && !confirmLarge) {
     `거부 — URL ${urls.length}건은 ${LARGE_THRESHOLD}건 초과(대량). 검수자 승인 후 --confirm-large 를 붙여 실행하세요.`,
   );
   console.error(`예: node scripts/indexnow-submit.mjs ${listPath} --confirm-large`);
+  process.exit(1);
+}
+
+// ── 루트 URL 가드 — 한 건이라도 있으면 전송 전에 거부(chunk 전체 422 방지) ──────────
+const isRootUrl = (u) => {
+  try {
+    const { pathname, search } = new URL(u);
+    return pathname === "/" && !search;
+  } catch {
+    return false;
+  }
+};
+const rootUrls = urls.filter(isRootUrl);
+if (rootUrls.length > 0) {
+  console.error(
+    `거부 — 목록에 루트 URL 이 ${rootUrls.length}건 있습니다: ${rootUrls.slice(0, 3).join(", ")}`,
+  );
+  console.error("네이버 IndexNow 는 루트 URL 을 422(Invalid urls)로 거부하고 해당 chunk 전체가 실패합니다.");
+  console.error("목록에서 루트를 빼고 다시 실행하세요. 홈 재크롤은 서치어드바이저 수집요청으로 처리합니다.");
   process.exit(1);
 }
 

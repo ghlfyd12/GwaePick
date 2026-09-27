@@ -13,6 +13,10 @@
 // 출력: scripts/indexnow/school-subject-urls.txt (한 줄 1 URL)
 // 상주/폴링/데몬 없음 — 파일 쓰고 종료.
 
+// 공통 규칙: 산출 목록에 **루트 URL**(`https://<host>` / `https://<host>/`)을 넣지 않는다 —
+// 네이버 IndexNow 가 422 "Invalid urls" 로 거부하고 그 chunk 전체가 실패한다(2026-09-27 실측).
+// 홈 재크롤은 서치어드바이저 수집요청으로 처리한다. (전송기 indexnow-submit.mjs 에도 가드 있음.)
+
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";

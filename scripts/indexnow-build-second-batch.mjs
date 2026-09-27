@@ -5,7 +5,8 @@
 // 대상(사이트맵 <loc> 와 동일 인코딩: 한글 경로는 encodeURIComponent):
 //   ① 지역 랜딩 122개        /{region.id}                     (인바운드 링크 신설)
 //   ② 경기 시군구×과목 368개  /tutoring/by-region/경기/{sg}/{subj}  (SSR 잘림 해소·사이트맵 등재분)
-//   ③ 허브 38개              홈 + by-region/by-school/by-subject 허브 + 시도 허브 34
+//   ③ 허브 37개              by-region/by-school/by-subject 허브 + 시도 허브 34
+//                            (홈=루트 URL 은 제외 — IndexNow 가 422 로 거부)
 //                            (폰트·이미지·링크 실변경)
 //
 // 출력: scripts/indexnow/second-batch-urls.txt (한 줄 1 URL). 상주/폴링 없음.
@@ -46,7 +47,8 @@ for (const subj of pseoSubjects) {
 const sidoSrc = read("src/data/sido.ts");
 const sidoSlugs = [...sidoSrc.matchAll(/slug:\s*"([a-z]+)"/g)].map((m) => m[1]); // 17
 const hubUrls = [
-  `${BASE}/`, // 홈(사이트맵 <loc> 와 동일하게 트레일링 슬래시)
+  // 홈(루트)은 넣지 않는다 — 네이버 IndexNow 가 422 "Invalid urls" 로 거부하고 그 chunk 가
+  // 통째로 실패한다(2026-09-27 실측). 홈 재크롤은 서치어드바이저 수집요청으로 처리한다.
   `${BASE}/tutoring/by-region`,
   `${BASE}/tutoring/by-school`,
   `${BASE}/tutoring/by-subject`,
@@ -64,6 +66,6 @@ writeFileSync(outFile, uniq.join("\n") + "\n", "utf8");
 
 console.log(`① 지역 랜딩: ${regionUrls.length}`);
 console.log(`② 경기 시군구×과목: ${sigunguUrls.length} (시군구 ${sigungu.length} × 과목 ${pseoSubjects.length} [${pseoSubjects.join(",")}])`);
-console.log(`③ 허브: ${hubUrls.length} (홈1 + 카테고리3 + 시도 ${sidoSlugs.length}×2)`);
+console.log(`③ 허브: ${hubUrls.length} (카테고리3 + 시도 ${sidoSlugs.length}×2, 홈 제외)`);
 console.log(`합계(중복 제거 전): ${all.length}  / 중복 제거 후: ${uniq.length}`);
 console.log(`출력: ${outFile}`);
