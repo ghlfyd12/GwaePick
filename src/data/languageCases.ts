@@ -1,4 +1,4 @@
-// 자동 생성(원문: src/data/raw/language-cases.txt). 검색용 학습사례(별점·날짜·실명 없음).
+// 원문: src/data/raw/language-cases.txt. 검색용 학습사례(별점·날짜·실명 없음).
 // 카테고리 표준화 + 느낌표/과장 표현 제거 적용. 컴포넌트는 이 파일을 읽어 그룹핑해 렌더한다.
 
 export type LanguageCase = {
@@ -109,6 +109,9 @@ export const languageCases: LanguageCase[] = [
   { id: "lc-098", category: "토익", ageGroup: "41세", text: "토익 시험 치고 왔는데, 수업에서 배운 내용이 그대로 나왔네요" },
   { id: "lc-099", category: "직장인 진급시험", ageGroup: "56세", text: "직장인진급시험 공부 덕분에 직장 내에서도 영어 실력자로 통합니다." },
   { id: "lc-100", category: "일본어 자격시험(JLPT)", ageGroup: "60세", text: "일본어자격증시험 합격의 기쁨을 60대에 맛보네요, 다 선생님 덕분입니다." },
+  // 신규 2건(2026-09-30). 카테고리 2종(영어회화·토익스피킹)도 이때 신설 — CASE_GROUPS 참고.
+  { id: "lc-101", category: "영어회화", ageGroup: "초3", text: "파닉스부터 시작해 5년째, 이제 사회적인 주제에도 영어로 자기 의견과 근거를 말할 수 있게 됐어요" },
+  { id: "lc-102", category: "토익스피킹", ageGroup: "직장인", text: "토익스피킹 2주 준비로 목표 130점을 넘어 140점을 받았어요" },
 ];
 
 /** 3개 그룹 — 카테고리 표준값으로 묶는다. */
@@ -124,12 +127,14 @@ export const CASE_GROUPS: CaseGroup[] = [
       "일본어 자격시험(JLPT)",
       "중국어 자격시험(HSK)",
       "주니어 토플",
+      "토익스피킹",
     ],
   },
   {
     key: "business",
-    title: "비즈니스·직장 영어",
-    categories: ["비즈니스 회화", "직장인 진급시험"],
+    // 영어회화 카테고리를 이 그룹에 넣으면서 표시명을 넓혔다(2026-09-30). key 는 유지.
+    title: "영어 회화·직장 영어",
+    categories: ["영어회화", "비즈니스 회화", "직장인 진급시험"],
   },
   {
     key: "school",
