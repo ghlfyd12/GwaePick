@@ -10,8 +10,14 @@
  * 깨뜨리지 않기 위해서다. 새로 내보내는 메타·본문은 전부 이 모듈의 빌더만 쓴다.
  */
 
-/** og URL 경로 버전. 썸네일 산출물이 실제로 바뀔 때만 올린다(캐시 무효화 목적). */
-export const POWER_THUMB_VERSION = "v9";
+/**
+ * og URL 경로 버전 — 썸네일 산출물이 실제로 바뀔 때만 올린다(캐시 무효화 목적).
+ * **축마다 따로 올린다**: 2026-10 어학 2종만 텍스트형으로 회귀(v9 → v10)했고 검고 6종은
+ * 사진형 v8 산출물 그대로라 v9 를 유지한다. 바뀌지 않은 축의 버전을 같이 올리면 내용 변경이
+ * 없는 URL 을 새로 통지하게 된다(IndexNow 남용).
+ */
+export const POWER_THUMB_VERSION_LANG = "v10";
+export const POWER_THUMB_VERSION_GUMJUNG = "v9";
 
 /** kind — 어학 2종 + 검고 6종 = 8종(라우트 resolveContent 와 1:1). */
 export type PowerThumbKind =
@@ -30,7 +36,11 @@ export function powerThumbPath(
   region: string,
   item: string,
 ): string {
-  return `/api/power-thumb/${kind}/${encodeURIComponent(region)}/${item}/${POWER_THUMB_VERSION}`;
+  const v =
+    kind === "exam" || kind === "conversation"
+      ? POWER_THUMB_VERSION_LANG
+      : POWER_THUMB_VERSION_GUMJUNG;
+  return `/api/power-thumb/${kind}/${encodeURIComponent(region)}/${item}/${v}`;
 }
 
 /** 정사각(1:1) 변형 — 비율만 쿼리로 가른다(라우트 `?r=sq`). */

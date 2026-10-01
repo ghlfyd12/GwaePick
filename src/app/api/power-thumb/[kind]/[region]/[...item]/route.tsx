@@ -1,5 +1,10 @@
 /**
- * 어학의참견(/power) 지역×시험·회화 + 검고의참견(gumjung) 페이지별 동적 썸네일 (v8 세이프 존·좌측 정렬·풀블리드).
+ * 어학의참견(/power) 지역×시험·회화 + 검고의참견(gumjung) 페이지별 동적 썸네일.
+ *
+ * **축별로 디자인이 다르다(2026-10 결정).**
+ *   - 어학(exam·conversation) = **텍스트형 v10** — 흰 단색 배경 + 퍼플 2줄, 사진·뱃지·CTA 없음.
+ *     사진형 v8 이 네이버 노출에서 구버전 고착·가독 저하를 보여 구 텍스트형(23ecbba)으로 회귀.
+ *   - 검고(gumjung-*) = **사진형 v8 유지** — 아래 설명 그대로.
  *
  * GET /api/power-thumb/{kind}/{region}/{item}[/{버전}][?r=og|sq] → PNG
  *   - kind: "exam" | "conversation"(어학) | "gumjung-subject|region|level|guide|age|schedule"(검고)
@@ -104,6 +109,66 @@ function fitFontSize(str: string, targetW: number, minFs: number, maxFs: number)
   return Math.max(minFs, Math.min(maxFs, Math.floor(targetW / estEm(str))));
 }
 
+/**
+ * 텍스트형 썸네일(어학 전용) — 밝은 단색 배경 위 퍼플 2줄.
+ *
+ * 세이프 존 준수: SNS·검색이 og(1200×630)를 중앙 정사각으로 크롭해도 두 줄이 모두 남도록
+ * 텍스트 블록을 캔버스 중앙의 정사각 세이프 존(정사각 변 − 좌우 6%) 안에만 둔다.
+ * 다른 요소가 없으므로 폰트 상한은 세이프 존이 허용하는 최대(가로=SAFE_W, 세로=2줄 수용)까지
+ * 올려 레퍼런스처럼 글자가 화면을 꽉 채우게 한다. 긴 지역명은 폭 기준으로 자동 축소된다.
+ */
+const TEXT_MIN_FS = 24;
+const LINE_H = 1.16;
+function textThumb(lines: [string, string], W: number, H: number, fontData: Buffer): Response {
+  const SQ = Math.min(W, H);
+  const safePad = Math.round(SQ * 0.06);
+  const SAFE = SQ - 2 * safePad; // og 554 / sq 950 (가로·세로 공통)
+  const widest = Math.max(...lines.map(estEm));
+  const byWidth = Math.floor(SAFE / widest);
+  const byHeight = Math.floor(SAFE / (2 * LINE_H));
+  const fontSize = Math.max(TEXT_MIN_FS, Math.min(byWidth, byHeight));
+
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          width: W,
+          height: H,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "#FFFFFF",
+        }}
+      >
+        {lines.map((line, i) => (
+          <div
+            key={i}
+            style={{
+              fontFamily: "Pretendard",
+              fontWeight: 700,
+              fontSize,
+              lineHeight: LINE_H,
+              color: PURPLE,
+              letterSpacing: "-0.02em",
+              textAlign: "center",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {line}
+          </div>
+        ))}
+      </div>
+    ),
+    {
+      width: W,
+      height: H,
+      fonts: [{ name: "Pretendard", data: fontData, weight: 700, style: "normal" }],
+      headers: { "Cache-Control": "public, max-age=31536000, immutable" },
+    },
+  );
+}
+
 function notFound(): Response {
   return new Response("Not found", {
     status: 404,
@@ -126,12 +191,15 @@ function resolveContent(kind: string, regionParam: string, itemSlug: string): Co
   if (kind === "exam") {
     const d = buildByExamData(regionParam, itemSlug);
     if (!d) return null;
-    return { axis: "power", region: d.regionName, keyword: `${d.exam.name} 과외`, badges: LANG_BADGES };
+    // 텍스트형 레퍼런스 규칙: 시험명은 붙여쓰기("아이엘츠과외").
+    return { axis: "power", region: d.regionName, keyword: `${d.exam.name}과외`, badges: LANG_BADGES };
   }
   if (kind === "conversation") {
     const d = buildByRegionData(regionParam, itemSlug);
     if (!d) return null;
-    return { axis: "power", region: d.regionName, keyword: `${d.label} 과외`, badges: LANG_BADGES };
+    // label 이 이미 "…과외"면 이중 부착 방지("중국어과외" / "영어회화 과외").
+    const kw = d.label.endsWith("과외") ? d.label : `${d.label} 과외`;
+    return { axis: "power", region: d.regionName, keyword: kw, badges: LANG_BADGES };
   }
   if (kind === "gumjung-subject") {
     const d = buildGumjungSubjectData(regionParam, itemSlug);
@@ -183,7 +251,13 @@ export async function GET(
 
   const r: RatioKey = new URL(req.url).searchParams.get("r") === "sq" ? "sq" : "og";
   const { W, H } = RATIOS[r];
-  const accent = c.axis === "gumjung" ? TEAL : PURPLE;
+
+  // ── 어학(exam·conversation) = 텍스트형(v10) ────────────────────────────────
+  // 2026-10 운영자 결정: 어학 2종은 사진형 v8 을 접고 구 텍스트형(23ecbba 계열)으로 회귀한다.
+  // 밝은 단색 배경 + 퍼플 2줄({지역} / {과목·시험}과외), 사진·뱃지·CTA 없음. 검고 6종은 v8 유지.
+  if (c.axis === "power") return textThumb([c.region, c.keyword], W, H, await loadFont());
+
+  const accent = TEAL;
   const bgFile =
     kind === "gumjung-guide" && GUMJUNG_GUIDE_PEOPLE[regionParam]
       ? GUMJUNG_GUIDE_PEOPLE[regionParam]
