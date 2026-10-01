@@ -184,6 +184,8 @@ function notFound(): Response {
  * 키워드가 충분히 커지고, 긴 지역명(고양시 일산동구 등)이 폰트 축소를 유발하지 않는다.
  */
 type Content = { axis: "power" | "gumjung"; region: string; keyword: string; badges: [string, string] };
+// 검고 키워드줄은 "검정고시"(2026-10 축소 — "과외"를 떼어 fit 로직이 글자를 더 키운다).
+// 일정 축만 "검정고시 일정"로 유지한다(원래 "과외"가 없었다).
 const GJ_BADGES: [string, string] = ["급별 1:1", "기초부터 준비"];
 const LANG_BADGES: [string, string] = ["왕초보 1:1", "전화·화상 수업"];
 
@@ -204,27 +206,27 @@ function resolveContent(kind: string, regionParam: string, itemSlug: string): Co
   if (kind === "gumjung-subject") {
     const d = buildGumjungSubjectData(regionParam, itemSlug);
     if (!d) return null;
-    return { axis: "gumjung", region: d.subjectLabel, keyword: "검정고시 과외", badges: GJ_BADGES };
+    return { axis: "gumjung", region: d.subjectLabel, keyword: "검정고시", badges: GJ_BADGES };
   }
   if (kind === "gumjung-region") {
     const d = buildGumjungRegionData(regionParam);
     if (!d) return null;
-    return { axis: "gumjung", region: d.regionName, keyword: "검정고시 과외", badges: GJ_BADGES };
+    return { axis: "gumjung", region: d.regionName, keyword: "검정고시", badges: GJ_BADGES };
   }
   if (kind === "gumjung-level") {
     const level = getGumjungLevel(regionParam);
     if (!level) return null;
-    return { axis: "gumjung", region: level.name, keyword: "검정고시 과외", badges: GJ_BADGES };
+    return { axis: "gumjung", region: level.name, keyword: "검정고시", badges: GJ_BADGES };
   }
   if (kind === "gumjung-guide") {
     const guide = getGumjungGuide(regionParam);
     if (!guide) return null;
-    return { axis: "gumjung", region: guide.navLabel, keyword: "검정고시 과외", badges: GJ_BADGES };
+    return { axis: "gumjung", region: guide.navLabel, keyword: "검정고시", badges: GJ_BADGES };
   }
   if (kind === "gumjung-age") {
     const age = getGumjungAge(regionParam);
     if (!age) return null;
-    return { axis: "gumjung", region: age.ageLabel, keyword: "검정고시 과외", badges: age.badges };
+    return { axis: "gumjung", region: age.ageLabel, keyword: "검정고시", badges: age.badges };
   }
   if (kind === "gumjung-schedule") {
     if (regionParam === "hub")
