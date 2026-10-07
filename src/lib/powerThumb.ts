@@ -12,11 +12,11 @@
 
 /**
  * og URL 경로 버전 — 썸네일 산출물이 실제로 바뀔 때만 올린다(캐시 무효화 목적).
- * **축마다 따로 올린다**: 2026-10 어학 2종은 텍스트형 회귀(v10) 뒤 사진+흰 패널로 **v13**, 검고 6종은 키워드 축소로 **v11**. 검고는
+ * **축마다 따로 올린다**: 2026-10 어학 2종은 텍스트형 회귀(v10) 뒤 사진+하단 그라데이션·지역명 축약으로 **v14**, 검고 6종은 키워드 축소로 **v11**. 검고는
  * 배치·뱃지는 v8 그대로고 키워드줄 문구만 짧아졌다. 바뀌지 않은 축의 버전을 같이 올리면 내용 변경이
  * 없는 URL 을 새로 통지하게 된다(IndexNow 남용).
  */
-export const POWER_THUMB_VERSION_LANG = "v13";
+export const POWER_THUMB_VERSION_LANG = "v14";
 export const POWER_THUMB_VERSION_GUMJUNG = "v11";
 
 /** kind — 어학 2종 + 검고 6종 = 8종(라우트 resolveContent 와 1:1). */
