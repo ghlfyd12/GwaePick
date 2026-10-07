@@ -280,6 +280,7 @@ export function buildSchoolMeta(p: SchoolMetaInput): Metadata {
         sigunguName: p.sigunguName!,
         schoolName: p.schoolName,
         subjectLabel: p.subjectLabel,
+        subjectSlug: p.subjectSlug,
         level: p.level ?? "high",
       })} | ${SITE_NAME}`
     : composeTitle({
