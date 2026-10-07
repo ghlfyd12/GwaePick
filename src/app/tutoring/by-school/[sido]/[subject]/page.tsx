@@ -100,6 +100,9 @@ export async function generateMetadata({
     regionShort: isAmbiguousSchoolName(ctx.school.name)
       ? shortRegion(ctx.sigunguName)
       : undefined,
+    // title A안 파일럿 판정·접두용(파일럿 밖에서는 쓰이지 않는다).
+    sigunguName: ctx.sigunguName,
+    sidoSlug: ctx.sidoSlug,
     // 초등은 내신 대신 단원평가·수행평가 프레이밍 description 을 쓰도록 학교급 전달.
     level: ctx.school.level,
     canonicalPath: `/tutoring/by-school/${ctx.school.slug}/${subj.slug}`,

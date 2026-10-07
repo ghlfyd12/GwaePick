@@ -40,6 +40,7 @@ import {
   PROFILE_SIZE,
 } from "@/lib/thumb";
 import { SCHOOL_GRADE_PHRASE } from "@/data/schoolGradeKeywords";
+import { isTitlePilot, buildPilotTitleCore } from "@/data/titlePilot";
 import {
   SCHOOL_PUBLISHED,
   SCHOOL_MODIFIED,
@@ -261,19 +262,33 @@ export interface SchoolMetaInput {
   schoolSlug?: string;
   /** 동명이교(지역 접미사) 학교만 지정 — title 앞에 짧은 지역명이 붙는다. */
   regionShort?: string;
+  /** 소속 시군구 전체 이름("대덕구"·"성남시 분당구") — title A안 파일럿의 접두에 쓴다. */
+  sigunguName?: string;
+  /** 소속 시도 slug — title A안 파일럿 범위 판정에 쓴다. */
+  sidoSlug?: string;
   /** 학교급 — description 프레이밍 + title 문구(초·중 override) 선택에 쓰인다. 미지정 시 고등 기준. */
   level?: TitleLevel;
   canonicalPath: string;
 }
 export function buildSchoolMeta(p: SchoolMetaInput): Metadata {
+  // title A안 파일럿(현재 대전 고교 520장) — 시군구 접두 + 짧은 꼬리로 유사문서를 분산한다.
+  // 파일럿 밖은 기존 composeTitle 그대로라 diff 0. description 은 양쪽 모두 무변경(변수 통제).
+  const pilot = isTitlePilot(p.sidoSlug, p.level) && p.sigunguName;
   const prefix = p.regionShort ? `${p.regionShort} ` : "";
-  const title = composeTitle({
-    pageType: "school",
-    head: `${prefix}${p.schoolName}`,
-    subjectLabel: p.subjectLabel,
-    subjectSlug: p.subjectSlug,
-    level: p.level,
-  });
+  const title = pilot
+    ? `${buildPilotTitleCore({
+        sigunguName: p.sigunguName!,
+        schoolName: p.schoolName,
+        subjectLabel: p.subjectLabel,
+        level: p.level ?? "high",
+      })} | ${SITE_NAME}`
+    : composeTitle({
+        pageType: "school",
+        head: `${prefix}${p.schoolName}`,
+        subjectLabel: p.subjectLabel,
+        subjectSlug: p.subjectSlug,
+        level: p.level,
+      });
   // 학교급별 description — 미지정(판별 불가)은 고등 기준 기본 세트.
   const descSet =
     p.level === "elem"
