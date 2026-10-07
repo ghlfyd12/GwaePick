@@ -16,6 +16,11 @@ const nextConfig: NextConfig = {
     // 포함(ENOENT 방지). 자산 교체 시 같은 파일명 유지 → config 무수정.
     "/api/power-thumb/[kind]/[region]/[...item]": [
       "./src/fonts/Pretendard-Bold-subset.ttf",
+      "./public/og-people/power-blur-1.jpg",
+      "./public/og-people/power-blur-2.jpg",
+      "./public/og-people/power-blur-3.jpg",
+      "./public/og-people/power-blur-4.jpg",
+      "./public/og-people/power-blur-5.jpg",
       "./public/og-people/power-1.jpg",
       "./public/og-people/power-2.jpg",
       "./public/og-people/power-3.jpg",
