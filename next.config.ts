@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
   // 이미지를 포함하도록 파일 추적에 명시(process.cwd() 기준 fs 읽기 대상). 없으면 Vercel 에서
   // ENOENT 로 렌더 실패할 수 있어 로컬 검증과 동일하게 배포에서도 파일을 확보한다.
   outputFileTracingIncludes: {
-    "/api/thumb/[type]/[slug]/[subject]": [
+    "/api/thumb/[type]/[slug]/[...subject]": [
       "./src/fonts/Pretendard-Bold-subset.ttf",
       "./public/images/school-students.png",
     ],

@@ -125,6 +125,39 @@ function resolveDongName(sidoSlug: string, sgSlug: string, dongSlug: string): st
   return g ? g.name : null;
 }
 
+/** 본문 히어로 변형 표식(경로 마지막 세그먼트). */
+const HERO_VARIANT = "hero";
+/** 히어로 WebP 품질 — 평면 색·텍스트라 80 에서 열화가 보이지 않는다. */
+const HERO_WEBP_QUALITY = 80;
+
+/**
+ * 본문 히어로용 경량 변환 — ImageResponse 의 PNG(800×600 RGBA, 약 142KB)를 **같은 치수**의
+ * WebP 로 다시 인코딩한다(약 12KB, −92%). 치수를 줄이지 않는 이유는 히어로 컨테이너가
+ * 모바일에서 가로 100vw 라 고해상도 화면에서는 800px 폭이 그대로 필요해서다.
+ *
+ * og:image 는 이 변형을 쓰지 않는다 — 변형 세그먼트가 없는 기존 경로가 PNG 를 그대로 반환하므로
+ * 이미 색인된 og 산출물은 바이트 단위로 무변경이다.
+ *
+ * sharp 는 Next 이미지 최적화가 쓰는 것과 같은 모듈이고, 앱 코드가 직접 의존하므로
+ * package.json 에 명시했다(전이 의존에 기대지 않는다).
+ */
+async function toHeroWebp(image: Response): Promise<Response> {
+  try {
+    const { default: sharp } = await import("sharp");
+    const png = Buffer.from(await image.arrayBuffer());
+    const webp = await sharp(png).webp({ quality: HERO_WEBP_QUALITY }).toBuffer();
+    return new Response(new Uint8Array(webp), {
+      headers: {
+        "Content-Type": "image/webp",
+        "Cache-Control": "public, max-age=31536000, immutable",
+      },
+    });
+  } catch {
+    // 인코더가 없거나 실패하면 원본 PNG 로 폴백한다(히어로가 비는 것보다 낫다).
+    return image;
+  }
+}
+
 function notFound(): Response {
   return new Response("Not found", {
     status: 404,
@@ -134,9 +167,15 @@ function notFound(): Response {
 
 export async function GET(
   _req: Request,
-  { params }: { params: Promise<{ type: string; slug: string; subject: string }> },
+  { params }: { params: Promise<{ type: string; slug: string; subject: string[] }> },
 ) {
-  const { type, slug, subject } = await params;
+  const { type, slug, subject: segs } = await params;
+  // segs = [과목] 또는 [과목, "hero"]. "hero" 는 본문 히어로용 경량(WebP) 변형 표식이다.
+  // og:image 는 버전·변형 세그먼트 없이 기존 경로를 그대로 써서 산출물이 1바이트도 바뀌지 않는다.
+  if (!segs?.length || segs.length > 2) return notFound();
+  if (segs.length === 2 && segs[1] !== HERO_VARIANT) return notFound();
+  const heroVariant = segs.length === 2;
+  const subject = segs[0];
 
   // ── 검증 우선(이미지 생성 전) — 무효 조합은 여기서 전부 404 ──────────
   let picked: Layout | null = null;
@@ -186,7 +225,7 @@ export async function GET(
   const { lines, fontSize } = picked;
   const [fontData, bg] = await Promise.all([loadFont(), loadBackground()]);
 
-  return new ImageResponse(
+  const image = new ImageResponse(
     (
       <div
         style={{
@@ -271,4 +310,5 @@ export async function GET(
       },
     },
   );
+  return heroVariant ? toHeroWebp(image) : image;
 }

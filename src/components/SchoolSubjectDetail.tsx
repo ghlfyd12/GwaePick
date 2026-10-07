@@ -27,7 +27,7 @@ import SchoolRegionLinks from "@/components/SchoolRegionLinks";
 import type { SchoolArticle } from "@/data/schoolArticleSections";
 import PageBanner from "@/components/PageBanner";
 import { buildSchoolBanner } from "@/data/pageBannerCopy";
-import { THUMB_SUBJECTS, thumbPath, thumbAlt } from "@/lib/thumb";
+import { THUMB_SUBJECTS, thumbHeroPath, thumbAlt } from "@/lib/thumb";
 
 /*
  * SchoolSubjectDetail — 학교×과목 상세(서버 컴포넌트). 지역 상세(DongSubjectDetail)와 동일 골격·디자인.
@@ -75,8 +75,9 @@ export default function SchoolSubjectDetail({
   // 그 외(초·중·타 과목)는 기존 학생 사진 유지 — 실측 후 별도 승인 시 확대.
   const useThumb = levelLabel === "고등학교" && THUMB_SUBJECTS.has(subject.slug);
   // 히어로 이미지 — 초등만 새 이미지, 중·고는 기존 그대로(학교급 데이터 기준 분기).
+  // 히어로는 경량 WebP 변형을 쓴다(og:image 는 lib/seo 가 thumbPath 로 PNG 원본 유지).
   const heroImage = useThumb
-    ? thumbPath(schoolSlug, subject.slug)
+    ? thumbHeroPath(schoolSlug, subject.slug)
     : isElem
       ? SCHOOL_HERO_IMAGE_ELEM
       : SCHOOL_HERO_IMAGE;

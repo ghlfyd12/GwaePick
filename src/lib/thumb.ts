@@ -42,9 +42,17 @@ export function isThumbEligible(_level: string, subjectSlug: string): boolean {
 
 /* ── 경로 빌더(상대 — metadataBase 로 절대화) ────────────────────────────── */
 
-/** 학교×과목: /api/thumb/school/{학교slug}/{과목slug}. */
+/** 학교×과목 og:image: /api/thumb/school/{학교slug}/{과목slug} (PNG, 산출물 불변). */
 export function thumbPath(schoolSlug: string, subjectSlug: string): string {
   return `/api/thumb/school/${schoolSlug}/${subjectSlug}`;
+}
+
+/**
+ * 학교×과목 **본문 히어로**: 위 경로 + "/hero" — 같은 그림을 WebP 로 다시 인코딩한 경량 변형
+ * (800×600 유지, 약 142KB → 12KB). og:image 는 위 thumbPath 를 그대로 쓰므로 영향 없다.
+ */
+export function thumbHeroPath(schoolSlug: string, subjectSlug: string): string {
+  return `${thumbPath(schoolSlug, subjectSlug)}/hero`;
 }
 
 /* ── 초·중 학교×과목 og:image — 정적 인물 사진(텍스트 없음). 학교 slug 해시로 7장 중 1장 배분. ── */
