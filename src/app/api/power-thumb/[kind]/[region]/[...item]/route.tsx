@@ -2,8 +2,10 @@
  * 어학의참견(/power) 지역×시험·회화 + 검고의참견(gumjung) 페이지별 동적 썸네일.
  *
  * **축별로 디자인이 다르다(2026-10 결정).**
- *   - 어학(exam·conversation) = **텍스트형 v12** — 블러 인물 배경 + 밝은 오버레이 위 퍼플 2줄,
- *     뱃지·CTA 없음. v10(흰 단색)에서 배경만 더하고 글자를 키웠다(줄별 개별 fit, 세이프 여백 6%→4%).
+ *   - 어학(exam·conversation) = **텍스트형 v13** — 풀블리드 인물 사진(블러·전면 오버레이 없음) 위에
+ *     **글자 뒤에만 흰 반투명 패널**(라운드)을 깔고 퍼플 2줄. 메인 축 학교 썸네일(/api/thumb)의
+ *     "사진 + 흰 띠" 구성을 따른 것이다. v12(강블러+오버레이 82%)는 사진이 식별되지 않아 폐기.
+ *     글자 크기는 v12 수준 유지(줄별 개별 fit), 패널까지 포함해 정사각 크롭 안에 들어온다.
  *     사진형 v8 이 네이버 노출에서 구버전 고착·가독 저하를 보여 구 텍스트형(23ecbba)으로 회귀.
  *   - 검고(gumjung-*) = **사진형 v8 유지** — 아래 설명 그대로.
  *
@@ -71,11 +73,6 @@ function loadFont(): Promise<Buffer> {
 
 // 로고 없는 인물 자산(public/og-people). 축별 배열 — 자산 교체 시 같은 파일명 유지.
 // 배정: power 1~5 = videocall·headset·phone·student·kid / gumjung 1~5 = young-m·young-f1·young-f2·adult-m·senior-f.
-// 어학 텍스트형(v12) 배경 — 같은 인물 사진을 **미리 블러 처리**한 자산(로컬 1회 생성, 결과물만 커밋).
-// satori 는 CSS filter: blur() 를 지원하지 않아 런타임 블러가 불가능하다. 다운스케일→블러→업스케일로
-// 피사체가 식별되지 않을 만큼 뭉갰고, 파일도 15~18KB 로 가볍다.
-const POWER_BLUR = ["power-blur-1.jpg", "power-blur-2.jpg", "power-blur-3.jpg", "power-blur-4.jpg", "power-blur-5.jpg"];
-
 const PEOPLE: Record<string, string[]> = {
   power: ["power-1.jpg", "power-2.jpg", "power-3.jpg", "power-4.jpg", "power-5.jpg"],
   gumjung: ["gumjung-1.jpg", "gumjung-2.jpg", "gumjung-3.jpg", "gumjung-4.jpg", "gumjung-5.jpg"],
@@ -125,10 +122,13 @@ function fitFontSize(str: string, targetW: number, minFs: number, maxFs: number)
  */
 const TEXT_MIN_FS = 24;
 const LINE_H = 1.08;
-/** 세이프 존 여백 비율 — v12 에서 6% → 4% 로 좁혀 같은 크롭 안전성에서 글자를 키웠다. */
-const SAFE_PAD_RATIO = 0.04;
-/** 배경 위 밝은 오버레이 — 흰 단색이던 v10 과 대비가 같은 수준이 되도록 맞췄다. */
-const TEXT_BG_OVERLAY = "rgba(255,255,255,0.82)";
+/** 패널이 중앙 정사각 크롭 가장자리에 붙지 않도록 두는 바깥 여백 비율. */
+const PANEL_MARGIN_RATIO = 0.02;
+/** 패널 안쪽 여백(가로·세로) 비율. */
+const PANEL_PAD_X_RATIO = 0.02;
+const PANEL_PAD_Y_RATIO = 0.025;
+/** 텍스트 뒤 흰 패널 — 전면 오버레이가 아니라 글자 뒤에만 깔아 사진이 둘레로 보이게 한다. */
+const PANEL_BG = "rgba(255,255,255,0.86)";
 
 function textThumb(
   lines: [string, string],
@@ -138,18 +138,30 @@ function textThumb(
   bg: string,
 ): Response {
   const SQ = Math.min(W, H);
-  const safePad = Math.round(SQ * SAFE_PAD_RATIO);
-  const SAFE = SQ - 2 * safePad; // og 580 / sq 994
-  // v12: 두 줄을 **각각** 세이프 존 가로에 맞춘다(v10 은 긴 줄 기준 공통 크기였다).
-  // 짧은 줄(지역명 등)이 긴 줄에 끌려 작아지지 않아 체감 크기가 크게 는다.
-  const heightCap = Math.floor(SAFE / (2 * LINE_H));
+  const margin = Math.round(SQ * PANEL_MARGIN_RATIO);
+  const padX = Math.round(SQ * PANEL_PAD_X_RATIO);
+  const padY = Math.round(SQ * PANEL_PAD_Y_RATIO);
+  // 패널 전체가 중앙 정사각 크롭 안에 들어오도록, 글자 폭 상한을 패널 여백만큼 깎는다.
+  const innerW = SQ - 2 * margin - 2 * padX; // og 578 / sq 992
+  const innerH = SQ - 2 * margin - 2 * padY;
+  const heightCap = Math.floor(innerH / (2 * LINE_H));
   const sizeOf = (t: string) =>
-    Math.max(TEXT_MIN_FS, Math.min(Math.floor(SAFE / estEm(t)), heightCap));
+    Math.max(TEXT_MIN_FS, Math.min(Math.floor(innerW / estEm(t)), heightCap));
   const sizes = lines.map(sizeOf);
 
   return new ImageResponse(
     (
-      <div style={{ width: W, height: H, position: "relative", display: "flex" }}>
+      <div
+        style={{
+          width: W,
+          height: H,
+          position: "relative",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {/* 배경 사진 — 오버레이 없이 그대로(장면이 보이게). */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={bg}
@@ -158,26 +170,21 @@ function textThumb(
           style={{ position: "absolute", top: 0, left: 0, width: W, height: H, objectFit: "cover" }}
           alt=""
         />
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: W,
-            height: H,
-            background: TEXT_BG_OVERLAY,
-            display: "flex",
-          }}
-        />
+        {/* 텍스트 뒤 흰 패널 — 글자 크기에 맞춰 자동으로 커진다. */}
         <div
           style={{
             position: "relative",
-            width: W,
-            height: H,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
+            maxWidth: SQ - 2 * margin,
+            paddingTop: padY,
+            paddingBottom: padY,
+            paddingLeft: padX,
+            paddingRight: padX,
+            background: PANEL_BG,
+            borderRadius: Math.round(SQ * 0.045),
           }}
         >
           {lines.map((line, i) => (
@@ -298,9 +305,10 @@ export async function GET(
   // 2026-10 운영자 결정: 어학 2종은 사진형 v8 을 접고 구 텍스트형(23ecbba 계열)으로 회귀한다.
   // 밝은 단색 배경 + 퍼플 2줄({지역} / {과목·시험}과외), 사진·뱃지·CTA 없음. 검고 6종은 v8 유지.
   if (c.axis === "power") {
-    const blurFile = hashPick(regionParam + itemSlug, POWER_BLUR);
-    const [fontData, blurBg] = await Promise.all([loadFont(), loadBackground(blurFile)]);
-    return textThumb([c.region, c.keyword], W, H, fontData, blurBg);
+    // v13: 블러본(power-blur-*)을 쓰지 않고 **원본 사진**을 그대로 깐다 — 장면이 보여야 한다.
+    const photo = hashPick(regionParam + itemSlug, PEOPLE.power);
+    const [fontData, photoBg] = await Promise.all([loadFont(), loadBackground(photo)]);
+    return textThumb([c.region, c.keyword], W, H, fontData, photoBg);
   }
 
   const accent = TEAL;
