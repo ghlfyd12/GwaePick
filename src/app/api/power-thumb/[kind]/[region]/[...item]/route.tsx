@@ -2,10 +2,10 @@
  * 어학의참견(/power) 지역×시험·회화 + 검고의참견(gumjung) 페이지별 동적 썸네일.
  *
  * **축별로 디자인이 다르다(2026-10 결정).**
- *   - 어학(exam·conversation) = **텍스트형 v14** — 성인 사진 풀블리드 + 하단 화이트 그라데이션 위에
- *     딥 퍼플 2줄(세이프 존 좌측 하단 정렬). 패널·뱃지·CTA 없음. 지역줄은 썸네일 전용 축약
- *     라벨(thumbRegionLabel)이라 긴 동 표기가 소속 시군구로 줄어 글자가 크게 들어간다.
- *     v10(흰 단색)·v12(강블러)·v13(흰 패널)은 폐기한 중간 단계다.
+ *   - 어학(exam·conversation) = **텍스트형 v15** — **흰 단색 배경** + 딥 퍼플 중앙 2줄.
+ *     사진을 쓰지 않는다(v14 사진형은 네이버 얼굴 중심 크롭으로 텍스트가 잘렸다).
+ *     지역줄은 축약 라벨(thumbRegionLabel), 폭이 모자라면 지역줄을 빼고 키워드 1줄 대형으로 간다.
+ *     v10·v12·v13·v14 는 폐기한 중간 단계다.
  *     사진형 v8 이 네이버 노출에서 구버전 고착·가독 저하를 보여 구 텍스트형(23ecbba)으로 회귀.
  *   - 검고(gumjung-*) = **사진형 v8 유지** — 아래 설명 그대로.
  *
@@ -73,13 +73,6 @@ function loadFont(): Promise<Buffer> {
 
 // 로고 없는 인물 자산(public/og-people). 축별 배열 — 자산 교체 시 같은 파일명 유지.
 // 배정: power 1~5 = videocall·headset·phone·student·kid / gumjung 1~5 = young-m·young-f1·young-f2·adult-m·senior-f.
-/**
- * 어학 썸네일 배경 — **성인 컷만** 쓴다(2026-10 운영자 결정). power-4(교복 학생)·power-5(아동)는
- * 어학 축의 주 대상(성인·대학생·직장인)과 맞지 않아 배정에서 뺐다. 자산 파일은 검고·기존 참조를
- * 위해 남겨 둔다.
- */
-const POWER_ADULT = ["power-1.jpg", "power-2.jpg", "power-3.jpg"];
-
 const PEOPLE: Record<string, string[]> = {
   power: ["power-1.jpg", "power-2.jpg", "power-3.jpg", "power-4.jpg", "power-5.jpg"],
   gumjung: ["gumjung-1.jpg", "gumjung-2.jpg", "gumjung-3.jpg", "gumjung-4.jpg", "gumjung-5.jpg"],
@@ -132,92 +125,109 @@ const LINE_H = 1.08;
 /** 패널이 중앙 정사각 크롭 가장자리에 붙지 않도록 두는 바깥 여백 비율. */
 const PANEL_MARGIN_RATIO = 0.02;
 
-/** 지역줄 : 키워드줄 크기 비 — 위계는 크기로만 준다(색·굵기 동일). */
+/**
+ * 어학 텍스트 썸네일 전용 폭 추정 — **반드시 실제 폭의 상한**이어야 한다.
+ *
+ * 공용 estEm 은 ASCII 를 일괄 0.5em 으로 보는데, Pretendard Bold 의 대문자는 그보다 훨씬 넓다.
+ * 그래서 "송파구 HSKK과외" 같은 라틴 다수 라벨이 세이프 존을 넘어 양끝이 잘렸다(2026-10-20 실측).
+ * 여기서는 글자 종류별로 **넉넉하게** 잡아, fit 결과가 항상 세이프 존 안에 들어오게 한다.
+ * (공용 estEm 은 검고 경로가 쓰므로 건드리지 않는다 — 검고 산출물 무변경.)
+ */
+function estEmText(str: string): number {
+  let w = 0;
+  for (const ch of str) {
+    const c = ch.codePointAt(0) ?? 0;
+    if (ch === " ") w += 0.3;
+    else if (c >= 0x41 && c <= 0x5a) w += 0.72; // A-Z
+    else if (c >= 0x30 && c <= 0x39) w += 0.60; // 0-9
+    else if (c >= 0x61 && c <= 0x7a) w += 0.56; // a-z
+    else if (c <= 0x7e) w += 0.40; // 그 외 ASCII(구두점 등)
+    else w += 1.0; // 한글·CJK
+  }
+  return w;
+}
+
+/** 지역줄 : 키워드줄 크기 비(2줄 배치일 때). */
 const REGION_LINE_RATIO = 0.7;
-/** 어학 텍스트 색 — 딥 퍼플(v14. 구 포인트색 #7D0096 은 텍스트형 전환으로 미사용). */
+/** 본문 텍스트 색 — 딥 퍼플. */
 const TEXT_DEEP_PURPLE = "#4C1D95";
+/**
+ * 2줄 배치를 포기하는 조건 — **세이프 존 폭에 맞췄을 때 하한(TEXT_MIN_FS)까지 눌리는 경우**에만
+ * 지역줄을 빼고 키워드 1줄로 간다. "작아 보이면 바꾼다"가 아니라 "넘칠 때만 바꾼다"로 좁혔다.
+ * 폭 추정(estEmText)을 상한으로 고쳐서 라틴 라벨도 2줄에 들어가므로 실제로는 거의 발동하지 않는다.
+ */
 
 /**
- * 어학 텍스트 썸네일(v14) — 성인 사진 위에 하단 화이트 그라데이션을 깔고,
- * 세이프 존 좌측 하단에 딥 퍼플 2줄(지역 / 키워드)을 올린다. 패널·뱃지·CTA 없음.
+ * 어학 텍스트 썸네일(v15) — **흰 단색 배경** 위 딥 퍼플 중앙 정렬.
  *
- * 좌측 정렬이지만 기준은 캔버스가 아니라 **중앙 정사각 세이프 존의 좌측 경계**다 —
- * og(1200×630)를 중앙 정사각으로 크롭해도 글자가 잘리지 않아야 하기 때문이다.
+ * 사진을 쓰지 않는다: v14 사진형은 네이버가 얼굴 중심으로 스마트 크롭하면서 텍스트가 잘려
+ * "송파구 오픽" 이 "구 과외" 로만 노출됐다(2026-10-20 실측). 인물·얼굴 요소를 없애 크롭
+ * 트리거 자체를 제거한다.
+ *
+ * 잘림 방지 2단 규칙:
+ *   1차 — 2줄로 넣었을 때 키워드줄이 너무 작아지면 **지역줄을 생략**하고 키워드 1줄 대형.
+ *   2차 — 키워드 자체가 길면 **임의 축약 없이 폰트만** 세이프 존 폭에 맞춰 줄인다.
+ * 폰트 크기를 항상 floor(세이프폭 / estEmText) 로 잡고 estEmText 가 상한이므로,
+ * 결과 폭은 정의상 세이프 존을 넘지 않는다.
  */
 function textThumb(
   lines: [string, string],
   W: number,
   H: number,
   fontData: Buffer,
-  bg: string,
 ): Response {
   const SQ = Math.min(W, H);
   const margin = Math.round(SQ * PANEL_MARGIN_RATIO);
   const innerW = SQ - 2 * margin;
-  const heightCap = Math.floor(innerW / (2 * LINE_H));
-  const ratio = [REGION_LINE_RATIO, 1];
-  const sizes = lines.map((t, i) =>
-    Math.max(
-      TEXT_MIN_FS,
-      Math.min(Math.floor((innerW * ratio[i]) / estEm(t)), Math.floor(heightCap * ratio[i])),
-    ),
-  );
+  const [region, keyword] = lines;
+
+  const fitW = (t: string, cap: number) =>
+    Math.max(TEXT_MIN_FS, Math.min(Math.floor(innerW / estEmText(t)), cap));
+
+  // 2줄 시도 — 키워드줄은 높이의 절반, 지역줄은 그 0.7 배.
+  const twoCap = Math.floor(innerW / (2 * LINE_H));
+  const kwTwo = fitW(keyword, twoCap);
+  // 폭 기준 소요 크기가 하한 미만이면(= 2줄로는 세이프 존을 넘김) 지역줄을 생략한다.
+  const needFs = (t: string) => Math.floor(innerW / estEmText(t));
+  const oneLine = needFs(keyword) < TEXT_MIN_FS || needFs(region) < TEXT_MIN_FS;
+
+  const render: { text: string; size: number }[] = oneLine
+    ? [{ text: keyword, size: fitW(keyword, Math.floor(innerW / LINE_H)) }]
+    : [
+        { text: region, size: fitW(region, Math.floor(twoCap * REGION_LINE_RATIO)) },
+        { text: keyword, size: kwTwo },
+      ];
 
   return new ImageResponse(
     (
-      <div style={{ width: W, height: H, position: "relative", display: "flex" }}>
-        {/* 배경 사진 — 성인 컷. 블러·전면 오버레이 없음. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={bg}
-          width={W}
-          height={H}
-          style={{ position: "absolute", top: 0, left: 0, width: W, height: H, objectFit: "cover" }}
-          alt=""
-        />
-        {/* 하단 화이트 그라데이션 — 위에서 38% 지점부터. 지역줄 구간 ≥85%, 키워드줄 구간 ≥95%. */}
-        <div
-          style={{
-            position: "absolute",
-            left: 0,
-            bottom: 0,
-            width: W,
-            height: Math.round(H * 0.62),
-            background:
-              "linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.70) 8%, rgba(255,255,255,0.88) 15%, rgba(255,255,255,0.95) 46%, rgba(255,255,255,0.99) 100%)",
-            display: "flex",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            left: Math.round((W - SQ) / 2) + margin,
-            bottom: margin + Math.round(SQ * 0.03),
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-start",
-            justifyContent: "flex-end",
-            maxWidth: innerW,
-          }}
-        >
-          {lines.map((line, i) => (
-            <div
-              key={i}
-              style={{
-                fontFamily: "Pretendard",
-                fontWeight: 700,
-                fontSize: sizes[i],
-                lineHeight: LINE_H,
-                color: TEXT_DEEP_PURPLE,
-                letterSpacing: "-0.02em",
-                textAlign: "left",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {line}
-            </div>
-          ))}
-        </div>
+      <div
+        style={{
+          width: W,
+          height: H,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "#FFFFFF",
+        }}
+      >
+        {render.map((l, i) => (
+          <div
+            key={i}
+            style={{
+              fontFamily: "Pretendard",
+              fontWeight: 700,
+              fontSize: l.size,
+              lineHeight: LINE_H,
+              color: TEXT_DEEP_PURPLE,
+              letterSpacing: "-0.02em",
+              textAlign: "center",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {l.text}
+          </div>
+        ))}
       </div>
     ),
     {
@@ -318,12 +328,10 @@ export async function GET(
   // 2026-10 운영자 결정: 어학 2종은 사진형 v8 을 접고 구 텍스트형(23ecbba 계열)으로 회귀한다.
   // 밝은 단색 배경 + 퍼플 2줄({지역} / {과목·시험}과외), 사진·뱃지·CTA 없음. 검고 6종은 v8 유지.
   if (c.axis === "power") {
-    // v14: 지역줄을 썸네일 전용 축약 라벨로 바꾼다(페이지 title·본문은 무변경).
+    // 지역줄은 썸네일 전용 축약 라벨(페이지 title·본문은 무변경).
     const label = kind === "exam" || kind === "conversation" ? thumbRegionLabel(regionParam, c.region) : c.region;
-    // 원본 사진을 그대로 깐다 — 장면이 보여야 한다.
-    const photo = hashPick(regionParam + itemSlug, POWER_ADULT);
-    const [fontData, photoBg] = await Promise.all([loadFont(), loadBackground(photo)]);
-    return textThumb([label, c.keyword], W, H, fontData, photoBg);
+    // v15: 배경 사진 없음(흰 단색) — 얼굴 스마트 크롭으로 텍스트가 잘리는 문제를 원천 차단.
+    return textThumb([label, c.keyword], W, H, await loadFont());
   }
 
   const accent = TEAL;

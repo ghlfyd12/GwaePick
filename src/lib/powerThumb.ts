@@ -16,7 +16,7 @@
  * 배치·뱃지는 v8 그대로고 키워드줄 문구만 짧아졌다. 바뀌지 않은 축의 버전을 같이 올리면 내용 변경이
  * 없는 URL 을 새로 통지하게 된다(IndexNow 남용).
  */
-export const POWER_THUMB_VERSION_LANG = "v14";
+export const POWER_THUMB_VERSION_LANG = "v15";
 export const POWER_THUMB_VERSION_GUMJUNG = "v11";
 
 /** kind — 어학 2종 + 검고 6종 = 8종(라우트 resolveContent 와 1:1). */
