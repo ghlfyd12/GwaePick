@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { serviceFromPath, SERVICE } from "@/data/service";
 import Footer from "@/components/layout/Footer";
+import { shouldCollapseRegionGroup } from "@/data/footerLinks";
 import PowerFooter from "@/components/layout/PowerFooter";
 import GumjungFooter from "@/components/layout/GumjungFooter";
 
@@ -12,10 +13,12 @@ import GumjungFooter from "@/components/layout/GumjungFooter";
  * 루트 레이아웃이 <Footer /> 대신 이 스위치를 렌더한다. 메인 Footer.tsx 는 무수정(diff 없음)이며
  * 메인 경로에서는 그대로 그 컴포넌트가 렌더되므로 메인 푸터 출력은 동일하다.
  * 판별은 service.ts 단일 소스(헤더 CTA·플로팅·ConsultLink 와 같은 기준).
+ * 메인 Footer 에는 경로 기반 collapseRegions 를 넘겨 상세 페이지에서 전국 시도 목록을 접는다.
  */
 export default function FooterSwitch() {
-  const service = serviceFromPath(usePathname());
+  const pathname = usePathname();
+  const service = serviceFromPath(pathname);
   if (service === SERVICE.power) return <PowerFooter />;
   if (service === SERVICE.gumjung) return <GumjungFooter />;
-  return <Footer />;
+  return <Footer collapseRegions={shouldCollapseRegionGroup(pathname)} />;
 }

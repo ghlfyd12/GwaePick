@@ -53,8 +53,32 @@ const gumjungLinks: FooterLink[] = [
   { label: "지역별 검정고시", href: "/gumjung/regions" },
 ];
 
+/** 전국 17개 시도 목록 그룹의 제목 — 상세 페이지에서 접을 대상을 이 값으로 식별한다. */
+export const REGION_GROUP_TITLE = "지역별 과외";
+
+/**
+ * 전국 시도 목록을 접을 경로인가.
+ *
+ * 상세 페이지(학교×과목·지역 상세)에서 전국 17개 시도가 펼쳐져 있으면 "전국 업체" 인상을 줘
+ * 지역 신뢰성을 떨어뜨린다. 홈·전국 허브는 그 목록이 본래 역할이므로 그대로 펼친다.
+ * 접어도 링크는 DOM 에 남으므로(details/summary) 크롤 경로는 보존된다.
+ */
+const TOP_LEVEL_STATIC = new Set([
+  "", "reviews", "teachers", "blog", "apply", "privacy", "power", "gumjung", "tutoring",
+]);
+export function shouldCollapseRegionGroup(pathname: string): boolean {
+  const seg = pathname.split("/").filter(Boolean);
+  // 학교×과목 상세 — /tutoring/by-school/{학교}/{과목}. 시도 허브·페이지네이션(/p/n)은 제외.
+  if (seg[0] === "tutoring" && seg[1] === "by-school" && seg.length === 4 && seg[2] !== "p") return true;
+  // 지역 상세 — /tutoring/by-region/{시도}/{...} 2단 이상. 시도 허브(3세그먼트)는 제외.
+  if (seg[0] === "tutoring" && seg[1] === "by-region" && seg.length >= 4) return true;
+  // 지역 랜딩 — /{지역id} 단일 세그먼트 중 알려진 정적 상단 경로가 아닌 것.
+  if (seg.length === 1 && !TOP_LEVEL_STATIC.has(seg[0])) return true;
+  return false;
+}
+
 export const footerGroups: FooterGroup[] = [
-  { title: "지역별 과외", links: regionLinks },
+  { title: REGION_GROUP_TITLE, links: regionLinks },
   { title: "과목별 과외", links: subjectLinks },
   { title: "바로가기", links: serviceLinks },
   { title: "어학의참견", links: powerLinks },
