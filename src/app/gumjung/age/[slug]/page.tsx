@@ -3,10 +3,8 @@ import { notFound } from "next/navigation";
 import GumjungAgeDetail from "@/components/gumjung/GumjungAgeDetail";
 import { site } from "@/data/site";
 import { GUMJUNG_AGE_SLUGS, getGumjungAge } from "@/data/gumjung/ages";
-import { GUMJUNG_MODIFIED } from "@/data/contentMeta";
 import { powerThumbPath, powerThumbSq } from "@/lib/powerThumb";
 
-const isoKST = (d: string) => `${d}T00:00:00+09:00`;
 
 /*
  * /gumjung/age/[slug] — 검고의참견 연령 축(14장: 13se~19se·20dae~70dae·senior).
@@ -34,10 +32,7 @@ export async function generateMetadata({
     description: age.metaDescription,
     alternates: { canonical },
     robots: { index: true, follow: true },
-    other: {
-      "article:published_time": isoKST(GUMJUNG_MODIFIED),
-      "article:modified_time": isoKST(GUMJUNG_MODIFIED),
-    },
+    // 날짜 메타 제거(SERP 작성일 노출 방지, 2026-10-21).
     openGraph: {
       title: age.metaTitle,
       description: age.metaDescription,

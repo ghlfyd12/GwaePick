@@ -3,10 +3,8 @@ import { notFound } from "next/navigation";
 import GumjungScheduleDetail from "@/components/gumjung/GumjungScheduleDetail";
 import { site } from "@/data/site";
 import { GUMJUNG_SIDO_SLUGS, getGumjungSido, gumjungSidoMeta } from "@/data/gumjung/schedule";
-import { GUMJUNG_MODIFIED } from "@/data/contentMeta";
 import { powerThumbPath, powerThumbSq } from "@/lib/powerThumb";
 
-const isoKST = (d: string) => `${d}T00:00:00+09:00`;
 
 /*
  * /gumjung/schedule/[sido] — 시도 검정고시 일정(17장, 전량 SSG). 그 외 값은 404.
@@ -35,10 +33,7 @@ export async function generateMetadata({
     description: meta.description,
     alternates: { canonical },
     robots: { index: true, follow: true },
-    other: {
-      "article:published_time": isoKST(GUMJUNG_MODIFIED),
-      "article:modified_time": isoKST(GUMJUNG_MODIFIED),
-    },
+    // 날짜 메타 제거(SERP 작성일 노출 방지, 2026-10-21).
     openGraph: {
       title: meta.title,
       description: meta.description,

@@ -6,16 +6,16 @@
  * 붙어, 유사문서 판정에 취약하다. A안은 **소속 시군구를 전 학교 title 접두로 주입**해 꼬리 조합을
  * 시군구(234종) 축으로 분산하고, 동시에 "{시군구} {과목}과외" 검색어를 학교 페이지가 함께 잡게 한다.
  *
- * 전면 교체(96,776장)는 재통지만 194 chunk(13회차+)라, **대전 고교 65교 × 8과목 = 520장**
- * 파일럿으로 먼저 적용하고 2주 관찰 후 확대를 판정한다. 그 외 학교·타 축은 현행 title 그대로다.
+ * **2026-10-21 전면 확대** — 10/20 조기 판독에서 실험군(신탄진고)은 A안 title 이 네이버 SERP 에
+ * 반영되고 순위도 유지됐고, 무처치군(가평고)은 하락이 관찰됐다. 방치 비용이 실재하므로 파일럿을
+ * 조기 종결하고 **전 학교 12,097교 × 8과목 = 96,776장**으로 확대한다.
  *
  * description 은 **의도적으로 무변경** — title 효과만 분리 측정하기 위한 변수 통제다.
  */
 import { resolveTitlePhrase, type TitleLevel } from "@/data/seoTitlePhrases";
 
-/** 파일럿 대상 시도(schools.ts 의 sido slug). */
+/** 파일럿 식별용(이력 보존) — 2026-10-09 통지한 실험군 범위. 지금은 범위 판정에 쓰지 않는다. */
 export const TITLE_PILOT_SIDO_SLUG = "daejeon";
-/** 파일럿 대상 학교급. */
 export const TITLE_PILOT_LEVEL: TitleLevel = "high";
 /**
  * 브랜드 꼬리를 뺀 본문 title 길이 상한.
@@ -23,25 +23,29 @@ export const TITLE_PILOT_LEVEL: TitleLevel = "high";
  */
 export const TITLE_PILOT_MAX_LEN = 40;
 
-/** 학교급별 학년 토큰 — title 용(띄어쓰기 분리로 부분일치 검색 폭을 넓힌다). */
-const PILOT_GRADE_TOKENS: Record<TitleLevel, string> = {
-  high: "고1 고2 고3",
-  middle: "중1 중2 중3",
-  elem: "초4 초5 초6",
+/**
+ * 학교급별 평가·학년 토큰 — title 용(띄어쓰기 분리로 부분일치 검색 폭을 넓힌다).
+ *
+ * 파일럿(고교)은 "내신 기출 고1 고2 고3" 한 벌이었는데, 전국 확대에는 초·중까지 들어온다.
+ * 초등에 "내신 기출"을 붙이면 사실과 맞지 않아(초등은 단원평가 체계) 학교급별로 평가어를 갈랐다.
+ */
+const TITLE_LEVEL_TOKENS: Record<TitleLevel, string> = {
+  high: "내신 기출 고1 고2 고3",
+  middle: "내신 수행평가 중1 중2 중3",
+  elem: "단원평가 초4 초5 초6",
 };
 
-/** 이 조합이 파일럿 대상인가. 범위를 넓힐 때 이 함수만 고친다. */
-export function isTitlePilot(sidoSlug?: string, level?: TitleLevel): boolean {
-  return sidoSlug === TITLE_PILOT_SIDO_SLUG && level === TITLE_PILOT_LEVEL;
+/** A안 적용 대상인가 — 2026-10-21 부터 **전 학교**다(파일럿 종료). */
+export function isTitlePilot(): boolean {
+  return true;
 }
 
 /**
  * A안 본문 title(브랜드 꼬리 제외).
- *   "{시군구} {학교} {과목}과외 - 내신 기출 {학년구} 1:1"
+ *   "{시군구} {학교} {과목}과외 - {학교급 평가어} {학년구} 1:1"
  *
  * 시군구를 접두로 쓰므로 동명이교용 지역 접두(regionShort)는 **붙이지 않는다**(이중 접두 방지).
- * 상한(40자)을 넘으면 학년구를 떼어 안전하게 줄인다 — 전수 점검상 대전 고교에서는 발생하지 않지만,
- * 범위를 넓혔을 때 긴 시군구·학교명 조합에서 title 이 터지지 않도록 둔 폴백이다.
+ * 상한(40자)을 넘으면 학년구를, 그래도 넘으면 평가어까지 떼어 안전하게 줄인다(2단 폴백).
  *
  * **예외 — full 타입 과목(논술·코딩)**: 이 두 과목은 문구 자체에 과목 고유 롱테일이 들어 있다
  * ("파이썬 자바스크립트 웹개발 게임제작 정보내신", "독서 첨삭"). A안 공통 꼬리로 덮으면 그 키워드를
@@ -62,8 +66,10 @@ export function buildPilotTitleCore(p: {
     return `${p.sigunguName} ${p.schoolName} ${phrase.text}`;
   }
   const head = `${p.sigunguName} ${p.schoolName} ${p.subjectLabel}과외`;
-  const full = `${head} - 내신 기출 ${PILOT_GRADE_TOKENS[p.level]} 1:1`;
+  const full = `${head} - ${TITLE_LEVEL_TOKENS[p.level]} 1:1`;
   if (full.length <= TITLE_PILOT_MAX_LEN) return full;
-  const short = `${head} - 내신 기출 1:1`;
+  // 상한 초과 시 학년 토큰을 떼고, 그래도 넘으면 평가어까지 뗀다(긴 시군구+긴 교명 조합 대비).
+  const evalWord = TITLE_LEVEL_TOKENS[p.level].split(" ").slice(0, p.level === "elem" ? 1 : 2).join(" ");
+  const short = `${head} - ${evalWord} 1:1`;
   return short.length <= TITLE_PILOT_MAX_LEN ? short : head;
 }

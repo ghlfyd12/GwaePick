@@ -6,10 +6,8 @@ import {
   GUMJUNG_GUIDE_SLUGS,
   getGumjungGuide,
 } from "@/data/gumjung/guides";
-import { GUMJUNG_MODIFIED } from "@/data/contentMeta";
 import { powerThumbPath, powerThumbSq } from "@/lib/powerThumb";
 
-const isoKST = (d: string) => `${d}T00:00:00+09:00`;
 
 /*
  * /gumjung/guide/[type] — 검고의참견 유형 가이드(7장).
@@ -36,10 +34,7 @@ export async function generateMetadata({
     description: guide.metaDescription,
     alternates: { canonical },
     robots: { index: true, follow: true },
-    other: {
-      "article:published_time": isoKST(GUMJUNG_MODIFIED),
-      "article:modified_time": isoKST(GUMJUNG_MODIFIED),
-    },
+    // 날짜 메타 제거(SERP 작성일 노출 방지, 2026-10-21).
     openGraph: {
       title: guide.metaTitle,
       description: guide.metaDescription,

@@ -12,11 +12,9 @@ import { site } from "@/data/site";
 import { examRegions, isExamRegionSlug } from "@/data/byRegionExam";
 import { GUMJUNG_LEVELS } from "@/data/gumjung/levels";
 import { gumjungScheduleSlugForSidoLabel } from "@/data/gumjung/schedule";
-import { GUMJUNG_MODIFIED } from "@/data/contentMeta";
 import { powerThumbPath, powerThumbSq } from "@/lib/powerThumb";
 
 const SITE_NAME = site.gumjung.name;
-const isoKST = (d: string) => `${d}T00:00:00+09:00`;
 
 const nfc = (s: string) => s.normalize("NFC");
 const slugKey = (s: string): string => {
@@ -233,10 +231,7 @@ export function buildGumjungRegionMetadata(regionParam: string): Metadata {
     alternates: { canonical },
     robots: { index: true, follow: true },
     // 검색 신선도 신호 — 발행일=수정일=GUMJUNG_MODIFIED(신규 축). 화면 표기는 하지 않음.
-    other: {
-      "article:published_time": isoKST(GUMJUNG_MODIFIED),
-      "article:modified_time": isoKST(GUMJUNG_MODIFIED),
-    },
+    // 날짜 메타 제거(SERP 작성일 노출 방지, 2026-10-21).
     openGraph: {
       title: data.metaTitle,
       description: data.metaDescription,

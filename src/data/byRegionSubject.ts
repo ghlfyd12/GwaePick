@@ -19,13 +19,7 @@ import { gyeonggi } from "@/data/gyeonggi";
 import { powerRegionSlugs, resolvePowerRegionName } from "@/data/powerRegions";
 import { POWER_SUBJECTS, objJosa, type PowerSubject } from "@/data/bySchoolSubject";
 import { powerThumbPath, powerThumbSq } from "@/lib/powerThumb";
-import {
-  POWER_REGION_THUMB_MODIFIED,
-  POWER_REGION_THUMB_PATH_MODIFIED,
-} from "@/data/contentMeta";
 
-/** OG article 시각(KST 자정 고정) — 검고 축과 같은 표기. */
-const isoKST = (d: string) => `${d}T00:00:00+09:00`;
 import {
   getExpansionRegion,
   isExpansionRegionSlug,
@@ -364,7 +358,6 @@ export function allByRegionPairs(): { region: string; subject: string }[] {
   }
   return out;
 }
-
 /** /power 전용 메타데이터 빌더. */
 export function buildByRegionMetadata(
   regionParam: string,
@@ -382,11 +375,7 @@ export function buildByRegionMetadata(
     description: data.metaDescription,
     alternates: { canonical },
     robots: { index: true, follow: true },
-    // 검고 축과 동일한 문서 시각 메타(9/16 진단에서 확인된 격차 해소).
-    other: {
-      "article:published_time": isoKST(POWER_REGION_THUMB_MODIFIED),
-      "article:modified_time": isoKST(POWER_REGION_THUMB_PATH_MODIFIED),
-    },
+    // 날짜 메타는 내보내지 않는다 — 네이버 SERP 작성일 노출 방지(2026-10-21).
     openGraph: {
       title: data.metaTitle,
       description: data.metaDescription,

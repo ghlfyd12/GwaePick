@@ -42,18 +42,14 @@ import {
 import { SCHOOL_GRADE_PHRASE } from "@/data/schoolGradeKeywords";
 import { isTitlePilot, buildPilotTitleCore } from "@/data/titlePilot";
 import {
-  SCHOOL_PUBLISHED,
   SCHOOL_MODIFIED,
   SCHOOL_THUMB_MODIFIED,
   SCHOOL_PROFILE_MODIFIED,
   SCHOOL_DETAIL_TITLE_MODIFIED,
   SCHOOL_HIGH_DETAIL_MODIFIED,
-  SCHOOL_HUB_PUBLISHED,
-  SCHOOL_HUB_MODIFIED,
 } from "@/data/contentMeta";
 
 /** ISO 날짜(YYYY-MM-DD) → KST 자정 ISO 8601 datetime. article:*_time · JSON-LD dates 용. */
-const isoKST = (d: string) => `${d}T00:00:00+09:00`;
 
 const SITE_NAME = site.name; // 지식의참견
 const SITE_URL = site.url.replace(/\/$/, ""); // 배포 기준 도메인(단일 소스)
@@ -271,9 +267,9 @@ export interface SchoolMetaInput {
   canonicalPath: string;
 }
 export function buildSchoolMeta(p: SchoolMetaInput): Metadata {
-  // title A안 파일럿(현재 대전 고교 520장) — 시군구 접두 + 짧은 꼬리로 유사문서를 분산한다.
-  // 파일럿 밖은 기존 composeTitle 그대로라 diff 0. description 은 양쪽 모두 무변경(변수 통제).
-  const pilot = isTitlePilot(p.sidoSlug, p.level) && p.sigunguName;
+  // title A안(2026-10-21 전국 확대) — 시군구 접두 + 학교급 평가어로 유사문서를 분산한다.
+  // sigunguName 이 없는 호출부는 기존 composeTitle 로 떨어진다. description 은 무변경.
+  const pilot = isTitlePilot() && p.sigunguName;
   const prefix = p.regionShort ? `${p.regionShort} ` : "";
   const title = pilot
     ? `${buildPilotTitleCore({
@@ -340,14 +336,10 @@ export function buildSchoolMeta(p: SchoolMetaInput): Metadata {
       : ["social", "science", "history"].includes(hs)
         ? SCHOOL_DETAIL_TITLE_MODIFIED
         : SCHOOL_THUMB_MODIFIED;
-  const base = baseMetadata(title, description, p.canonicalPath, og);
-  return {
-    ...base,
-    other: {
-      "article:published_time": isoKST(SCHOOL_PUBLISHED),
-      "article:modified_time": isoKST(modifiedTime),
-    },
-  };
+  // article:*_time 은 내보내지 않는다 — 네이버 SERP 에 "작성일"로 노출돼 pSEO 상세가 낡아 보인다.
+  // 크롤 신선도 신호는 sitemap lastmod(contentMeta 상수)가 그대로 담당한다.
+  void modifiedTime;
+  return baseMetadata(title, description, p.canonicalPath, og);
 }
 
 export interface SchoolHubMetaInput {
@@ -375,8 +367,7 @@ export function buildSchoolHubMeta(p: SchoolHubMetaInput): Metadata {
   return {
     ...base,
     other: {
-      "article:published_time": isoKST(SCHOOL_HUB_PUBLISHED),
-      "article:modified_time": isoKST(SCHOOL_HUB_MODIFIED),
+      /* 날짜 메타 제거(SERP 작성일 노출 방지) */
     },
   };
 }
@@ -604,8 +595,8 @@ export function webPageJsonLd(p: {
     "@type": "WebPage",
     name: p.name,
     url: absUrl(p.canonicalPath),
-    datePublished: isoKST(p.published ?? SCHOOL_PUBLISHED),
-    dateModified: isoKST(p.modified ?? SCHOOL_MODIFIED),
+    // datePublished/dateModified 는 넣지 않는다 — 구조화 데이터의 날짜도 SERP 작성일로 쓰인다.
+    // 호출부 published/modified 인자는 하위호환으로 받되 출력하지 않는다.
   };
 }
 

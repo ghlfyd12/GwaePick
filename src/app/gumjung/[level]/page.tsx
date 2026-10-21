@@ -6,10 +6,8 @@ import {
   GUMJUNG_LEVEL_SLUGS,
   getGumjungLevel,
 } from "@/data/gumjung/levels";
-import { GUMJUNG_MODIFIED } from "@/data/contentMeta";
 import { powerThumbPath, powerThumbSq } from "@/lib/powerThumb";
 
-const isoKST = (d: string) => `${d}T00:00:00+09:00`;
 
 /*
  * /gumjung/[level] — 검고의참견 급별 상세(고졸·중졸·초졸 3장).
@@ -39,10 +37,7 @@ export async function generateMetadata({
     description,
     alternates: { canonical },
     robots: { index: true, follow: true },
-    other: {
-      "article:published_time": isoKST(GUMJUNG_MODIFIED),
-      "article:modified_time": isoKST(GUMJUNG_MODIFIED),
-    },
+    // 날짜 메타 제거(SERP 작성일 노출 방지, 2026-10-21).
     openGraph: {
       title,
       description,

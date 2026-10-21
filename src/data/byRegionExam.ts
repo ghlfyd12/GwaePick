@@ -19,13 +19,7 @@ import {
 } from "@/data/powerRegionsExpansion";
 import { isKnownPowerRegion } from "@/data/byRegionSubject";
 import { powerThumbPath, powerThumbSq } from "@/lib/powerThumb";
-import {
-  POWER_REGION_THUMB_MODIFIED,
-  POWER_REGION_THUMB_PATH_MODIFIED,
-} from "@/data/contentMeta";
 
-/** OG article 시각(KST 자정 고정) — 검고 축과 같은 표기. */
-const isoKST = (d: string) => `${d}T00:00:00+09:00`;
 import {
   examBySlug,
   isExamSlug,
@@ -233,7 +227,6 @@ export function buildByExamData(
     relatedLinks,
   };
 }
-
 /** /power 전용 시험 페이지 메타데이터 빌더. */
 export function buildByExamMetadata(
   regionParam: string,
@@ -251,11 +244,7 @@ export function buildByExamMetadata(
     description: data.metaDescription,
     alternates: { canonical },
     robots: { index: true, follow: true },
-    // 검고 축과 동일한 문서 시각 메타(9/16 진단에서 확인된 격차 해소).
-    other: {
-      "article:published_time": isoKST(POWER_REGION_THUMB_MODIFIED),
-      "article:modified_time": isoKST(POWER_REGION_THUMB_PATH_MODIFIED),
-    },
+    // 날짜 메타는 내보내지 않는다 — 네이버 SERP 작성일 노출 방지(2026-10-21).
     openGraph: {
       title: data.metaTitle,
       description: data.metaDescription,

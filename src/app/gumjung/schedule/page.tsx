@@ -2,10 +2,8 @@ import type { Metadata } from "next";
 import GumjungScheduleDetail from "@/components/gumjung/GumjungScheduleDetail";
 import { site } from "@/data/site";
 import { GUMJUNG_SCHEDULE_HUB } from "@/data/gumjung/schedule";
-import { GUMJUNG_MODIFIED } from "@/data/contentMeta";
 import { powerThumbPath, powerThumbSq } from "@/lib/powerThumb";
 
-const isoKST = (d: string) => `${d}T00:00:00+09:00`;
 
 /* /gumjung/schedule — 검정고시 일정 허브(SSG). */
 export const dynamic = "force-static";
@@ -19,10 +17,7 @@ export function generateMetadata(): Metadata {
     description: GUMJUNG_SCHEDULE_HUB.metaDescription,
     alternates: { canonical },
     robots: { index: true, follow: true },
-    other: {
-      "article:published_time": isoKST(GUMJUNG_MODIFIED),
-      "article:modified_time": isoKST(GUMJUNG_MODIFIED),
-    },
+    // 날짜 메타 제거(SERP 작성일 노출 방지, 2026-10-21).
     openGraph: {
       title: GUMJUNG_SCHEDULE_HUB.metaTitle,
       description: GUMJUNG_SCHEDULE_HUB.metaDescription,
