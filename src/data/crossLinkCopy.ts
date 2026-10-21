@@ -16,3 +16,6 @@ export const schoolRegionTitle = (sidoLabel: string) => `${sidoLabel} 지역별 
 
 /** 학교 페이지 → 시도 지역 허브 앵커 텍스트. */
 export const schoolRegionLinkLabel = (sidoLabel: string) => `${sidoLabel} 지역 과외`;
+
+/** 학교 페이지 → 해당 시군구 지역 랜딩 앵커 텍스트(랜딩이 있을 때만 노출). */
+export const schoolSigunguLinkLabel = (regionName: string) => `${regionName} 과외 선생님 보기`;

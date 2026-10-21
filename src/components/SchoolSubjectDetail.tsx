@@ -24,6 +24,7 @@ import SchoolExamGuide from "@/components/school/SchoolExamGuide";
 import { buildSchoolExamGuide } from "@/data/schoolExamGuide";
 import { getDetailSubjectCopy } from "@/data/detailSubjectCopy";
 import SchoolRegionLinks from "@/components/SchoolRegionLinks";
+import { schoolSigunguLanding } from "@/lib/schoolRegionLanding";
 import type { SchoolArticle } from "@/data/schoolArticleSections";
 import PageBanner from "@/components/PageBanner";
 import { buildSchoolBanner } from "@/data/pageBannerCopy";
@@ -64,6 +65,8 @@ export default function SchoolSubjectDetail({
   article?: SchoolArticle | null;
 }) {
   const region = `${sidoLabel} ${sigunguName}`;
+  // 소재 시군구 랜딩(있을 때만). 서버에서 해석하므로 regions.ts 가 클라이언트로 가지 않는다.
+  const sigunguLanding = schoolSigunguLanding(sidoLabel, sigunguName);
   // H1 의 지역 파트 — 정식명이 있으면 "{시군구} {정식명}", 없으면 "{시군구}"만(메타 title 과 동일 규칙).
   const h1RegionPart = schoolFullName ? `${sigunguName} ${schoolFullName}` : sigunguName;
   const intro = buildSchoolIntro(schoolName, subject.label, levelLabel);
@@ -527,7 +530,7 @@ export default function SchoolSubjectDetail({
         </section>
 
         {/* 9-1. 지역으로 찾기 — 학교→지역 스택 연결(시도 허브, 과목 중립: 학교 데이터가 동 미포함) */}
-        <SchoolRegionLinks sidoLabel={sidoLabel} sidoSlug={sidoSlug} />
+        <SchoolRegionLinks sidoLabel={sidoLabel} sidoSlug={sidoSlug} sigunguLanding={sigunguLanding} />
 
         {/* 10. 최종 CTA */}
         <section className="rounded-2xl bg-surface px-6 py-8 text-center sm:py-10">
