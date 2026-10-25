@@ -19,7 +19,9 @@ export default function Footer() {
         {/* 사이트와이드 내부 링크 — 전 페이지 렌더 크롤 경로 */}
         <nav
           aria-label="사이트 링크"
-          className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-3 md:grid-cols-4"
+          // 5 그룹 = md 이상에서 한 행. 접힌 "지역별 과외"가 1줄 높이만 차지해도 빈 칸이 생기지
+          // 않고, 펼치면 그 열만 아래로 늘어난다(전 셀 상단 정렬이라 다른 그룹은 제자리).
+          className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-5"
         >
           {footerGroups.map((group) => {
             const collapsed = group.title === REGION_GROUP_TITLE;
