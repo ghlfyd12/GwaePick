@@ -9,10 +9,10 @@ import { footerGroups, REGION_GROUP_TITLE } from "@/data/footerLinks";
  * - 하단: 사이트명 / 슬로건 / 연락처 / 저작권 표기
  * - 어두운 배경 금지 — 밝은 회색 톤으로 차분하게. 링크는 중립 회색 기본, 호버에만 accent(경로별 코랄/퍼플).
  *
- * collapseRegions: 상세 페이지에서 "지역별 과외"(전국 17개 시도) 그룹을 접는다. `details/summary` 라
+ * "지역별 과외"(전국 17개 시도) 그룹은 전 페이지에서 기본 접힘이다. `details/summary` 라
  * JS 없이도 펼칠 수 있고, 접힌 상태에서도 링크가 DOM 에 남아 크롤 경로가 보존된다(표시만 토글).
  */
-export default function Footer({ collapseRegions = false }: { collapseRegions?: boolean }) {
+export default function Footer() {
   return (
     <footer className="border-t border-line bg-surface-alt">
       <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
@@ -22,7 +22,7 @@ export default function Footer({ collapseRegions = false }: { collapseRegions?: 
           className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-3 md:grid-cols-4"
         >
           {footerGroups.map((group) => {
-            const collapsed = collapseRegions && group.title === REGION_GROUP_TITLE;
+            const collapsed = group.title === REGION_GROUP_TITLE;
             const list = (
               // 접힘 상태 표시 토글은 CSS 로 명시한다 — 이 환경에서는 details 의 UA 기본
               // 숨김이 적용되지 않아 링크가 그대로 보였다. [open] 기반이라 JS 없이도 펼쳐진다.
