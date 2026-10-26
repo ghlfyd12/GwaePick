@@ -7,8 +7,9 @@ import type { ConsultLead } from "@/lib/notion";
  * - 알림 실패는 삼켜서 사용자 응답/성공 화면에 영향 주지 않는다.
  * - TELEGRAM_BOT_TOKEN & TELEGRAM_CHAT_ID 가 설정돼 있으면 텔레그램으로 전송, 없으면 서버 로그로 보존.
  *   (별도 알림 채널이 아직 없어 로그 폴백. 채널 추가 시 이 함수만 확장.)
+ * - 돌려주는 값: 텔레그램으로 실제로 보냈으면 true — 브라우저 우체국 알림(NotifyTracker)이 두 번 보내지 않게 한다.
  */
-export async function notifyNewLead(lead: ConsultLead): Promise<void> {
+export async function notifyNewLead(lead: ConsultLead): Promise<boolean> {
   const text = [
     `[${lead.service}] 새 상담 신청`,
     `이름: ${lead.name || "(미입력)"}`,
@@ -28,7 +29,7 @@ export async function notifyNewLead(lead: ConsultLead): Promise<void> {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ chat_id: chatId, text, disable_web_page_preview: true }),
       });
-      if (res.ok) return;
+      if (res.ok) return true;
       console.error("[notify] 텔레그램 전송 실패", res.status);
     } catch (err) {
       console.error("[notify] 텔레그램 오류:", err);
@@ -36,4 +37,5 @@ export async function notifyNewLead(lead: ConsultLead): Promise<void> {
   }
   // 텔레그램 미설정/실패 → 서버 로그로 보존(운영자 확인·복구 가능).
   console.log(`[notify]\n${text}`);
+  return false;
 }

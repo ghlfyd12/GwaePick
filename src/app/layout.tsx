@@ -6,6 +6,7 @@ import FooterSwitch from "@/components/layout/FooterSwitch";
 import FloatingButtons from "@/components/layout/FloatingButtons";
 import RootShell from "@/components/layout/RootShell";
 import UtmCapture from "@/components/UtmCapture";
+import NotifyTracker from "@/components/NotifyTracker";
 import { site } from "@/data/site";
 
 /*
@@ -100,6 +101,8 @@ export default function RootLayout({
       <body className="flex min-h-dvh flex-col bg-white pb-[calc(5rem+env(safe-area-inset-bottom))] text-ink lg:pb-0">
         {/* 유입 UTM first-touch 캡처(화면 비노출) — 홈·/apply 등 모든 진입점 커버 */}
         <UtmCapture />
+        {/* 문의 알림(텔레그램 우체국) — 방문·전화·카톡 클릭·상담 신청, 로딩 뒤 조용히(화면 비노출) */}
+        <NotifyTracker />
         <RootShell>
           <Header />
           <main className="flex-1">{children}</main>

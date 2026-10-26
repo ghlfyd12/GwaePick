@@ -78,12 +78,14 @@ export async function POST(request: Request) {
   try {
     const page = await insertConsultLead(databaseId, lead);
     // 저장 성공 후 알림 — 실패해도 사용자에겐 성공(저장은 이미 완료).
+    // notified: 서버가 텔레그램으로 이미 알렸는지 — true 면 브라우저 우체국 알림을 보내지 않는다(두 번 방지).
+    let notified = false;
     try {
-      await notifyNewLead(lead);
+      notified = await notifyNewLead(lead);
     } catch (notifyErr) {
       console.error("[consult] 알림 실패(저장은 완료):", notifyErr);
     }
-    return NextResponse.json({ ok: true, id: page.id });
+    return NextResponse.json({ ok: true, id: page.id, notified });
   } catch (err) {
     // 노션 에러 상세를 서버 로그로 드러낸다(삼키지 않는다).
     const e = err as { code?: string; status?: number; message?: string; body?: unknown };

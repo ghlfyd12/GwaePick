@@ -6,6 +6,7 @@ import Script from "next/script";
 import { consultFormConfig } from "@/data/consultFormOptions";
 import { serviceFromPath } from "@/data/service";
 import { site } from "@/data/site";
+import { notifyLead, areaOf } from "@/components/NotifyTracker";
 
 /*
  * ConsultForm(#consult) — 무료 상담 신청 섹션 + 폼.
@@ -142,6 +143,9 @@ export default function ConsultForm({
       });
       if (!res.ok) throw new Error("bad status");
       setStatus("success");
+      // 저장 성공 뒤 텔레그램 알림 신호 — 서버가 이미 알렸으면 보내지 않음. 학년·과목·지역만(이름·연락처·주소·문의 제외).
+      const json = (await res.json().catch(() => ({}))) as { notified?: boolean };
+      if (!json.notified) notifyLead({ grade: form.grades.join(", "), subject: form.subjects.join(", "), area: areaOf(form.address) });
     } catch {
       setStatus("error");
     }

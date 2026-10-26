@@ -126,3 +126,9 @@ export const site = {
   /** 푸터 저작권 표기 연도 */
   copyrightYear: 2026,
 } as const;
+
+/**
+ * 문의 알림 우체국(Cloudflare Worker, 여러 사이트 공용) 주소 — 공개값(비밀 아님). 봇 토큰은 우체국에만 있다.
+ * 비우면 브라우저 알림(NotifyTracker)을 보내지 않는다.
+ */
+export const NOTIFY_URL = (process.env.NEXT_PUBLIC_NOTIFY_URL ?? "https://studykim-notify.studykim-notify.workers.dev").trim();

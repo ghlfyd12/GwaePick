@@ -14,6 +14,7 @@ import {
 } from "@/data/applyFormOptions";
 import type { SidoOption, SubjectOption } from "@/lib/inquiryOptions";
 import { getUtm } from "@/lib/utm";
+import { notifyLead, areaOf } from "@/components/NotifyTracker";
 
 /*
  * 신청폼 본체(클라이언트) — 단순화판.
@@ -277,6 +278,12 @@ export default function ApplyForm({
 
       if (res.ok && json.ok) {
         setStatus("success");
+        // 저장 성공 뒤 텔레그램 알림 신호(/api/inquiries 는 서버 텔레그램이 없어 항상 보냄). 학년·과목·지역만(이름·연락처·주소·문의 제외).
+        notifyLead({
+          grade: grades.join(", "),
+          subject: subjectOptions.filter((s) => subjectIds.includes(s.id)).map((s) => s.label).join(", "),
+          area: areaOf(baseAddress),
+        });
         return;
       }
       if (res.status === 400 && Array.isArray(json.fields)) {
