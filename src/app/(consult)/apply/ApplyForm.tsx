@@ -14,7 +14,7 @@ import {
 } from "@/data/applyFormOptions";
 import type { SidoOption, SubjectOption } from "@/lib/inquiryOptions";
 import { getUtm } from "@/lib/utm";
-import { notifyLead, areaOf } from "@/components/NotifyTracker";
+import { notifyLead, areaOf, useFormOpenNotice } from "@/components/NotifyTracker";
 
 /*
  * 신청폼 본체(클라이언트) — 단순화판.
@@ -65,6 +65,9 @@ export default function ApplyForm({
   successBody?: string;
 }) {
   const uid = useId();
+  // 전환 깔때기 — 폼이 화면에 들어온 순간 "폼 열기" 를 한 번 보낸다.
+  const formRef = useRef<HTMLFormElement>(null);
+  useFormOpenNotice(formRef);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   // 학년·과목은 다중 선택(각각 독립 저장 — inquiry_grades / inquiry_subjects).
@@ -318,7 +321,7 @@ export default function ApplyForm({
   const err = (key: string) => errors[key] || "";
 
   return (
-    <form onSubmit={onSubmit} noValidate className="space-y-6">
+    <form ref={formRef} onSubmit={onSubmit} noValidate className="space-y-6">
       {/* 이름 */}
       <Field id={`${uid}-name`} label="이름" error={err("name")} required>
         <input

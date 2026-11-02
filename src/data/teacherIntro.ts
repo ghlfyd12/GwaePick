@@ -45,11 +45,11 @@ export const teacherIntro = {
   /** 마무리 한 줄. */
   closing: "자세한 상담으로 방향성을 꼼꼼하게 잡아 갑니다.",
 
-  /** 헤드샷 사진. public/images/teacher-intro.png 에 저장. */
+  /** 소개 사진. 생성 헤드샷 대신 선생님이 직접 푼 풀이 판서로 둔다(2026-11-02). */
   photo: {
-    src: "/images/teacher-intro.png",
-    alt: "지식의참견 선생님 소개 사진",
-    width: 800,
-    height: 800,
+    src: "/images/trust/trust-05-board.webp",
+    alt: "선생님이 화이트보드에 수학 풀이 과정을 단계별로 적어 둔 모습",
+    width: 1600,
+    height: 1067,
   },
 } as const;

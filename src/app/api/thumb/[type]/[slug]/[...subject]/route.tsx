@@ -126,7 +126,15 @@ function resolveDongName(sidoSlug: string, sgSlug: string, dongSlug: string): st
 }
 
 /** 본문 히어로 변형 표식(경로 마지막 세그먼트). */
-const HERO_VARIANT = "hero";
+/**
+ * 본문 히어로 변형 표식. 산출물이 바뀌면 **새 표식을 추가**하고 lib/thumb 의 thumbHeroPath 를
+ * 그쪽으로 올린다 — 응답이 immutable 1년 캐시라 같은 URL 로 내용만 바꾸면 갱신되지 않는다.
+ * 구 표식도 계속 렌더해 이미 캐시된 참조가 깨지지 않게 둔다.
+ *  - hero  : 사진 배경(school-students) 위 텍스트 — 2026-11-02 이전
+ *  - hero2 : 사진 없는 면 배경 — 생성 인물 컷 제거(2026-11-02)
+ */
+const HERO_VARIANTS = new Set(["hero", "hero2"]);
+const HERO_NO_PHOTO = "hero2";
 /** 히어로 WebP 품질 — 평면 색·텍스트라 80 에서 열화가 보이지 않는다. */
 const HERO_WEBP_QUALITY = 80;
 
@@ -173,8 +181,9 @@ export async function GET(
   // segs = [과목] 또는 [과목, "hero"]. "hero" 는 본문 히어로용 경량(WebP) 변형 표식이다.
   // og:image 는 버전·변형 세그먼트 없이 기존 경로를 그대로 써서 산출물이 1바이트도 바뀌지 않는다.
   if (!segs?.length || segs.length > 2) return notFound();
-  if (segs.length === 2 && segs[1] !== HERO_VARIANT) return notFound();
+  if (segs.length === 2 && !HERO_VARIANTS.has(segs[1])) return notFound();
   const heroVariant = segs.length === 2;
+  const noPhoto = segs[1] === HERO_NO_PHOTO;
   const subject = segs[0];
 
   // ── 검증 우선(이미지 생성 전) — 무효 조합은 여기서 전부 404 ──────────
@@ -223,7 +232,12 @@ export async function GET(
 
   // ── 검증 통과 후에만 렌더 ────────────────────────────────────────────
   const { lines, fontSize } = picked;
-  const [fontData, bg] = await Promise.all([loadFont(), loadBackground()]);
+  // 본문 히어로(heroVariant)는 사진 배경을 쓰지 않는다 — 생성 인물 컷을 페이지에서 지우기 위한 것(2026-11-02).
+  // og:image(쿼리 없는 기본 변형)는 손대지 않는다: 이미 색인된 썸네일이라 바꾸면 전량 재통지 대상이 된다.
+  const [fontData, bg] = await Promise.all([
+    loadFont(),
+    noPhoto ? Promise.resolve(null) : loadBackground(),
+  ]);
 
   const image = new ImageResponse(
     (
@@ -237,33 +251,50 @@ export async function GET(
           justifyContent: "center",
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={bg}
-          width={W}
-          height={H}
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: W,
-            height: H,
-            objectFit: "cover",
-          }}
-          alt=""
-        />
-        {/* 밝은 오버레이 — 사진을 은은한 배경 질감 수준으로 낮춰 텍스트가 주인공이 되게 한다. */}
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: W,
-            height: H,
-            background: "rgba(255,255,255,0.55)",
-            display: "flex",
-          }}
-        />
+        {bg ? (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={bg}
+              width={W}
+              height={H}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: W,
+                height: H,
+                objectFit: "cover",
+              }}
+              alt=""
+            />
+            {/* 밝은 오버레이 — 사진을 은은한 배경 질감 수준으로 낮춰 텍스트가 주인공이 되게 한다. */}
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: W,
+                height: H,
+                background: "rgba(255,255,255,0.55)",
+                display: "flex",
+              }}
+            />
+          </>
+        ) : (
+          // 사진 없는 히어로 — 연한 면 배경 한 장(어학 텍스트형과 같은 기조).
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: W,
+              height: H,
+              background: "#F6F3EF",
+              display: "flex",
+            }}
+          />
+        )}
         {/* 중앙 흰 가로 띠 — 커진 텍스트를 감싸도록 높이 확대(패딩), 폭 100%, 수직 중앙 */}
         <div
           style={{

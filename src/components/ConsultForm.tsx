@@ -6,7 +6,7 @@ import Script from "next/script";
 import { consultFormConfig } from "@/data/consultFormOptions";
 import { serviceFromPath } from "@/data/service";
 import { site } from "@/data/site";
-import { notifyLead, areaOf } from "@/components/NotifyTracker";
+import { notifyLead, areaOf, useFormOpenNotice } from "@/components/NotifyTracker";
 
 /*
  * ConsultForm(#consult) — 무료 상담 신청 섹션 + 폼.
@@ -91,6 +91,9 @@ export default function ConsultForm({
     "idle" | "submitting" | "success" | "error"
   >("idle");
   const addressDetailRef = useRef<HTMLInputElement>(null);
+  // 전환 깔때기 — 폼이 화면에 들어온 순간 "폼 열기" 를 한 번 보낸다.
+  const formRef = useRef<HTMLFormElement>(null);
+  useFormOpenNotice(formRef);
 
   // 서비스별 옵션·라벨(지식=과목, 어학=언어). 학년·과목/언어는 다중 선택.
   const formConfig = consultFormConfig(service);
@@ -214,7 +217,7 @@ export default function ConsultForm({
             </div>
 
             {/* 폼 */}
-            <form onSubmit={onSubmit} noValidate className="mt-8 flex flex-col gap-5">
+            <form ref={formRef} onSubmit={onSubmit} noValidate className="mt-8 flex flex-col gap-5">
               {/* 이름 + 연락처 (데스크톱 2열) */}
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 <Field label={formConfig.nameLabel} required error={errors.name}>

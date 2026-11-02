@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 import {
   fetchRegionOptions,
@@ -61,6 +62,18 @@ export default async function ApplyPage() {
             상황에 맞는 선생님을 1:1로 연결해 드립니다. 신청과 상담은 무료입니다.
           </p>
         </header>
+
+        {/* 상담 자리 사진 — 신청 폼 바로 위. 생성 인물 컷 대신 실제 상담 테이블. */}
+        <div className="mb-8 overflow-hidden rounded-2xl ring-1 ring-line">
+          <Image
+            src="/images/trust/trust-02-consult.webp"
+            alt="상담 테이블에 마주 놓인 찻잔 두 잔과 상담 노트"
+            width={1600}
+            height={1067}
+            sizes="(min-width: 672px) 672px, 100vw"
+            className="h-auto w-full"
+          />
+        </div>
 
         {loadFailed ? (
           <p

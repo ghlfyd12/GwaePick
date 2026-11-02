@@ -16,7 +16,7 @@ export default function HeroSearch({
   searchLabel,
   searchPlaceholder,
   searchEmptyMessage,
-  image = { src: "/images/region-hero.jpg", alt: "교복 입은 학생들" },
+  image = { src: "/images/trust/trust-01-lesson.webp", alt: "노트북으로 1:1 화상 수업을 하며 풀이 노트를 함께 보는 모습" },
 }: {
   eyebrow: string;
   headlineLines: string[];

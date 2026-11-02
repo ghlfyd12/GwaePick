@@ -52,11 +52,11 @@ export default function TeachersPage() {
             </p>
           </div>
 
-          {/* 오른쪽 — 교사 단체사진(고정 비율, 인물 균형) */}
+          {/* 오른쪽 — 선생님이 직접 푼 판서(생성 단체사진 대체, 2026-11-02) */}
           <div className="relative order-1 aspect-[4/3] w-full overflow-hidden rounded-2xl shadow-md ring-1 ring-line md:order-2">
             <Image
-              src="/images/teachers-hero.jpg"
-              alt="지식의참견 선생님들"
+              src="/images/trust/trust-05-board.webp"
+              alt="선생님이 화이트보드에 수학 풀이 과정을 단계별로 적어 둔 모습"
               fill
               priority
               sizes="(min-width: 768px) 512px, 100vw"

@@ -35,7 +35,8 @@ export const TUTOR_QUALITY = {
   titleAfter: ", 충분히 확인하셨나요?",
   body: "수업을 누가 하느냐에 따라서 아이의 학습 태도가 바뀔 수 있습니다. 성적을 넘어, 아이의 인성까지 키우는 선생님이 절대적으로 필요합니다.",
   image: {
-    src: "/images/tutor-consult.png", // 사용자가 추가(워터마크 제거본). 없으면 영역 비움.
-    alt: "상담 중인 선생님과 학생",
+    // 생성 인물 컷 대신 실제 상담 자리 사진(2026-11-02). 없으면 영역 비움.
+    src: "/images/trust/trust-02-consult.webp",
+    alt: "상담 테이블에 놓인 찻잔 두 잔과 상담 노트",
   },
 } as const;

@@ -21,8 +21,8 @@ import { getDetailSubjectCopy } from "@/data/detailSubjectCopy";
 
 // 과목별 이미지가 없을 때 쓰는 공용 fallback(전 과목 공통) — 신규 과목 대비용으로 유지.
 const SUBJECT_HERO_FALLBACK = {
-  src: "/images/subject-students.png",
-  alt: "교재로 함께 공부하는 학생들",
+  src: "/images/trust/trust-03-note.webp",
+  alt: "선생님이 빨간펜으로 짚어 채점한 풀이 노트",
 };
 
 export default function SubjectDetail({ subject }: { subject: Subject }) {

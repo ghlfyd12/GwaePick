@@ -33,7 +33,7 @@ const TITLE = `${site.name} | 직접 가르친 선생님의 1:1 맞춤 과외 �
  * 어느 한쪽으로 통일하지 않는다.
  */
 const DESCRIPTION =
-  `지식의 참견은 직접 가르쳐 온 선생님이 상담하고 검증된 선생님을 연결하는 1:1 맞춤 과외 매칭 서비스입니다. ${site.slogan}`;
+  `지식의 참견에서는 직접 가르쳐 온 선생님이 상담하고, 그 자리에서 가장 잘 맞는 선생님을 연결해 드립니다. ${site.slogan}`;
 
 /* URL 공유 미리보기(OG/트위터) 이미지 — site.ogImage 단일 소스(절대 URL 변환). */
 const OG_IMAGE = site.ogImage;

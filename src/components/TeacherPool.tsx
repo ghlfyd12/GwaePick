@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
 import { teachers, type Subject } from "@/data/teacherPool";
 import { site } from "@/data/site";
@@ -109,17 +108,12 @@ export default function TeacherPool({
               aria-label={`${t.name} — ${site.cta.label}`}
               className="group flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             >
-              {/* 사진 — 정사각형, object-cover, 둥근 상단 */}
-              <div className="relative aspect-square w-full overflow-hidden bg-surface-alt">
-                <Image
-                  src={t.image}
-                  alt={`${t.name} 프로필 사진`}
-                  fill
-                  sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-                  className="object-cover"
-                  // 개발 서버 이미지 최적화 이슈 회피. 배포 시 최적화를 원하면 제거.
-                  unoptimized
-                />
+              {/* 생성 프로필 사진은 2026-11-02 제거 — 그 자리에 전공·경력(근거)을 둔다. */}
+              <div className="flex aspect-[5/3] w-full flex-col justify-center bg-surface-alt px-4 py-3 sm:px-5">
+                <p className="text-[11px] font-semibold text-accent sm:text-xs">전공·경력</p>
+                <p className="mt-1 break-keep text-sm font-bold leading-snug text-ink sm:text-base">
+                  {t.credential}
+                </p>
               </div>
 
               <div className="flex flex-1 flex-col p-3 sm:p-4">

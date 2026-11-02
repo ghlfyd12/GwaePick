@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import {
   useCallback,
@@ -258,11 +257,11 @@ export default function Teachers() {
               >
                 {teacher ? (
                   <article
-                    className={`group relative flex h-[440px] flex-col overflow-hidden rounded-3xl p-6 shadow-lg sm:h-[480px] sm:p-7 ${tone.card} ${
+                    className={`group relative flex h-[280px] flex-col overflow-hidden rounded-3xl p-6 shadow-lg sm:h-[300px] sm:p-7 ${tone.card} ${
                       isActive ? "" : "cursor-pointer"
                     }`}
                   >
-                    {/* 텍스트(인용부호·한마디·과목 태그) — 사진 위로 올림(z-10). 여백을 줄여 사진 영역 확보. */}
+                    {/* 생성 헤드샷을 쓰지 않으므로(2026-11-02) 카드는 선생님의 말·경력만으로 선다. */}
                     <div className="relative z-10">
                       <span
                         aria-hidden
@@ -271,9 +270,9 @@ export default function Teachers() {
                         &ldquo;
                       </span>
 
-                      {/* 선생님 한마디(intro) — 1줄 고정(말줄임). 2줄이 더 좋으면 line-clamp-2 로. */}
+                      {/* 선생님 한마디(intro) — 사진을 뺀 만큼 3줄까지 보여 준다. */}
                       <p
-                        className={`mt-0.5 line-clamp-1 text-lg font-bold leading-snug sm:text-xl ${tone.headline}`}
+                        className={`mt-0.5 line-clamp-3 text-xl font-bold leading-snug sm:text-2xl ${tone.headline}`}
                       >
                         {teacher.intro}
                       </p>
@@ -288,21 +287,8 @@ export default function Teachers() {
                       </ul>
                     </div>
 
-                    {/* 사진 — object-cover + object-top(얼굴 상단이 잘리지 않게). 영역을 키움. */}
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[72%]">
-                      <Image
-                        src={teacher.image}
-                        alt={`${teacher.name} 사진`}
-                        fill
-                        sizes="360px"
-                        className="object-cover object-top transition-transform duration-300 ease-out group-hover:-translate-y-2"
-                      />
-                    </div>
-
-                    {/* 하단 학력·소속/이름 — 사진 위 그라데이션으로 가독성 확보 */}
-                    <div
-                      className={`pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t to-transparent px-6 pb-5 pt-12 ${tone.caption}`}
-                    >
+                    {/* 하단 학력·소속/이름 — 사진이 없으므로 카드 아래쪽에 그대로 붙인다. */}
+                    <div className="relative z-10 mt-auto">
                       <p className={`text-xs ${tone.credential}`}>
                         {teacher.credential}
                       </p>

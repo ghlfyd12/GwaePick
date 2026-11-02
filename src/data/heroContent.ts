@@ -138,13 +138,13 @@ export const heroContent = {
   ] satisfies SideBanner[],
 
   /**
-   * 히어로 단일 배경 이미지(사진) — 선생님-학생 1:1 장면.
-   * object-cover 로 영역을 꽉 채우고, 인물이 좌측 텍스트와 겹치지 않게 objectPosition 으로 민다.
-   * 2028 입시 인포그래픽(뉴스) 슬라이드는 제거됨 — 원본 이미지 파일은 추후 재활용 위해 유지.
+   * 히어로 단일 배경 이미지(사진) — 실제 1:1 수업 장면(화상 수업 화면 + 손글씨 풀이 노트).
+   * 생성 인물 컷을 쓰지 않는다(2026-11-02) — 없는 사람의 얼굴은 신뢰의 근거가 되지 못한다.
+   * object-cover 로 영역을 꽉 채우고, 노트북 화면이 좌측 텍스트에 가리지 않게 우측으로 민다.
    */
   heroBackground: {
-    src: "/images/hero-main.png",
-    alt: "교실에서 선생님이 학생의 교재를 짚어가며 1:1로 설명하는 모습",
-    objectPosition: "65% center",
+    src: "/images/trust/trust-01-lesson.webp",
+    alt: "책상 위 노트북으로 1:1 화상 수업을 하며 풀이 노트를 함께 보는 모습",
+    objectPosition: "60% center",
   } satisfies HeroBackground,
 } as const;

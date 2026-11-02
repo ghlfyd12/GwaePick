@@ -52,7 +52,7 @@ export function thumbPath(schoolSlug: string, subjectSlug: string): string {
  * (800×600 유지, 약 142KB → 12KB). og:image 는 위 thumbPath 를 그대로 쓰므로 영향 없다.
  */
 export function thumbHeroPath(schoolSlug: string, subjectSlug: string): string {
-  return `${thumbPath(schoolSlug, subjectSlug)}/hero`;
+  return `${thumbPath(schoolSlug, subjectSlug)}/hero2`;
 }
 
 /* ── 초·중 학교×과목 og:image — 정적 인물 사진(텍스트 없음). 학교 slug 해시로 7장 중 1장 배분. ── */

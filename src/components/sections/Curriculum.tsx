@@ -26,24 +26,7 @@ export default function Curriculum() {
         {srTitle}
       </h2>
 
-      {/* 좌우 여백 장식 인물 — 흰 배경 PNG 가 흰 섹션에 묻혀 누끼처럼 보인다.
-          본문 뒤(z-0)·하단 정렬·클릭 불가, 태블릿 이하(xl 미만)에서는 숨김. */}
-      <Image
-        src="/images/students-white.png"
-        alt=""
-        aria-hidden
-        width={396}
-        height={362}
-        className="pointer-events-none absolute bottom-0 left-0 z-0 hidden h-[300px] w-auto select-none xl:block 2xl:h-[360px]"
-      />
-      <Image
-        src="/images/teacher-white.png"
-        alt=""
-        aria-hidden
-        width={357}
-        height={423}
-        className="pointer-events-none absolute bottom-0 right-0 z-0 hidden h-[360px] w-auto select-none xl:block 2xl:h-[460px]"
-      />
+      {/* 좌우 여백 장식 인물(생성 컷)은 2026-11-02 제거 — 장식일 뿐 근거가 없어 대체하지 않는다. */}
 
       <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-10 md:grid-cols-[3fr_2fr] md:gap-14">
         {/* 왼쪽: 커리큘럼 이미지(왼쪽 정렬) — 어두운 그래픽이 카드처럼 보이게 라운드+그림자.

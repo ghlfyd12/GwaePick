@@ -35,9 +35,8 @@ import { THUMB_SUBJECTS, thumbHeroPath, thumbAlt } from "@/lib/thumb";
  * 콘텐츠 맥락만 '지역' → '학교'. 공통 데이터(STEP·믿는 이유·후기)는 dongPageCopy.ts 재사용.
  */
 
-// 학교 Hero 학생 사진 — 동 페이지와 별개 에셋. 학교급에 따라 분기.
-const SCHOOL_HERO_IMAGE = "/images/school-students.png"; // 중·고(기존, 교복 학생)
-const SCHOOL_HERO_IMAGE_ELEM = "/images/school-elementary.png"; // 초등(함께 공부하는 초등학생)
+// 학교 Hero 사진 — 생성 인물 컷을 쓰지 않는다(2026-11-02). 학교급 구분 없이 채점 노트 한 장.
+const SCHOOL_HERO_IMAGE = "/images/trust/trust-03-note.webp";
 
 export default function SchoolSubjectDetail({
   schoolSlug,
@@ -81,14 +80,10 @@ export default function SchoolSubjectDetail({
   // 히어로는 경량 WebP 변형을 쓴다(og:image 는 lib/seo 가 thumbPath 로 PNG 원본 유지).
   const heroImage = useThumb
     ? thumbHeroPath(schoolSlug, subject.slug)
-    : isElem
-      ? SCHOOL_HERO_IMAGE_ELEM
-      : SCHOOL_HERO_IMAGE;
+    : SCHOOL_HERO_IMAGE;
   const heroAlt = useThumb
     ? thumbAlt(schoolName, subject.label)
-    : isElem
-      ? "함께 공부하는 초등학생들"
-      : "교복을 입은 학생들";
+    : "선생님이 빨간펜으로 짚어 채점한 풀이 노트";
   const displayName = schoolFullName ?? schoolName; // 정식명, 없으면 약칭
   const strategyCards = buildStrategyCards(schoolName, schoolFullName, levelLabel, subject.label, subject.why);
   const relatedKeywords = buildRelatedKeywords(schoolName, displayName, isElem);

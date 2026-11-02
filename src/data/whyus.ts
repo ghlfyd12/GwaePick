@@ -90,8 +90,8 @@ export const whyus = {
       badge: "학생 개인에 최적화된 1:1",
       title: "1:1 맞춤 과외",
       body: "학생 한 명 한 명의 수준과 약점을 먼저 파악해, 꼭 필요한 부분부터 채우는 1:1 맞춤 수업입니다. 직접 가르쳐 본 선생님이 상담으로 시작점을 잡아드립니다.",
-      image: "/images/whyus-1.png",
-      imageAlt: "선생님이 학생과 1:1로 마주 앉아 수업하는 모습",
+      image: "/images/trust/trust-01-lesson.webp",
+      imageAlt: "노트북 화면으로 1:1 수업을 하며 풀이 노트에 직접 적어 보는 모습",
       imageSide: "left",
     },
     {
@@ -99,8 +99,8 @@ export const whyus = {
       badge: "검증된 선생님 배정",
       title: "검증된 전문 선생님",
       body: "실력과 경력을 검증한 선생님만 배정합니다. 아이와 호흡이 맞지 않으면 다른 선생님과 호흡을 맞춰볼 수 있도록 조율합니다.",
-      image: "/images/whyus-2.png",
-      imageAlt: "검증된 전문 선생님이 수업을 준비하는 모습",
+      image: "/images/trust/trust-02-consult.webp",
+      imageAlt: "상담 테이블에 마주 놓인 찻잔 두 잔과 상담 노트",
       imageSide: "right",
     },
     {
@@ -108,20 +108,18 @@ export const whyus = {
       badge: "원하는 방식으로 선택",
       title: "방문 과외 & 화상 과외",
       body: "선생님이 직접 찾아가는 방문 수업과, 온라인으로 편하게 만나는 화상 수업 중에서 선택할 수 있습니다.",
-      image: "/images/whyus-3.png",
-      imageAlt: "방문 수업과 화상 수업 장면",
+      image: "/images/trust/trust-05-board.webp",
+      imageAlt: "화이트보드에 단계별로 적어 둔 수학 풀이",
       imageSide: "left",
     },
     {
-      // ⚠️ whyus-4.png 교체 권장: 현재 이미지는 'AI 진단' 느낌 + 화면 글자가 깨져 있어
-      // 본문(선생님이 결과를 바탕으로 맞춤 관리)과 어울리지 않는다.
-      // → '선생님이 리포트를 학부모와 공유하는' 실제 사진으로 교체 권장(imageAlt 가 그 방향).
+      // 2026-11-02 교체 완료 — 가짜 진단 UI 컷을 선생님이 직접 채점한 노트 사진으로 바꿨다.
       id: "report",
       badge: "한눈에 보는 학습 진단",
       title: "데이터 진단 + 선생님의 맞춤 관리",
       body: "학생의 성취도와 강·약점을 한눈에 보이는 리포트로 정리하고, 선생님이 그 결과를 바탕으로 다음 수업을 맞춤 설계합니다. 매 수업 내용과 다음 계획을 학부모님과 공유합니다.",
-      image: "/images/whyus-4.png",
-      imageAlt: "선생님이 작성한 수업 리포트를 학부모에게 공유하는 모습",
+      image: "/images/trust/trust-03-note.webp",
+      imageAlt: "선생님이 빨간펜으로 틀린 풀이를 짚어 채점해 둔 노트",
       imageSide: "right",
     },
     {
@@ -129,8 +127,8 @@ export const whyus = {
       badge: "입시 전 영역을 한 번에",
       title: "내신·수능·수행평가 통합 관리",
       body: "내신 대비부터 수능 준비, 수행평가, 생활기록부 관리까지 입시에 필요한 영역을 지식의참견 하나로 통합 관리합니다.",
-      image: "/images/whyus-5.png",
-      imageAlt: "내신·수능·수행평가 자료를 함께 정리하는 모습",
+      image: "/images/trust/trust-04-books.webp",
+      imageAlt: "포스트잇으로 단원을 표시해 둔 교재 네 권",
       imageSide: "left",
     },
   ] satisfies WhyUsBlock[],

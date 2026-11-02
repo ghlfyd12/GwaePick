@@ -27,7 +27,7 @@ import {
  */
 
 // 교실 학생 사진 — 한 곳에서 관리(기존 에셋 재사용).
-const HERO_IMAGE = "/images/classroom-student.png";
+const HERO_IMAGE = "/images/trust/trust-04-books.webp";
 
 type SgLite = { name: string; slug: string; dong: { name: string; slug: string }[] };
 
@@ -82,7 +82,7 @@ export default function DongHub({
           <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl shadow-md">
             <Image
               src={HERO_IMAGE}
-              alt="교실에서 공부하는 학생"
+              alt="포스트잇으로 단원을 표시해 둔 교재 네 권"
               fill
               priority
               sizes="(min-width: 768px) 512px, 100vw"
