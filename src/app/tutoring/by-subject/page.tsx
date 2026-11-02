@@ -19,6 +19,10 @@ export default function BySubjectPage() {
         eyebrow="과목별"
         headlineLines={["우리 아이 과목에 맞춘", "집중 관리", "1:1 맞춤 과외"]}
         subCopyLines={[INTRO]}
+        image={{
+          src: "/images/trust/trust-03-note.webp",
+          alt: "선생님이 빨간펜으로 짚어 채점한 풀이 노트",
+        }}
         searchKind="subject"
         searchLabel="과목 빠르게 검색"
         searchPlaceholder="과목 빠르게 검색 (예: 수학, 영어, 역사, 논술)"

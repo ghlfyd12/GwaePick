@@ -16,7 +16,8 @@ export default function HeroSearch({
   searchLabel,
   searchPlaceholder,
   searchEmptyMessage,
-  image = { src: "/images/trust/trust-01-lesson.webp", alt: "노트북으로 1:1 화상 수업을 하며 풀이 노트를 함께 보는 모습" },
+  // 기본값은 대면·중립 컷. 화상 컷(trust-01)은 히어로에 쓰지 않는다(2026-11-02).
+  image = { src: "/images/trust/trust-06-visit.webp", alt: "마주 앉는 자리 두 개와 펼쳐 둔 교재가 놓인 공부 책상" },
 }: {
   eyebrow: string;
   headlineLines: string[];

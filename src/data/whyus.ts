@@ -90,8 +90,8 @@ export const whyus = {
       badge: "학생 개인에 최적화된 1:1",
       title: "1:1 맞춤 과외",
       body: "학생 한 명 한 명의 수준과 약점을 먼저 파악해, 꼭 필요한 부분부터 채우는 1:1 맞춤 수업입니다. 직접 가르쳐 본 선생님이 상담으로 시작점을 잡아드립니다.",
-      image: "/images/trust/trust-01-lesson.webp",
-      imageAlt: "노트북 화면으로 1:1 수업을 하며 풀이 노트에 직접 적어 보는 모습",
+      image: "/images/trust/trust-03-note.webp",
+      imageAlt: "선생님이 빨간펜으로 틀린 풀이를 짚어 채점해 둔 노트",
       imageSide: "left",
     },
     {
@@ -108,8 +108,8 @@ export const whyus = {
       badge: "원하는 방식으로 선택",
       title: "방문 과외 & 화상 과외",
       body: "선생님이 직접 찾아가는 방문 수업과, 온라인으로 편하게 만나는 화상 수업 중에서 선택할 수 있습니다.",
-      image: "/images/trust/trust-05-board.webp",
-      imageAlt: "화이트보드에 단계별로 적어 둔 수학 풀이",
+      image: "/images/trust/trust-01-lesson.webp",
+      imageAlt: "노트북으로 화상 수업을 하며 풀이 노트를 함께 보는 모습",
       imageSide: "left",
     },
     {
@@ -118,8 +118,8 @@ export const whyus = {
       badge: "한눈에 보는 학습 진단",
       title: "데이터 진단 + 선생님의 맞춤 관리",
       body: "학생의 성취도와 강·약점을 한눈에 보이는 리포트로 정리하고, 선생님이 그 결과를 바탕으로 다음 수업을 맞춤 설계합니다. 매 수업 내용과 다음 계획을 학부모님과 공유합니다.",
-      image: "/images/trust/trust-03-note.webp",
-      imageAlt: "선생님이 빨간펜으로 틀린 풀이를 짚어 채점해 둔 노트",
+      image: "/images/trust/trust-05-board.webp",
+      imageAlt: "선생님이 다음 수업 계획을 화이트보드에 단계별로 적어 둔 모습",
       imageSide: "right",
     },
     {

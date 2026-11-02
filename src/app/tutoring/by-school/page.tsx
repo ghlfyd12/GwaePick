@@ -20,6 +20,10 @@ export default function BySchoolPage() {
         eyebrow="학교별"
         headlineLines={["우리 아이 학교에 맞춘", "단계별", "1:1 맞춤 과외"]}
         subCopyLines={[INTRO]}
+        image={{
+          src: "/images/trust/trust-06-visit.webp",
+          alt: "마주 앉는 자리 두 개와 펼쳐 둔 교재가 놓인 공부 책상",
+        }}
         searchKind="school"
         searchLabel="학교 빠르게 검색"
         searchPlaceholder="학교 빠르게 검색 (예: ○○중학교, ○○고등학교)"

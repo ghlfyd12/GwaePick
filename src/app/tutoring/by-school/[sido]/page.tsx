@@ -150,6 +150,10 @@ export default async function SchoolSidoPage({
         eyebrow={HERO.eyebrow}
         headlineLines={[...HERO.headlineLines]}
         subCopyLines={[...HERO.subCopyLines]}
+        image={{
+          src: "/images/trust/trust-04-books.webp",
+          alt: "포스트잇으로 단원을 표시해 둔 교재 네 권",
+        }}
         searchKind="school"
         searchLabel={HERO.searchLabel}
         searchPlaceholder={HERO.searchPlaceholder}

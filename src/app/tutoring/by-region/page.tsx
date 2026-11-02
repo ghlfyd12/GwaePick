@@ -140,6 +140,7 @@ const HEADLINE_LINES = ["우리 동네에서 시작하는", "1:1 맞춤 과외"]
 // 서브카피는 "…무료 체험." 뒤에서 줄을 나눠 두 줄로(문구 동일).
 const INTRO_LINES = [
   "지역별 맞춤 커리큘럼 상담과 무료 체험.",
+  "방문 수업과 화상 수업 중에서 고르실 수 있습니다.",
   "원하는 지역을 선택하면 해당 시·구가 나타납니다.",
 ];
 
@@ -171,6 +172,10 @@ export default function ByRegionPage() {
         eyebrow={EYEBROW}
         headlineLines={HEADLINE_LINES}
         subCopyLines={INTRO_LINES}
+        image={{
+          src: "/images/trust/trust-07-bag.webp",
+          alt: "교재와 필기구를 담은 가방이 공부 책상 옆 의자에 놓인 모습",
+        }}
         searchKind="region"
         searchLabel="우리 지역 빠르게 검색"
         searchPlaceholder="우리 지역 빠르게 검색 (예: 대치동, 강남구, 일산)"

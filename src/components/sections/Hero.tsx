@@ -17,7 +17,7 @@ import styles from "./Hero.module.css";
  * 페이지 유일의 <h1> 은 이 섹션의 헤드라인.
  */
 export default function Hero() {
-  const { activeVariant, headlines, cta, heroBackground, eyebrow } = heroContent;
+  const { activeVariant, headlines, cta, heroBackground, eyebrow, heroNote } = heroContent;
   const headline = headlines[activeVariant];
 
   return (
@@ -72,6 +72,14 @@ export default function Hero() {
                 </span>
               ))}
             </h1>
+
+            {/* 수업 방식 한 줄 — 첫 화면이 "화상 전문"으로 읽히지 않게 방문·화상을 함께 밝힌다. */}
+            <p
+              className={`${styles.fadeUp} mt-3 break-keep text-sm text-white/90 [text-shadow:0_1px_8px_rgba(0,0,0,0.45)] md:mt-4 md:text-base`}
+              style={{ animationDelay: "0.1s" }}
+            >
+              {heroNote}
+            </p>
 
             {/* 주 CTA — 데스크톱만(모바일은 상단 헤더 '무료상담'으로 이동). */}
             <div

@@ -138,13 +138,19 @@ export const heroContent = {
   ] satisfies SideBanner[],
 
   /**
-   * 히어로 단일 배경 이미지(사진) — 실제 1:1 수업 장면(화상 수업 화면 + 손글씨 풀이 노트).
+   * 히어로 아래 한 줄 — 첫 화면이 "화상 전문"으로 읽히지 않게 수업 방식을 바로 밝힌다.
+   */
+  heroNote: "방문 수업과 화상 수업 중에서 고르실 수 있습니다.",
+
+  /**
+   * 히어로 단일 배경 이미지(사진) — 마주 앉은 자리와 펼쳐 둔 교재(방문 수업).
    * 생성 인물 컷을 쓰지 않는다(2026-11-02) — 없는 사람의 얼굴은 신뢰의 근거가 되지 못한다.
-   * object-cover 로 영역을 꽉 채우고, 노트북 화면이 좌측 텍스트에 가리지 않게 우측으로 민다.
+   * 첫 화면은 대면·중립 컷으로 둔다(2026-11-02) — 화상 컷(trust-01)은 방문·화상 안내 블록 전용.
+   * object-cover 로 영역을 꽉 채우고, 교재가 좌측 텍스트에 가리지 않게 우측으로 민다.
    */
   heroBackground: {
-    src: "/images/trust/trust-01-lesson.webp",
-    alt: "책상 위 노트북으로 1:1 화상 수업을 하며 풀이 노트를 함께 보는 모습",
+    src: "/images/trust/trust-06-visit.webp",
+    alt: "마주 앉는 자리 두 개와 펼쳐 둔 교재가 놓인 공부 책상",
     objectPosition: "60% center",
   } satisfies HeroBackground,
 } as const;

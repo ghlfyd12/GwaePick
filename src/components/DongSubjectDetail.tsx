@@ -107,8 +107,8 @@ export default function DongSubjectDetail({
         {/* 대표 이미지 — 학교 템플릿과 동일 방식(next/image + unoptimized). 검색 썸네일 노출용. */}
         <div className="relative mx-auto mb-6 aspect-[4/3] w-full max-w-sm overflow-hidden rounded-2xl shadow-md sm:max-w-md">
           <Image
-            src="/images/trust/trust-01-lesson.webp"
-            alt="책상 위 노트북으로 1:1 화상 수업을 하며 풀이 노트를 함께 보는 모습"
+            src="/images/trust/trust-06-visit.webp"
+            alt="마주 앉는 자리 두 개와 펼쳐 둔 교재가 놓인 공부 책상"
             fill
             priority
             sizes="(min-width: 640px) 448px, 100vw"
