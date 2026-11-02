@@ -47,16 +47,6 @@ const EMPTY: FormState = {
 
 type Errors = Partial<Record<keyof FormState, string>>;
 
-/**
- * 목적격 조사 을/를 — 라벨이 서비스별로 달라져("희망 과목" / "희망 언어")
- * 안내 문구를 고정할 수 없으므로 받침 유무로 고른다.
- */
-const objectParticle = (word: string) => {
-  const code = word.charCodeAt(word.length - 1) - 0xac00;
-  if (code < 0 || code > 11171) return "을"; // 한글이 아니면 기본값
-  return code % 28 === 0 ? "를" : "을";
-};
-
 declare global {
   interface Window {
     daum?: {
@@ -110,10 +100,8 @@ export default function ConsultForm({
     if (!form.phone.trim()) e.phone = "연락처를 입력해 주세요.";
     else if (!/^[0-9-]+$/.test(form.phone) || digits.length < 9 || digits.length > 11)
       e.phone = "연락처 형식을 확인해 주세요. (숫자/하이픈)";
-    if (form.grades.length === 0) e.grades = "학년을 1개 이상 선택해 주세요.";
-    if (form.subjects.length === 0)
-      e.subjects = `${formConfig.choiceLabel}${objectParticle(formConfig.choiceLabel)} 1개 이상 선택해 주세요.`;
-    if (!form.address.trim()) e.address = "주소를 검색해 주세요.";
+    // 학년·과목·주소는 선택 — 상담 전화에서 어차피 다시 확인하는 항목이라 폼 문턱만 낮춘다
+    // (2026-11-02). 빈 값은 저장·알림 모두 허용된다(노션은 속성 제외, 알림은 "-" 표기).
     if (!form.agree) e.agree = "개인정보 수집·이용에 동의해 주세요.";
     return e;
   };
@@ -248,7 +236,7 @@ export default function ConsultForm({
               </div>
 
               {/* 학년 (다중) */}
-              <Field label="학년" required hint="(중복 선택 가능)" error={errors.grades}>
+              <Field label="학년" hint="(선택 · 중복 가능)" error={errors.grades}>
                 {(id) => (
                   <MultiSelect
                     id={id}
@@ -262,7 +250,7 @@ export default function ConsultForm({
               </Field>
 
               {/* 과목/언어 (다중) — 라벨·옵션은 서비스별(지식=희망 과목, 어학=희망 언어). */}
-              <Field label={formConfig.choiceLabel} required hint="(중복 선택 가능)" error={errors.subjects}>
+              <Field label={formConfig.choiceLabel} hint="(선택 · 중복 가능)" error={errors.subjects}>
                 {(id) => (
                   <MultiSelect
                     id={id}
@@ -276,7 +264,7 @@ export default function ConsultForm({
               </Field>
 
               {/* 주소 + 검색 버튼 */}
-              <Field label="주소" required error={errors.address}>
+              <Field label="주소" hint="(선택)" error={errors.address}>
                 {(id) => (
                   <div className="flex gap-2">
                     <input
