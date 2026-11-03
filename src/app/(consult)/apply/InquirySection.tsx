@@ -37,19 +37,17 @@ export default async function InquirySection({
 }) {
   let regions: SidoOption[] = [];
   let subjects: SubjectOption[] = [];
-  let loadFailed = false;
 
-  if (!isSupabaseConfigured()) {
-    loadFailed = true;
-  } else {
+  // 서버에서 선택지를 구워 두면 폼이 즉시 쓰인다. 비어 와도 폼은 렌더하고
+  // ApplyForm 이 런타임에 /api/inquiry-options 로 보강한다(정적 폴백 고착 재발 방지).
+  if (isSupabaseConfigured()) {
     try {
       [regions, subjects] = await Promise.all([
         fetchRegionOptions(),
         fetchSubjectOptions(),
       ]);
     } catch (err) {
-      console.error("[consult] 선택지 로딩 실패:", (err as Error)?.message);
-      loadFailed = true;
+      console.error("[consult] 선택지 빌드 로딩 실패(런타임 보강 예정):", (err as Error)?.message);
     }
   }
 
@@ -98,22 +96,12 @@ export default async function InquirySection({
         </div>
 
         <div className="mt-7">
-          {loadFailed ? (
-            <p
-              role="status"
-              className="rounded-lg border border-line bg-white p-6 text-center text-base text-muted"
-            >
-              신청에 필요한 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주시거나 전화로
-              문의해 주세요.
-            </p>
-          ) : (
-            <ApplyForm
-              regions={regions}
-              subjects={subjects}
-              successTitle={successTitle}
-              successBody={successBody}
-            />
-          )}
+          <ApplyForm
+            regions={regions}
+            subjects={subjects}
+            successTitle={successTitle}
+            successBody={successBody}
+          />
         </div>
       </div>
     </section>

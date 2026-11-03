@@ -33,20 +33,18 @@ export const metadata: Metadata = {
 export default async function ApplyPage() {
   let regions: SidoOption[] = [];
   let subjects: SubjectOption[] = [];
-  let loadFailed = false;
 
-  if (!isSupabaseConfigured()) {
-    loadFailed = true;
-  } else {
+  // 선택지를 서버에서 미리 구워 두면 폼이 즉시 쓰인다(happy path). 빌드 시점에 Supabase 가
+  // 잠시 죽어 시드가 비어 와도 폼은 그대로 렌더하고, ApplyForm 이 런타임에
+  // /api/inquiry-options 로 보강한다(2026-11-03 정적 폴백 영구 고착 재발 방지).
+  if (isSupabaseConfigured()) {
     try {
       [regions, subjects] = await Promise.all([
         fetchRegionOptions(),
         fetchSubjectOptions(),
       ]);
     } catch (err) {
-      // 선택지를 못 읽어도 페이지 자체는 뜬다(안내 문구로 대체).
-      console.error("[apply] 선택지 로딩 실패:", (err as Error)?.message);
-      loadFailed = true;
+      console.error("[apply] 선택지 빌드 로딩 실패(런타임 보강 예정):", (err as Error)?.message);
     }
   }
 
@@ -75,16 +73,7 @@ export default async function ApplyPage() {
           />
         </div>
 
-        {loadFailed ? (
-          <p
-            role="status"
-            className="rounded-lg border border-line bg-white p-6 text-base text-muted"
-          >
-            신청에 필요한 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
-          </p>
-        ) : (
-          <ApplyForm regions={regions} subjects={subjects} />
-        )}
+        <ApplyForm regions={regions} subjects={subjects} />
       </div>
     </div>
   );

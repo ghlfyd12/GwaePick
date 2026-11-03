@@ -68,6 +68,40 @@ export default function ApplyForm({
   // 전환 깔때기 — 폼이 화면에 들어온 순간 "폼 열기" 를 한 번 보낸다.
   const formRef = useRef<HTMLFormElement>(null);
   useFormOpenNotice(formRef);
+
+  /* ── 선택지(지역·과목) — 서버가 구워 준 시드 + 런타임 보강 ─────────────────
+   * 정적 페이지라 빌드 시점에 Supabase 가 죽어 있으면 시드가 비어 온다. 그때 폼을
+   * 숨기지 않고, 런타임에 /api/inquiry-options 로 live 선택지를 받아 스스로 채운다.
+   * (서버에서 이미 구워 왔으면 네트워크 호출 없이 그대로 쓴다.) */
+  const [opts, setOpts] = useState<{ regions: SidoOption[]; subjects: SubjectOption[] }>(
+    { regions, subjects },
+  );
+  const seeded = regions.length > 0 && subjects.length > 0;
+  const [optsState, setOptsState] = useState<"ok" | "loading" | "error">(
+    seeded ? "ok" : "loading",
+  );
+  const loadOpts = useRef(async () => {
+    setOptsState("loading");
+    try {
+      const res = await fetch("/api/inquiry-options");
+      if (!res.ok) throw new Error(String(res.status));
+      const json = await res.json();
+      if (Array.isArray(json.regions) && Array.isArray(json.subjects) && json.subjects.length > 0) {
+        setOpts({ regions: json.regions, subjects: json.subjects });
+        setOptsState("ok");
+      } else {
+        setOptsState("error");
+      }
+    } catch {
+      setOptsState("error");
+    }
+  });
+  useEffect(() => {
+    // 서버 시드가 비었을 때만 런타임에 한 번 보강한다.
+    if (!seeded) void loadOpts.current();
+    // 최초 1회 — seeded 는 마운트 시점 값으로 고정.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   // 학년·과목은 다중 선택(각각 독립 저장 — inquiry_grades / inquiry_subjects).
@@ -97,12 +131,12 @@ export default function ApplyForm({
 
   // 대표 과목 옵션 — subjects 에 실재하는 과목명만 사용(방어적). label 은 표시, id 는 저장.
   const subjectOptions = useMemo(() => {
-    const byName = new Map(subjects.map((s) => [s.name, s.id]));
+    const byName = new Map(opts.subjects.map((s) => [s.name, s.id]));
     return REPRESENTATIVE_SUBJECTS.flatMap((r) => {
       const id = byName.get(r.subjectName);
       return id ? [{ id, label: r.label }] : [];
     });
-  }, [subjects]);
+  }, [opts.subjects]);
 
   const clearError = (key: string) =>
     setErrors((e) => (e[key] ? { ...e, [key]: "" } : e));
@@ -206,7 +240,7 @@ export default function ApplyForm({
     new daum.Postcode({
       oncomplete: (data) => {
         const base = data.roadAddress || data.jibunAddress || "";
-        const resolved = resolveRegion(regions, data.sido, data.sigungu);
+        const resolved = resolveRegion(opts.regions, data.sido, data.sigungu);
         if (!resolved) {
           // schools 캐시에 없는 지역(극히 드묾) — 다른 주소로 재검색을 유도한다.
           setErrors((e) => ({
@@ -228,7 +262,7 @@ export default function ApplyForm({
       width: "100%",
       height: "100%",
     }).embed(el);
-  }, [postcodeOpen, regions]);
+  }, [postcodeOpen, opts.regions]);
 
   /* ── 제출 ───────────────────────────────────────────────────────── */
   const validate = () => {
@@ -244,6 +278,8 @@ export default function ApplyForm({
 
   const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    // 선택지가 아직 준비되지 않았으면(런타임 보강 중/실패) 제출을 막는다 — 과목·지역 해석 불가.
+    if (optsState !== "ok") return;
     const found = validate();
     setErrors(found);
     if (Object.keys(found).length > 0) return;
@@ -322,6 +358,29 @@ export default function ApplyForm({
 
   return (
     <form ref={formRef} onSubmit={onSubmit} noValidate className="space-y-6">
+      {/* 선택지 로딩 상태 — 시드가 비어 런타임 보강 중/실패일 때만 안내(폼은 계속 보인다). */}
+      {optsState !== "ok" && (
+        <div
+          role="status"
+          className="rounded-lg border border-line bg-surface-alt p-4 text-sm text-muted"
+        >
+          {optsState === "loading" ? (
+            "신청에 필요한 지역·과목 정보를 불러오는 중입니다. 잠시만 기다려 주세요."
+          ) : (
+            <span className="flex flex-wrap items-center gap-2">
+              지역·과목 정보를 불러오지 못했습니다. 전화로도 신청하실 수 있습니다.
+              <button
+                type="button"
+                onClick={() => void loadOpts.current()}
+                className="min-h-9 rounded-md px-2 text-accent underline underline-offset-2"
+              >
+                다시 시도
+              </button>
+            </span>
+          )}
+        </div>
+      )}
+
       {/* 이름 */}
       <Field id={`${uid}-name`} label="이름" error={err("name")} required>
         <input
@@ -438,7 +497,8 @@ export default function ApplyForm({
           <button
             type="button"
             onClick={openPostcode}
-            className="min-h-12 shrink-0 rounded-lg border border-accent px-4 text-base font-semibold text-accent transition-colors hover:bg-accent/5"
+            disabled={optsState !== "ok"}
+            className="min-h-12 shrink-0 rounded-lg border border-accent px-4 text-base font-semibold text-accent transition-colors hover:bg-accent/5 disabled:opacity-60"
           >
             주소 검색
           </button>
@@ -641,10 +701,14 @@ export default function ApplyForm({
 
       <button
         type="submit"
-        disabled={status === "submitting"}
+        disabled={status === "submitting" || optsState !== "ok"}
         className="inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-accent px-6 text-lg font-semibold text-white transition-colors hover:bg-accent-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-60"
       >
-        {status === "submitting" ? "접수하는 중" : "무료 시범수업 신청"}
+        {status === "submitting"
+          ? "접수하는 중"
+          : optsState === "loading"
+            ? "불러오는 중"
+            : "무료 시범수업 신청"}
       </button>
 
       {/* 우편번호 검색 레이어 — 팝업 차단 없이 화면 안에서 검색한다. */}
