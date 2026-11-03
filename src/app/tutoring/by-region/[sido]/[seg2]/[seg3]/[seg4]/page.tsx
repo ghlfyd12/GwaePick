@@ -20,7 +20,7 @@ import {
   subjects as subjectsEn,
   subjectBySlug as subjectBySlugEn,
 } from "@/data/subjects";
-import { PILOT, buildFaq } from "@/data/dongPageCopy";
+import { PILOT, buildFaq, isPilotDong } from "@/data/dongPageCopy";
 import { pickRegionSchools } from "@/lib/regionSchoolPick";
 import DongSubjectDetail from "@/components/DongSubjectDetail";
 import JsonLd from "@/components/JsonLd";
@@ -141,6 +141,8 @@ export async function generateMetadata({
         dongSlug: dong.slug,
         subjectSlug: subj.slug,
       },
+      // 색인 집중(게이트 2) — 파일럿(서울 4구·고양 3구) 외 확장 동×과목은 noindex+follow.
+      noindex: !isPilotDong(sidoSlug, sg.slug),
     });
   }
   return {};

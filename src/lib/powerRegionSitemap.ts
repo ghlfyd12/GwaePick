@@ -14,7 +14,6 @@ import { allByExamPairs } from "@/data/byRegionExam";
 import { provinceExpansionDongPairs } from "@/data/cityDong";
 import { subjects as detailSubjects } from "@/data/subjects";
 import { GUMJUNG_SITEMAP_CHUNKS } from "@/lib/gumjungSitemap";
-import { HIGH_DETAIL_SITEMAP_CHUNKS } from "@/lib/highDetailSitemap";
 
 /** 지역 축 전체 (지역×과목) 조합 — 모듈 1회 계산. */
 export const POWER_REGION_PAIRS = allByRegionPairs();
@@ -48,15 +47,16 @@ export const PROVINCE_DONG_SITEMAP_CHUNKS = Math.max(
 
 /**
  * 전체 사이트맵 파일 수(단일 소스) = 코어 1 + 학교 청크 + 파워 지역 청크 + 어학시험 청크
- * + 도 지역 dong 청크 + 고교 허브 청크. robots·index·sitemap 공유.
- * 새 청크는 항상 맨 뒤 id 라 기존 shard id 불변.
+ * + 고교 허브 청크 + 검고 청크. robots·index·sitemap 공유.
+ *
+ * ⚠️ 게이트 2(색인 집중): 도 지역 dong 청크(PROVINCE_DONG)와 고교 세부과목 청크(HIGH_DETAIL)는
+ *    비파일럿 동·세부과목을 noindex 로 돌리면서 **사이트맵에서 제외**했다(끈 URL 을 광고하지 않음).
+ *    PROVINCE_DONG_*·highDetail 상수 정의는 남겨 두되 총계·라우팅에는 더하지 않는다.
  */
 export const TOTAL_SITEMAP_COUNT =
   1 +
   SCHOOL_SITEMAP_CHUNKS +
   POWER_REGION_SITEMAP_CHUNKS +
   POWER_EXAM_SITEMAP_CHUNKS +
-  PROVINCE_DONG_SITEMAP_CHUNKS +
   SCHOOL_HUB_SITEMAP_CHUNKS +
-  GUMJUNG_SITEMAP_CHUNKS +
-  HIGH_DETAIL_SITEMAP_CHUNKS;
+  GUMJUNG_SITEMAP_CHUNKS;

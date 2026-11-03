@@ -181,12 +181,14 @@ function baseMetadata(
   description: string,
   canonicalPath: string,
   ogImage: OgImage = OG_IMAGE,
+  /** 색인 집중(게이트 2) — 수요 낮은 축은 noindex+follow. 페이지는 200·내부링크는 계속 전달. */
+  noindex = false,
 ): Metadata {
   return {
     title: { absolute: title },
     description,
     alternates: { canonical: canonicalPath },
-    robots: { index: true, follow: true },
+    robots: { index: !noindex, follow: true },
     openGraph: {
       title,
       description,
@@ -264,6 +266,8 @@ export interface SchoolMetaInput {
   sidoSlug?: string;
   /** 학교급 — description 프레이밍 + title 문구(초·중 override) 선택에 쓰인다. 미지정 시 고등 기준. */
   level?: TitleLevel;
+  /** 색인 집중(게이트 2) — 고교 세부과목(과탐·사탐) 등 수요 낮은 축만 true. 기본 false(색인). */
+  noindex?: boolean;
   canonicalPath: string;
 }
 export function buildSchoolMeta(p: SchoolMetaInput): Metadata {
@@ -339,7 +343,7 @@ export function buildSchoolMeta(p: SchoolMetaInput): Metadata {
   // article:*_time 은 내보내지 않는다 — 네이버 SERP 에 "작성일"로 노출돼 pSEO 상세가 낡아 보인다.
   // 크롤 신선도 신호는 sitemap lastmod(contentMeta 상수)가 그대로 담당한다.
   void modifiedTime;
-  return baseMetadata(title, description, p.canonicalPath, og);
+  return baseMetadata(title, description, p.canonicalPath, og, p.noindex ?? false);
 }
 
 export interface SchoolHubMetaInput {
@@ -402,6 +406,8 @@ export interface RegionMetaInput {
     dongSlug: string;
     subjectSlug: string;
   };
+  /** 색인 집중(게이트 2) — 비파일럿 동×과목 등 수요 낮은 축만 true. 기본 false(색인). */
+  noindex?: boolean;
   canonicalPath: string;
 }
 
@@ -458,7 +464,7 @@ export function buildRegionMeta(p: RegionMetaInput): Metadata {
       middleSchools: p.dongSchools.middleSchools,
       highSchools: p.dongSchools.highSchools,
     });
-    return baseMetadata(title, description, p.canonicalPath, regionOg);
+    return baseMetadata(title, description, p.canonicalPath, regionOg, p.noindex ?? false);
   }
   if (p.subjectLabel) {
     // description 은 기존과 동일하게 "학년 과목" 결합 문구를 쓴다.
@@ -486,7 +492,7 @@ export function buildRegionMeta(p: RegionMetaInput): Metadata {
         regionName: p.regionName,
         subjectPhrase,
       }) + (detailDesc ? ` ${detailDesc.descTail}` : "");
-    return baseMetadata(title, description, p.canonicalPath, regionOg);
+    return baseMetadata(title, description, p.canonicalPath, regionOg, p.noindex ?? false);
   }
   const title = `${p.regionName} ${REGION_HUB_TITLE_PHRASE} | ${SITE_NAME}`;
   const description = pick(REGION_HUB_DESC, p.canonicalPath)({ regionName: p.regionName });

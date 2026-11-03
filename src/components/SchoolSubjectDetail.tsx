@@ -70,7 +70,7 @@ export default function SchoolSubjectDetail({
   const h1RegionPart = schoolFullName ? `${sigunguName} ${schoolFullName}` : sigunguName;
   const intro = buildSchoolIntro(schoolName, subject.label, levelLabel);
   const why = buildWhySchool(schoolName, levelLabel);
-  const faq = buildSchoolFaq(schoolName, levelLabel);
+  const faq = buildSchoolFaq(schoolName, levelLabel, subject.slug);
   const isElem = levelLabel === "초등학교";
   const isHigh = levelLabel === "고등학교"; // 고교만 세부과목(과탐 4) 노출·허브 링크
   // 파일럿: 고교×핵심5과목은 히어로를 페이지별 텍스트 썸네일(생성 라우트)로 교체.

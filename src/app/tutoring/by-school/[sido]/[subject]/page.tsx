@@ -6,6 +6,7 @@ import { subjects, subjectBySlug } from "@/data/subjects";
 import {
   getHighDetailSubject,
   HIGH_DETAIL_SLUGS,
+  isHighDetailSubjectSlug,
 } from "@/data/highDetailSubjects";
 import { HIGH_SCHOOL_HUB_SLUGS } from "@/lib/schoolSitemap";
 import { SCHOOLS, LEVEL_LABEL } from "@/data/schools";
@@ -105,6 +106,9 @@ export async function generateMetadata({
     sidoSlug: ctx.sidoSlug,
     // 초등은 내신 대신 단원평가·수행평가 프레이밍 description 을 쓰도록 학교급 전달.
     level: ctx.school.level,
+    // 색인 집중(게이트 2) — 고교 세부과목(과탐·사탐) 은 검색 수요가 사실상 없어 noindex+follow.
+    // 기본 8과목(핵심6 = A축 포함)은 noindex 아님(색인 유지). 세부과목은 고교에서만 해석되므로 오폭 없음.
+    noindex: ctx.school.level === "high" && isHighDetailSubjectSlug(subj.slug),
     canonicalPath: `/tutoring/by-school/${ctx.school.slug}/${subj.slug}`,
   });
 }
@@ -143,7 +147,7 @@ export default async function SchoolSubjectPage({
     ]),
     // FAQPage — SchoolSubjectDetail 이 실제로 렌더링하는 Q&A(buildSchoolFaq)와 동일 소스.
     // 학교급별 분기가 렌더와 JSON-LD 에 동일하게 반영되도록 같은 levelLabel 을 넘긴다.
-    faqJsonLd(buildSchoolFaq(ctx.school.name, LEVEL_LABEL[ctx.school.level])),
+    faqJsonLd(buildSchoolFaq(ctx.school.name, LEVEL_LABEL[ctx.school.level], subj.slug)),
     // WebPage — 검색결과 신선도(발행/수정일) 신호. 날짜는 contentMeta.ts 상수.
     webPageJsonLd({
       name: `${ctx.school.name} ${subj.label}과외`,

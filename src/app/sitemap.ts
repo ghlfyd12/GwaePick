@@ -11,11 +11,6 @@ import { powerRegionSlugs } from "@/data/powerRegions";
 import { LANGUAGE_SLUGS } from "@/data/languageDetail";
 import { allPowerPerformancePairs } from "@/data/powerSchoolDepts";
 import { allBySchoolPairs } from "@/data/bySchoolSubject";
-import { seoulExpansionDongPairs } from "@/data/seoulDong";
-import {
-  metroExpansionDongPairs,
-  provinceExpansionDongPairs,
-} from "@/data/cityDong";
 import {
   SITEMAP_URLS_PER_FILE,
   SCHOOL_PAIR_COUNT,
@@ -32,8 +27,6 @@ import {
   POWER_EXAM_PAIRS,
   POWER_EXAM_PAIR_COUNT,
   POWER_EXAM_SITEMAP_CHUNKS,
-  PROVINCE_DONG_URL_COUNT,
-  PROVINCE_DONG_SITEMAP_CHUNKS,
   TOTAL_SITEMAP_COUNT,
 } from "@/lib/powerRegionSitemap";
 import {
@@ -56,8 +49,6 @@ import {
   GUMJUNG_URL_COUNT,
   GUMJUNG_SITEMAP_CHUNKS,
 } from "@/lib/gumjungSitemap";
-import { HIGH_DETAIL_URL_COUNT, highDetailPairAt } from "@/lib/highDetailSitemap";
-import { SCHOOL_HIGH_DETAIL_MODIFIED } from "@/data/contentMeta";
 
 /*
  * 동적 sitemap — 분할 구조(/sitemap/[id].xml). robots.txt 가 각 파일 URL 을 모두 가리킨다.
@@ -68,6 +59,12 @@ import { SCHOOL_HIGH_DETAIL_MODIFIED } from "@/data/contentMeta";
  *
  * 한글 슬러그는 encodeURIComponent 로 안전 출력. 도메인은 site.url 단일 소스.
  * 학교 페이지는 ISR(온디맨드) 이지만, 사이트맵에 모두 실어 색인 후보로 노출한다(정직한 실제 페이지).
+ *
+ * ⚠️ 게이트 2(색인 집중): 검색 수요가 사실상 없는 롱테일 축은 noindex+follow 로 돌리고
+ *    사이트맵에서도 제외했다(끈 URL 을 광고하지 않아 크롤 예산을 A축으로 재배분).
+ *      - 고교 세부과목(과탐·사탐) /tutoring/by-school/{고교}/{세부9}
+ *      - 비파일럿 동×과목(서울 확장 + 6대 광역시 + 도) — 파일럿(서울 4구·고양 3구)만 유지
+ *    페이지 자체는 200 으로 살아 있으며(resolve 그대로), 메타만 noindex 다.
  */
 
 const base = site.url.replace(/\/$/, "");
@@ -141,7 +138,8 @@ function coreSitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  // 동×과목 상세 — 파일럿(서울 4구·고양 3구)만 등록(전국 일괄 금지)
+  // 동×과목 상세 — 파일럿(서울 4구·고양 3구)만 등록(전국 일괄 금지).
+  // ⚠️ 게이트 2: 비파일럿 동×과목(서울 확장·광역시·도)은 noindex 로 전환해 사이트맵에서 제외했다.
   const pilotDetail: MetadataRoute.Sitemap = [];
   for (const p of PILOT) {
     const sd = getSido(p.sido);
@@ -157,34 +155,6 @@ function coreSitemap(): MetadataRoute.Sitemap {
             changeFrequency: "weekly",
             priority: 0.5,
           });
-    }
-  }
-
-  // 서울 동×과목 1차 확장 — 비파일럿 21구 기초 동(+명소 복구) × 8과목.
-  // 렌더는 기존 resolveNew(온디맨드 ISR)가 담당, 여기선 사이트맵 등재만. lastmod=동 템플릿 변경일.
-  const seoulDongPages: MetadataRoute.Sitemap = [];
-  for (const { sigungu, dong } of seoulExpansionDongPairs) {
-    for (const subj of detailSubjects) {
-      seoulDongPages.push({
-        url: `${base}/tutoring/by-region/seoul/${sigungu}/${dong}/${subj.slug}`,
-        lastModified: DONG_PSEO_MODIFIED,
-        changeFrequency: "weekly",
-        priority: 0.5,
-      });
-    }
-  }
-
-  // 6대 광역시 동×과목 2차 확장 — 기초 동(+부산 명소 복구) × 8과목.
-  // 렌더는 기존 resolveNew(온디맨드 ISR)가 담당, 여기선 사이트맵 등재만. lastmod=동 템플릿 변경일.
-  const metroDongPages: MetadataRoute.Sitemap = [];
-  for (const { sido, sigungu, dong } of metroExpansionDongPairs) {
-    for (const subj of detailSubjects) {
-      metroDongPages.push({
-        url: `${base}/tutoring/by-region/${sido}/${sigungu}/${dong}/${subj.slug}`,
-        lastModified: DONG_PSEO_MODIFIED,
-        changeFrequency: "weekly",
-        priority: 0.5,
-      });
     }
   }
 
@@ -244,8 +214,6 @@ function coreSitemap(): MetadataRoute.Sitemap {
     ...subjectDetailPages,
     ...pseoPages,
     ...pilotDetail,
-    ...seoulDongPages,
-    ...metroDongPages,
     ...powerRegionPages,
     ...powerLanguagePages,
     ...powerSchoolsIndex,
@@ -290,29 +258,6 @@ function powerExamSitemap(chunk: number): MetadataRoute.Sitemap {
 }
 
 /**
- * 도 지역 dong 청크(3차) — /tutoring/by-region/{도}/{시군구}/{동}/{과목} 한 청크(슬라이스).
- * 코어 40k 근접 회피 위해 전용 청크로 분리(맨 뒤 id, 기존 shard 불변). lastmod=DONG_PSEO_MODIFIED.
- * 렌더는 기존 resolveNew(온디맨드 ISR)가 담당, 여기선 사이트맵 등재만.
- */
-function provinceDongSitemap(chunk: number): MetadataRoute.Sitemap {
-  const start = chunk * SITEMAP_URLS_PER_FILE;
-  const end = Math.min(start + SITEMAP_URLS_PER_FILE, PROVINCE_DONG_URL_COUNT);
-  const subjectCount = detailSubjects.length;
-  const out: MetadataRoute.Sitemap = [];
-  for (let p = start; p < end; p++) {
-    const pair = provinceExpansionDongPairs[Math.floor(p / subjectCount)];
-    const subject = detailSubjects[p % subjectCount];
-    out.push({
-      url: `${base}/tutoring/by-region/${pair.sido}/${pair.sigungu}/${pair.dong}/${subject.slug}`,
-      lastModified: DONG_PSEO_MODIFIED,
-      changeFrequency: "weekly",
-      priority: 0.5,
-    });
-  }
-  return out;
-}
-
-/**
  * 검고의참견 청크 — /gumjung 전 유형(급별·급별×과목·지역·가이드) 한 청크(슬라이스).
  * 경로는 GUMJUNG_PATHS 에 이미 인코딩되어 담겨 있다(추가 enc 불필요). lastmod=GUMJUNG_MODIFIED.
  * 항상 맨 뒤 id 라 기존 shard id 불변.
@@ -326,26 +271,6 @@ function gumjungSitemap(chunk: number): MetadataRoute.Sitemap {
       url: `${base}${GUMJUNG_PATHS[p]}`,
       lastModified: GUMJUNG_MODIFIED,
       changeFrequency: "weekly",
-      priority: 0.6,
-    });
-  }
-  return out;
-}
-
-/**
- * 고교 세부과목(과탐 4) 청크 — /tutoring/by-school/{고교}/{physics|chemistry|biology|earth-science}.
- * 항상 맨 뒤 id 라 기존 shard id 불변. lastmod=SCHOOL_HIGH_DETAIL_MODIFIED.
- */
-function highDetailSitemap(chunk: number): MetadataRoute.Sitemap {
-  const start = chunk * SITEMAP_URLS_PER_FILE;
-  const end = Math.min(start + SITEMAP_URLS_PER_FILE, HIGH_DETAIL_URL_COUNT);
-  const out: MetadataRoute.Sitemap = [];
-  for (let p = start; p < end; p++) {
-    const { school, subject } = highDetailPairAt(p);
-    out.push({
-      url: `${base}/tutoring/by-school/${enc(school)}/${subject}`,
-      lastModified: SCHOOL_HIGH_DETAIL_MODIFIED,
-      changeFrequency: "monthly",
       priority: 0.6,
     });
   }
@@ -393,23 +318,19 @@ export default async function sitemap({
 }): Promise<MetadataRoute.Sitemap> {
   // lastModified 는 빌드 시각(new Date)이 아니라 유형별 정직한 상수를 각 함수가 직접 사용한다.
   const n = Number(await id);
-  // id 0 = 코어 / 1..S = 학교 / 파워 지역 / 어학시험 / 그 뒤 = 도 지역 dong 청크(append, 맨 뒤).
+  // id 0 = 코어 / 1..S = 학교 / 파워 지역 / 어학시험 / 고교 허브 / 그 뒤 = 검고(맨 뒤).
+  // (게이트 2: 도 지역 dong·고교 세부과목 청크는 제외했다 — powerRegionSitemap.TOTAL_SITEMAP_COUNT 참조.)
   if (n <= 0) return coreSitemap();
   if (n <= SCHOOL_SITEMAP_CHUNKS) return schoolSitemap(n - 1);
-  const afterSchool = n - 1 - SCHOOL_SITEMAP_CHUNKS; // 0-based: 회화 + 시험 + 도 dong
+  const afterSchool = n - 1 - SCHOOL_SITEMAP_CHUNKS; // 0-based: 회화 + 시험 + 허브 + 검고
   if (afterSchool < POWER_REGION_SITEMAP_CHUNKS)
     return powerRegionSitemap(afterSchool);
   const afterPowerRegion = afterSchool - POWER_REGION_SITEMAP_CHUNKS;
   if (afterPowerRegion < POWER_EXAM_SITEMAP_CHUNKS)
     return powerExamSitemap(afterPowerRegion);
   const afterExam = afterPowerRegion - POWER_EXAM_SITEMAP_CHUNKS;
-  if (afterExam < PROVINCE_DONG_SITEMAP_CHUNKS)
-    return provinceDongSitemap(afterExam);
-  const afterProvinceDong = afterExam - PROVINCE_DONG_SITEMAP_CHUNKS;
-  if (afterProvinceDong < SCHOOL_HUB_SITEMAP_CHUNKS)
-    return schoolHubSitemap(afterProvinceDong);
-  const afterSchoolHub = afterProvinceDong - SCHOOL_HUB_SITEMAP_CHUNKS;
-  if (afterSchoolHub < GUMJUNG_SITEMAP_CHUNKS) return gumjungSitemap(afterSchoolHub);
-  // 맨 뒤 — 고교 세부과목 청크(append, 기존 shard id 불변).
-  return highDetailSitemap(afterSchoolHub - GUMJUNG_SITEMAP_CHUNKS);
+  if (afterExam < SCHOOL_HUB_SITEMAP_CHUNKS)
+    return schoolHubSitemap(afterExam);
+  // 맨 뒤 — 검고 청크.
+  return gumjungSitemap(afterExam - SCHOOL_HUB_SITEMAP_CHUNKS);
 }

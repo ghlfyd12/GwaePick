@@ -51,6 +51,16 @@ export const PILOT: { sido: string; sigungu: string[] }[] = [
   },
 ];
 
+/**
+ * 동×과목 색인 집중(게이트 2) — 파일럿(서울 4구·고양 3구)만 색인 유지, 나머지 확장 동은 noindex.
+ * 렌더(resolveNew)는 그대로 200 을 내되 메타만 noindex+follow 로 달아 색인 희석을 막는다.
+ */
+export function isPilotDong(sidoSlug: string, sigunguSlug: string): boolean {
+  return PILOT.some(
+    (p) => p.sido === sidoSlug && p.sigungu.includes(sigunguSlug),
+  );
+}
+
 export type Slots = {
   sigungu: string;
   dong: string;
